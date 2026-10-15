@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Tips: caret-color</title>
+<style>
+  /* ===== Tokens ===== */
+  :root {
+    --ink: #1c2433;
+    --sub: #657085;
+    --line: #e4e8ef;
+    --bg: #f4f6f9;          /* ステージ・淡いグレー面 */
+    --page: #eaeef4;
+    --accent: #4a6b94;      /* くすみブルー */
+    --accent-soft: #e9eff7;
+    --accent-line: #c6d4e6;
+    --warn: #a8691f;        /* 控えめなアクセント（注意・ズレの指摘のみ） */
+    --warn-soft: #fbf3e6;
+    --warn-line: #ecd9b8;
+    --ease: cubic-bezier(.22, .7, .25, 1);
+    --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", "Meiryo", sans-serif;
+    --mono: "SFMono-Regular", Consolas, "Roboto Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font-family: var(--font);
+    line-height: 1.7;
+    padding: 40px 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== Motion（opacity:0 は keyframes 側にだけ置く＝動きを無効化しても内容は必ず見える） ===== */
+  @keyframes rise  { from { opacity: 0; transform: translateY(10px); } }
+  @keyframes slide { from { opacity: 0; transform: translateX(14px); } }
+  @keyframes ring  { from { box-shadow: 0 0 0 0 rgba(74, 107, 148, 0); } to { box-shadow: 0 0 0 4px rgba(74, 107, 148, .14); } }
+  .rise { animation: rise .45s var(--ease) calc(var(--i, 0) * 70ms) backwards; }
+  /* 子要素を順番に表示（デモ側の親に .stg を付ける） */
+  .stg > * { animation: rise .4s var(--ease) calc(var(--base, 0ms) + var(--k, 0) * 80ms) backwards; }
+  .stg > :nth-child(1) { --k: 0; } .stg > :nth-child(2) { --k: 1; } .stg > :nth-child(3) { --k: 2; }
+  .stg > :nth-child(4) { --k: 3; } .stg > :nth-child(5) { --k: 4; } .stg > :nth-child(6) { --k: 5; }
+  .stg > :nth-child(7) { --k: 6; } .stg > :nth-child(8) { --k: 7; }
+  .before .stg { --base: 520ms; }
+  .after  .stg { --base: 680ms; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+
+  /* ===== Card ===== */
+  .card {
+    max-width: 1080px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 44px 48px 40px;
+    box-shadow: 0 1px 2px rgba(28, 36, 51, .04), 0 18px 40px -20px rgba(28, 36, 51, .18);
+  }
+  .eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--accent); }
+  .eyebrow code {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0; font-weight: 600;
+    color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent-line);
+    border-radius: 999px; padding: 1px 10px;
+  }
+  h1 { font-size: 28px; line-height: 1.45; letter-spacing: .01em; margin: 14px 0 10px; }
+  .lead { font-size: 15px; color: var(--sub); max-width: 46em; }
+  .head { margin-bottom: 30px; }
+
+  /* ===== Compare layout ===== */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; position: relative; }
+  .arrow {
+    position: absolute; z-index: 2; left: 50%; top: 24px; transform: translateX(-50%);
+    width: 30px; height: 30px; border-radius: 50%; background: #fff; border: 1px solid var(--accent-line);
+    color: var(--accent); display: grid; place-items: center; font-size: 14px; line-height: 1;
+  }
+  .panel {
+    min-width: 0; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 20px;
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease), border-color .25s var(--ease);
+  }
+  .panel:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -12px rgba(28, 36, 51, .18); }
+  .panel.after { border-color: var(--accent-line); animation: slide .5s var(--ease) 340ms backwards; }
+  .panel-h { display: flex; align-items: center; gap: 10px; }
+  .badge {
+    flex: none; font-size: 11px; font-weight: 700; letter-spacing: .06em; border-radius: 999px; padding: 1px 10px;
+    color: var(--sub); background: var(--bg); border: 1px solid var(--line);
+  }
+  .after .badge { color: #fff; background: var(--accent); border-color: var(--accent); }
+  .panel h2 { font-size: 16px; line-height: 1.5; }
+  .cap { font-size: 13px; color: var(--sub); margin: 4px 0 14px; }
+  .stage {
+    display: flex; align-items: center; min-height: 140px; padding: 18px;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+  }
+  .stage > * { width: 100%; }
+  .after .stage { background: var(--accent-soft); border-color: var(--accent-line); animation: ring .6s var(--ease) 820ms backwards; box-shadow: 0 0 0 4px rgba(74, 107, 148, .14); }
+
+  /* ===== Code ===== */
+  .code {
+    margin-top: 22px; background: #f7f9fc; border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 10px; overflow: hidden; transition: border-color .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  .code:hover { border-color: var(--accent-line); border-left-color: var(--accent); box-shadow: 0 6px 16px -10px rgba(28, 36, 51, .2); }
+  .code figcaption { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--sub); padding: 8px 18px 0; }
+  .code pre {
+    font-family: var(--mono); font-size: 14.5px; line-height: 1.8; color: #2a3550;
+    padding: 4px 18px 14px; white-space: pre-wrap; word-break: break-word;
+  }
+
+  /* ===== Notes ===== */
+  .notes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px; }
+  .note { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px 16px; font-size: 14px; line-height: 1.75; transition: transform .25s var(--ease); }
+  .note:hover { transform: translateY(-2px); }
+  .note h3 { display: flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: .06em; color: var(--accent); margin-bottom: 2px; }
+  .note h3::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .note.caution { background: var(--warn-soft); border-color: var(--warn-line); }
+  .note.caution h3 { color: var(--warn); }
+
+  /* ===== B: 仕様ピル / C: 操作ヒント / D: 単一パネル ===== */
+  .spec { margin-top: 10px; }
+  .spec code { font-family: var(--mono); font-size: 12.5px; color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 6px; padding: 2px 8px; }
+  .before .spec code { color: var(--sub); background: var(--bg); border-color: var(--line); }
+  .hint { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; padding: 10px 16px; background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 12px; font-size: 14px; color: var(--accent); }
+  .hint b { flex: none; font-size: 11px; letter-spacing: .08em; color: #fff; background: var(--accent); border-radius: 999px; padding: 1px 10px; }
+  .try .stage { min-height: 168px; }
+  .solo .panel { grid-column: 1 / -1; }
+  .solo .stage { min-height: 190px; }
+
+  @media (max-width: 760px) {
+    .card { padding: 28px 20px; border-radius: 16px; }
+    h1 { font-size: 22px; }
+    .compare, .notes { grid-template-columns: 1fr; }
+    .arrow { display: none; }
+  }
+
+  /* ===== プロパティ別デモCSS（demos/*.json の demo_css） ===== */
+  .cc { display: grid; gap: 12px; }
+  .cc label { display: grid; gap: 4px; font-size: 12px; font-weight: 700; color: var(--sub); }
+  .cc input { font: inherit; font-size: 15px; padding: 10px 12px; background: #fff; color: var(--ink); border: 1px solid #cbd3df; border-radius: 8px; outline: none; transition: border-color .25s var(--ease), box-shadow .25s var(--ease); }
+  .cc input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,107,148,.18); }
+  .cc .col { caret-color: var(--warn); }
+</style>
+</head>
+<body>
+<main class="card">
+  <header class="head">
+    <div class="eyebrow rise"><span>CSS TIPS · No.30 · フォーム・細部の作り込み</span><code>caret-color</code></div>
+    <h1 class="rise" style="--i:1">input内のテキストカーソル（キャレット）の色を自由に変更</h1>
+    <p class="lead rise" style="--i:2">input内のテキストカーソル（キャレット）の色を自由に変更できる</p>
+  </header>
+
+  <p class="hint rise" style="--i:2"><b>TRY IT</b><span>2つの入力欄をクリックして、キャレット（入力位置の縦線）の色を比べてください</span></p>
+  <div class="compare solo try">
+    <section class="panel after rise" style="--i:3">
+      <div class="panel-h"><span class="badge">DEMO</span><h2>caret-color で、入力位置の縦線の色を変えられる</h2></div>
+      <p class="cap">ブランドカラーに合わせたり、暗い背景で見やすくしたりできる</p>
+      <div class="stage">
+        <div class="cc stg"><label>caret-color: auto（標準）<input type="text" value="ここに入力"></label><label>caret-color: アンバー<input class="col" type="text" value="ここに入力"></label></div>
+      </div>
+    </section>
+  </div>
+
+
+  <figure class="code rise" style="--i:9">
+    <figcaption>CSS</figcaption>
+    <pre>input {
+  caret-color: #c76b00;
+}</pre>
+  </figure>
+
+  <div class="notes">
+    <section class="note rise" style="--i:10">
+      <h3>用途</h3>
+      ブランドカラーにこだわったフォームデザインで、入力カーソルの色まで統一したい細部の作り込み
+    </section>
+    <section class="note caution rise" style="--i:11">
+      <h3>注意</h3>
+      細部の調整なので、優先度は高くしすぎない。
+    </section>
+    <section class="note rise" style="--i:12">
+      <h3>ブラウザ対応</h3>
+      主要ブラウザ対応良好
+    </section>
+  </div>
+</main>
+</body>
+</html>

@@ -44,8 +44,14 @@
   .stg > :nth-child(7) { --k: 6; } .stg > :nth-child(8) { --k: 7; }
   .before .stg { --base: 520ms; }
   .after  .stg { --base: 680ms; }
+  /* 「動きを減らす」設定: ページ装飾の動きだけ止める。
+     教材デモ（motion: true のデモ定義 → .stage.motion-demo の中身）は止めない＝動きを見ること自体が学習内容のため。
+     ただし装飾（.rise / .stg / .stage 自身）は教材デモ内でも止める。 */
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation: none !important; transition: none !important; }
+    *:not(.motion-demo):not(.motion-demo *),
+    *:not(.motion-demo):not(.motion-demo *)::before,
+    *:not(.motion-demo):not(.motion-demo *)::after { animation: none !important; transition: none !important; }
+    .rise, .stg > *, .stage { animation: none !important; }
   }
 
   /* ===== Card ===== */
@@ -127,6 +133,23 @@
   .solo .panel { grid-column: 1 / -1; }
   .solo .stage { min-height: 190px; }
 
+  /* ===== 教材デモの操作（再生・切り替えボタン / 動き軽減時の案内） ===== */
+  .demo-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 14px; }
+  .play-btn { appearance: none; font: inherit; font-size: 14px; font-weight: 700; color: #fff; background: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 8px 20px; min-height: 44px; cursor: pointer; }
+  .play-btn:hover { background: #3c5a80; }
+  .play-btn:focus-visible { outline: 3px solid var(--accent-line); outline-offset: 2px; }
+  .play-btn[aria-pressed="true"] { background: #fff; color: var(--accent); }
+  .banner, .rm-note:not([hidden]), .env-note:not([hidden]) { margin: 0 0 14px; padding: 8px 14px; font-size: 13px; line-height: 1.6; color: var(--warn); background: var(--warn-soft); border: 1px solid var(--warn-line); border-radius: 10px; }
+  .banner { margin: 0 0 14px; font-weight: 700; }
+  .banner b { margin-right: 6px; }
+  .xtra { margin-top: 22px; }
+  .xtra h2 { font-size: 16px; margin: 0 0 6px; }
+  .xtra p { font-size: 14px; color: var(--sub); margin: 0 0 12px; }
+  .xtra table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .xtra th, .xtra td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .xtra th { color: var(--sub); font-size: 12px; font-weight: 700; }
+  .xtra code { font-family: var(--mono); font-size: 12.5px; color: var(--accent); }
+
   @media (max-width: 760px) {
     .card { padding: 28px 20px; border-radius: 16px; }
     h1 { font-size: 22px; }
@@ -135,36 +158,40 @@
   }
 
   /* ===== プロパティ別デモCSS（demos/*.json の demo_css） ===== */
-  .sg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .sg figure { margin: 0; }
-  .sg figcaption { font-size: 11px; color: var(--sub); margin-bottom: 4px; }
-  .sg .bx { height: 84px; overflow: auto; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px; }
-  .sg .bx i { display: block; height: 14px; margin-bottom: 6px; border-radius: 4px; background: var(--accent); }
-  .after .sg .bx { scrollbar-gutter: stable; }
+  .bx { height: 112px; overflow: auto; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px; }
+  .bx .edge { text-align: right; font-size: 11px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+  .bx i { display: block; height: 14px; margin-bottom: 6px; border-radius: 4px; background: var(--accent); }
+  .bx .more { display: none; }
+  .bx.grown .more { display: block; }
+  .after .bx { scrollbar-gutter: stable; }
 </style>
 </head>
 <body>
 <main class="card">
   <header class="head">
     <div class="eyebrow rise"><span>CSS TIPS · No.34 · レイアウト・スクロール</span><code>scrollbar-gutter: stable</code></div>
-    <h1 class="rise" style="--i:1">スクロールバーの出現・消失によるコンテンツ幅のガタつきを事前に防止</h1>
-    <p class="lead rise" style="--i:2">スクロールバーの出現・消失によるコンテンツ幅のガタつきを事前に防止できる</p>
+    <h1 class="rise" style="--i:1">スクロールバーの出現・消失による横ズレを抑える</h1>
+    <p class="lead rise" style="--i:2">スクロールバーが場所を取る環境で、出現・消失による横ズレを抑えられる</p>
   </header>
 
-  <div class="compare">
+  <p class="hint rise" style="--i:2"><b>TRY IT</b><span>「内容を増やす」を押すと、スクロールバーが出る前後で右端の位置が変わるか確認できます</span></p>
+  <p class="banner" role="note"><b>環境による違い</b>スクロールバーが幅を取る環境（Windows など）で効果が見えます。macOS やスマホなどのオーバーレイスクロールバーでは、そもそも同じ横ズレが起きないため、見え方が異なります。</p>
+  <p class="env-note" id="env-note" role="note" hidden>お使いの環境はオーバーレイスクロールバーのため、Before でも右端はズレません。スクロールバーが幅を取る環境（Windows の Chrome・Edge など）で比べてください。</p>
+  <div class="demo-controls"><button class="play-btn" type="button" data-toggle=".bx" data-class="grown" aria-pressed="false">内容を増やす／減らす</button></div>
+  <div class="compare try">
     <div class="arrow rise" style="--i:4" aria-hidden="true">→</div>
     <section class="panel before rise" style="--i:3">
-      <div class="panel-h"><span class="badge">BEFORE</span><h2>開閉時にガタつく</h2></div>
-      <p class="cap">スクロールバーが出ると、内容の幅が狭くなりレイアウトがずれる</p>
+      <div class="panel-h"><span class="badge">BEFORE</span><h2>スクロールバー出現時に横へズレる</h2></div>
+      <p class="cap">スクロールバーが出ると、その幅の分だけ内容が狭くなり、右端がズレる</p>
       <div class="stage">
-        <div class="sg"><figure><figcaption>内容が少ない</figcaption><div class="bx"><i></i><i></i></div></figure><figure><figcaption>内容が多い</figcaption><div class="bx"><i></i><i></i><i></i><i></i><i></i><i></i></div></figure></div>
+        <div class="bx"><div class="edge">右端 ▕</div><i></i><i></i><span class="more"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
       </div>
     </section>
     <section class="panel after">
-      <div class="panel-h"><span class="badge">AFTER</span><h2>幅を安定させる</h2></div>
-      <p class="cap">scrollbar-gutter: stable で、バーの分を常に確保する</p>
+      <div class="panel-h"><span class="badge">AFTER</span><h2>ガターを確保して幅を安定させる</h2></div>
+      <p class="cap">scrollbar-gutter: stable で、スクロールバーの幅を最初から確保しておく</p>
       <div class="stage">
-        <div class="sg"><figure><figcaption>内容が少ない</figcaption><div class="bx"><i></i><i></i></div></figure><figure><figcaption>内容が多い</figcaption><div class="bx"><i></i><i></i><i></i><i></i><i></i><i></i></div></figure></div>
+        <div class="bx"><div class="edge">右端 ▕</div><i></i><i></i><span class="more"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
       </div>
     </section>
   </div>
@@ -172,26 +199,63 @@
 
   <figure class="code rise" style="--i:9">
     <figcaption>CSS</figcaption>
-    <pre>.panel {
+    <pre>html {
+  scrollbar-gutter: stable;
+}
+
+/* スクロールする要素にも指定できる */
+.panel {
   overflow: auto;
-  scrollbar-gutter: stable; /* バーの分を常に確保 */
+  scrollbar-gutter: stable;
 }</pre>
   </figure>
 
   <div class="notes">
     <section class="note rise" style="--i:10">
       <h3>用途</h3>
-      モーダル表示時に背面のスクロールを止めた瞬間、スクロールバー分のレイアウトシフトが起きるのを防ぎたいとき
+      ページの高さによってスクロールバーが出たり消えたりし、コンテンツ幅が微妙にズレるのを抑えたいとき
     </section>
     <section class="note caution rise" style="--i:11">
       <h3>注意</h3>
-      OSやブラウザのスクロールバー表示設定で見え方が変わる。
+      OSやブラウザのスクロールバー表示設定で見え方が変わる。 ガタつきを抑える方法の1つで、すべての環境でズレがなくなるわけではない（オーバーレイスクロールバーでは、もともとズレない）。
     </section>
     <section class="note rise" style="--i:12">
       <h3>ブラウザ対応</h3>
-      主要ブラウザ対応良好。実案件では確認推奨
+      主要ブラウザで利用可能。オーバーレイスクロールバー環境では見え方が異なる
     </section>
   </div>
 </main>
+<script>
+(() => {
+  const mq = matchMedia('(prefers-reduced-motion: reduce)');
+  const sync = () => document.querySelectorAll('.rm-note').forEach((n) => { n.hidden = !mq.matches; });
+  sync(); if (mq.addEventListener) mq.addEventListener('change', sync);
+  // 再生: .play を付け直して、毎回最初から再生する
+  const replay = (el) => { el.classList.remove('play'); void el.offsetWidth; el.classList.add('play'); };
+  document.querySelectorAll('[data-replay]').forEach((b) => b.addEventListener('click', () => document.querySelectorAll(b.dataset.replay).forEach(replay)));
+  document.querySelectorAll('[data-hover-replay]').forEach((el) => {
+    el.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') replay(el); });
+    el.addEventListener('click', (e) => { if (e.pointerType !== 'mouse') replay(el); });
+    el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); replay(el); } });
+  });
+  // 切り替え: hover / focus の状態を、ボタン（タップ・キーボード）でも作れるようにする
+  document.querySelectorAll('[data-toggle]').forEach((b) => b.addEventListener('click', () => {
+    const on = b.getAttribute('aria-pressed') !== 'true';
+    b.setAttribute('aria-pressed', String(on));
+    document.querySelectorAll(b.dataset.toggle).forEach((el) => el.classList.toggle(b.dataset.class || 'is-on', on));
+  }));
+})();
+</script>
+<script>
+(() => {
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:absolute;left:-9999px;width:100px;height:100px;overflow:scroll';
+  document.body.appendChild(probe);
+  const overlay = probe.offsetWidth - probe.clientWidth === 0;
+  probe.remove();
+  const note = document.getElementById('env-note');
+  if (note && overlay) note.hidden = false;
+})();
+</script>
 </body>
 </html>

@@ -44,8 +44,14 @@
   .stg > :nth-child(7) { --k: 6; } .stg > :nth-child(8) { --k: 7; }
   .before .stg { --base: 520ms; }
   .after  .stg { --base: 680ms; }
+  /* 「動きを減らす」設定: ページ装飾の動きだけ止める。
+     教材デモ（motion: true のデモ定義 → .stage.motion-demo の中身）は止めない＝動きを見ること自体が学習内容のため。
+     ただし装飾（.rise / .stg / .stage 自身）は教材デモ内でも止める。 */
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation: none !important; transition: none !important; }
+    *:not(.motion-demo):not(.motion-demo *),
+    *:not(.motion-demo):not(.motion-demo *)::before,
+    *:not(.motion-demo):not(.motion-demo *)::after { animation: none !important; transition: none !important; }
+    .rise, .stg > *, .stage { animation: none !important; }
   }
 
   /* ===== Card ===== */
@@ -127,6 +133,14 @@
   .solo .panel { grid-column: 1 / -1; }
   .solo .stage { min-height: 190px; }
 
+  /* ===== 教材デモの操作（再生・切り替えボタン / 動き軽減時の案内） ===== */
+  .demo-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 14px; }
+  .play-btn { appearance: none; font: inherit; font-size: 14px; font-weight: 700; color: #fff; background: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 8px 20px; min-height: 44px; cursor: pointer; }
+  .play-btn:hover { background: #3c5a80; }
+  .play-btn:focus-visible { outline: 3px solid var(--accent-line); outline-offset: 2px; }
+  .play-btn[aria-pressed="true"] { background: #fff; color: var(--accent); }
+  .rm-note:not([hidden]) { margin: 0 0 14px; padding: 8px 14px; font-size: 13px; line-height: 1.6; color: var(--warn); background: var(--warn-soft); border: 1px solid var(--warn-line); border-radius: 10px; }
+
   @media (max-width: 760px) {
     .card { padding: 28px 20px; border-radius: 16px; }
     h1 { font-size: 22px; }
@@ -136,12 +150,16 @@
 
   /* ===== プロパティ別デモCSS（demos/*.json の demo_css） ===== */
   .kf { padding: 16px; background: #fff; border: 1px solid var(--line); border-radius: 12px; display: grid; gap: 8px; cursor: pointer; }
+  .kf:focus-visible { outline: 3px solid var(--accent-line); outline-offset: 2px; }
   .kf small { font-family: var(--mono); font-size: 11px; color: var(--sub); }
   .kf .it { padding: 8px 14px; border-radius: 8px; background: var(--accent-soft); border: 1px solid var(--accent-line); color: var(--accent); font-size: 14px; font-weight: 600; }
-  @keyframes kf-pop { from { transform: translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
-  .kf:hover .it { animation: kf-pop .5s var(--ease) backwards; }
-  .kf:hover .it:nth-of-type(2) { animation-delay: .1s; }
-  .kf:hover .it:nth-of-type(3) { animation-delay: .2s; }
+  /* 初期状態は通常表示（opacity:0 は keyframes の中だけ）。.play が付いた瞬間に最初から再生される */
+  @keyframes kf-pop { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes kf-fade { from { opacity: 0; } to { opacity: 1; } }
+  .kf.play .it { animation: kf-pop .5s var(--ease) backwards; }
+  .kf.play .it:nth-of-type(2) { animation-delay: .1s; }
+  .kf.play .it:nth-of-type(3) { animation-delay: .2s; }
+  @media (prefers-reduced-motion: reduce) { .kf.play .it { animation-name: kf-fade; } }
 </style>
 </head>
 <body>
@@ -152,13 +170,15 @@
 
   </header>
 
-  <p class="hint rise" style="--i:2"><b>TRY IT</b><span>カードにマウスを乗せると、1回だけアニメーションが再生されます</span></p>
+  <p class="hint rise" style="--i:2"><b>TRY IT</b><span>マウスを乗せる／タップする／「▶ 再生」ボタンで再生（Tab → Enter でも可）</span></p>
+  <p class="rm-note" role="note" hidden>お使いの端末は「動きを減らす」設定です。ページ装飾の動きは止めていますが、このデモは学習用のため、操作したときだけ再生します（移動は省いて、ふわっと表示するだけの控えめな動きにしています）。</p>
+  <div class="demo-controls"><button class="play-btn" type="button" data-replay=".kf">▶ 再生</button></div>
   <div class="compare solo try">
     <section class="panel after rise" style="--i:3">
       <div class="panel-h"><span class="badge">DEMO</span><h2>@keyframes で動きを定義し、animation で呼び出す</h2></div>
-      <p class="cap">ホバーのたびに1回だけ再生される（ループはしない）</p>
-      <div class="stage">
-        <div class="kf" tabindex="0"><small>ここにマウスを乗せる</small><div class="it">項目 1</div><div class="it">項目 2</div><div class="it">項目 3</div></div>
+      <p class="cap">操作するたびに、最初から1回だけ再生される（ループはしない）。デモでは :hover の代わりに .play クラスで同じ animation を付けています</p>
+      <div class="stage motion-demo">
+        <div class="kf" tabindex="0" role="button" aria-label="アニメーションを再生" data-hover-replay><small>ここを操作すると再生（マウスを乗せる／タップ／Enter）</small><div class="it">項目 1</div><div class="it">項目 2</div><div class="it">項目 3</div></div>
       </div>
     </section>
   </div>
@@ -190,5 +210,26 @@
     </section>
   </div>
 </main>
+<script>
+(() => {
+  const mq = matchMedia('(prefers-reduced-motion: reduce)');
+  const sync = () => document.querySelectorAll('.rm-note').forEach((n) => { n.hidden = !mq.matches; });
+  sync(); if (mq.addEventListener) mq.addEventListener('change', sync);
+  // 再生: .play を付け直して、毎回最初から再生する
+  const replay = (el) => { el.classList.remove('play'); void el.offsetWidth; el.classList.add('play'); };
+  document.querySelectorAll('[data-replay]').forEach((b) => b.addEventListener('click', () => document.querySelectorAll(b.dataset.replay).forEach(replay)));
+  document.querySelectorAll('[data-hover-replay]').forEach((el) => {
+    el.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') replay(el); });
+    el.addEventListener('click', (e) => { if (e.pointerType !== 'mouse') replay(el); });
+    el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); replay(el); } });
+  });
+  // 切り替え: hover / focus の状態を、ボタン（タップ・キーボード）でも作れるようにする
+  document.querySelectorAll('[data-toggle]').forEach((b) => b.addEventListener('click', () => {
+    const on = b.getAttribute('aria-pressed') !== 'true';
+    b.setAttribute('aria-pressed', String(on));
+    document.querySelectorAll(b.dataset.toggle).forEach((el) => el.classList.toggle('is-on', on));
+  }));
+})();
+</script>
 </body>
 </html>

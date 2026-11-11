@@ -44,8 +44,14 @@
   .stg > :nth-child(7) { --k: 6; } .stg > :nth-child(8) { --k: 7; }
   .before .stg { --base: 520ms; }
   .after  .stg { --base: 680ms; }
+  /* 「動きを減らす」設定: ページ装飾の動きだけ止める。
+     教材デモ（motion: true のデモ定義 → .stage.motion-demo の中身）は止めない＝動きを見ること自体が学習内容のため。
+     ただし装飾（.rise / .stg / .stage 自身）は教材デモ内でも止める。 */
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation: none !important; transition: none !important; }
+    *:not(.motion-demo):not(.motion-demo *),
+    *:not(.motion-demo):not(.motion-demo *)::before,
+    *:not(.motion-demo):not(.motion-demo *)::after { animation: none !important; transition: none !important; }
+    .rise, .stg > *, .stage { animation: none !important; }
   }
 
   /* ===== Card ===== */
@@ -127,6 +133,23 @@
   .solo .panel { grid-column: 1 / -1; }
   .solo .stage { min-height: 190px; }
 
+  /* ===== 教材デモの操作（再生・切り替えボタン / 動き軽減時の案内） ===== */
+  .demo-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 14px; }
+  .play-btn { appearance: none; font: inherit; font-size: 14px; font-weight: 700; color: #fff; background: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 8px 20px; min-height: 44px; cursor: pointer; }
+  .play-btn:hover { background: #3c5a80; }
+  .play-btn:focus-visible { outline: 3px solid var(--accent-line); outline-offset: 2px; }
+  .play-btn[aria-pressed="true"] { background: #fff; color: var(--accent); }
+  .banner, .rm-note:not([hidden]), .env-note:not([hidden]) { margin: 0 0 14px; padding: 8px 14px; font-size: 13px; line-height: 1.6; color: var(--warn); background: var(--warn-soft); border: 1px solid var(--warn-line); border-radius: 10px; }
+  .banner { margin: 0 0 14px; font-weight: 700; }
+  .banner b { margin-right: 6px; }
+  .xtra { margin-top: 22px; }
+  .xtra h2 { font-size: 16px; margin: 0 0 6px; }
+  .xtra p { font-size: 14px; color: var(--sub); margin: 0 0 12px; }
+  .xtra table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .xtra th, .xtra td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .xtra th { color: var(--sub); font-size: 12px; font-weight: 700; }
+  .xtra code { font-family: var(--mono); font-size: 12.5px; color: var(--accent); }
+
   @media (max-width: 760px) {
     .card { padding: 28px 20px; border-radius: 16px; }
     h1 { font-size: 22px; }
@@ -135,71 +158,112 @@
   }
 
   /* ===== プロパティ別デモCSS（demos/*.json の demo_css） ===== */
-  .cs { background: #fff; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-  .cs summary { cursor: pointer; padding: 12px 14px; font-weight: 600; font-size: 14px; list-style-position: inside; }
-  .cs .bd { padding: 0 14px 14px; font-size: 13px; color: var(--sub); line-height: 1.7; }
-  .after .cs { interpolate-size: allow-keywords; }
-  .after .cs::details-content { height: 0; overflow: clip; transition: height .35s var(--ease), content-visibility .35s allow-discrete; }
-  .after .cs[open]::details-content { height: auto; }
+  .acc { background: #fff; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .acc-h { padding: 12px 14px; font-weight: 600; font-size: 14px; border-bottom: 1px solid var(--line); }
+  .pn { height: 0; overflow: hidden; transition: height .3s ease; }
+  .pn.open { height: auto; }
+  .pn p { padding: 12px 14px; font-size: 13px; color: var(--sub); line-height: 1.7; }
+  .after .acc { interpolate-size: allow-keywords; }
 </style>
 </head>
 <body>
 <main class="card">
   <header class="head">
     <div class="eyebrow rise"><span>CSS TIPS · No.32 · アニメーション</span><code>calc-size() / interpolate-size</code></div>
-    <h1 class="rise" style="--i:1">長年不可能だった height:auto へのトランジションをJSなしで実現最新CSS</h1>
-    <p class="lead rise" style="--i:2">長年不可能だった height:auto へのトランジションをJSなしで実現できる最新CSS</p>
+    <h1 class="rise" style="--i:1">height: auto へのアニメーションが可能になりつつある</h1>
+    <p class="lead rise" style="--i:2">最新CSSで、height: auto への開閉アニメーションが可能になりつつある</p>
   </header>
 
-  <p class="hint rise" style="--i:2"><b>TRY IT</b><span>見出しをクリックして、開閉の動きを比べてください</span></p>
+  <p class="hint rise" style="--i:2"><b>TRY IT</b><span>「▶ 開閉する」ボタンで、左右の開き方を比べてください（マウス・タップ・キーボードで操作できます）</span></p>
+  <p class="banner" role="note"><b>最新CSS・対応注意</b>interpolate-size は対応ブラウザが限られる新しいCSSです。未対応の環境では、従来どおりパッと開閉します（表示が壊れるわけではありません）。案件で使う前に、対応ブラウザとフォールバックを必ず確認してください。</p>
+  <p class="rm-note" role="note" hidden>お使いの端末は「動きを減らす」設定です。ページ装飾の動きは止めていますが、このデモは動きを見ること自体が学習内容のため、ボタンなどで操作したときは動きます。</p>
+  <div class="demo-controls"><button class="play-btn" type="button" data-toggle=".pn" data-class="open" aria-pressed="false">▶ 開閉する</button></div>
   <div class="compare try">
     <div class="arrow rise" style="--i:4" aria-hidden="true">→</div>
     <section class="panel before rise" style="--i:3">
-      <div class="panel-h"><span class="badge">BEFORE</span><h2>height:autoが動かない</h2></div>
-      <p class="cap">height: auto は従来アニメーションできず、開閉が一瞬で切り替わる</p>
-      <div class="stage">
-        <details class="cs"><summary>よくある質問</summary><div class="bd">高さが auto の要素は、これまでアニメーションの対象にできませんでした。この指定を入れると、開閉の動きが補間されます。</div></details>
+      <div class="panel-h"><span class="badge">BEFORE</span><h2>height: 0 → auto がそのままでは動かない</h2></div>
+      <p class="cap">height: 0 から height: auto へは、そのままでは補間できず、パッと開く</p>
+      <div class="stage motion-demo">
+        <div class="acc"><div class="acc-h">よくある質問</div><div class="pn"><p>高さが auto の要素は、これまで高さのアニメーションの対象にできませんでした。</p></div></div>
       </div>
     </section>
     <section class="panel after">
-      <div class="panel-h"><span class="badge">AFTER</span><h2>CSSだけで開閉演出</h2></div>
-      <p class="cap">interpolate-size で、auto への高さ変化もなめらかになる</p>
-      <div class="stage">
-        <details class="cs"><summary>よくある質問</summary><div class="bd">高さが auto の要素は、これまでアニメーションの対象にできませんでした。この指定を入れると、開閉の動きが補間されます。</div></details>
+      <div class="panel-h"><span class="badge">AFTER</span><h2>対応ブラウザではCSSだけで開閉できる</h2></div>
+      <p class="cap">interpolate-size: allow-keywords を足すと、auto への高さ変化も補間される（対応ブラウザのみ）</p>
+      <div class="stage motion-demo">
+        <div class="acc"><div class="acc-h">よくある質問</div><div class="pn"><p>高さが auto の要素は、これまで高さのアニメーションの対象にできませんでした。</p></div></div>
       </div>
     </section>
   </div>
 
+  <section class="xtra" aria-label="interpolate-size と calc-size() の違い">
+    <h2>混同しやすい2つの違い</h2>
+    <table>
+      <thead><tr><th></th><th>interpolate-size</th><th>calc-size()</th></tr></thead>
+      <tbody>
+        <tr><th>種類</th><td>プロパティ（設定）</td><td>CSS関数</td></tr>
+        <tr><th>役割</th><td>auto などのキーワードへの変化を、補間してよいと許可する</td><td>auto などのサイズを、計算式の中で扱えるようにする</td></tr>
+        <tr><th>書き方の例</th><td><code>interpolate-size: allow-keywords;</code></td><td><code>height: calc-size(auto, size);</code></td></tr>
+      </tbody>
+    </table>
+  </section>
 
   <figure class="code rise" style="--i:9">
     <figcaption>CSS</figcaption>
-    <pre>details {
+    <pre>/* ① interpolate-size：auto などのキーワードへの補間を許可する設定 */
+:root {
   interpolate-size: allow-keywords;
 }
-details::details-content {
+.panel {
   height: 0;
-  overflow: clip;
-  transition: height .3s, content-visibility .3s allow-discrete;
+  overflow: hidden;
+  transition: height .3s ease;
 }
-details[open]::details-content {
+.panel.open {
   height: auto;
+}
+
+/* ② calc-size()：auto を計算の中で扱える関数（別の機能） */
+.panel.open {
+  height: calc-size(auto, size);
 }</pre>
   </figure>
 
   <div class="notes">
     <section class="note rise" style="--i:10">
       <h3>用途</h3>
-      アコーディオンやモーダルの開閉を、高さをJSで計測せずにCSSアニメーションだけで実装したいとき
+      アコーディオンなど、内容量が変わる要素の高さをJSで計測せずにアニメーションしたいとき
     </section>
     <section class="note caution rise" style="--i:11">
       <h3>注意</h3>
-      最新CSS枠。案件投入前に対応ブラウザとフォールバック確認。
+      最新CSS枠。案件投入前に対応ブラウザとフォールバック確認。 未対応ブラウザでは補間されず、パッと開閉する。その状態でも使えるかをフォールバックとして確認する。interpolate-size（設定）と calc-size()（関数）は別の機能で、どちらも新しい。
     </section>
     <section class="note rise" style="--i:12">
       <h3>ブラウザ対応</h3>
-      最新CSS。対応ブラウザ要確認
+      最新CSS。対応ブラウザが限られるため、案件投入前に必ず確認
     </section>
   </div>
 </main>
+<script>
+(() => {
+  const mq = matchMedia('(prefers-reduced-motion: reduce)');
+  const sync = () => document.querySelectorAll('.rm-note').forEach((n) => { n.hidden = !mq.matches; });
+  sync(); if (mq.addEventListener) mq.addEventListener('change', sync);
+  // 再生: .play を付け直して、毎回最初から再生する
+  const replay = (el) => { el.classList.remove('play'); void el.offsetWidth; el.classList.add('play'); };
+  document.querySelectorAll('[data-replay]').forEach((b) => b.addEventListener('click', () => document.querySelectorAll(b.dataset.replay).forEach(replay)));
+  document.querySelectorAll('[data-hover-replay]').forEach((el) => {
+    el.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') replay(el); });
+    el.addEventListener('click', (e) => { if (e.pointerType !== 'mouse') replay(el); });
+    el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); replay(el); } });
+  });
+  // 切り替え: hover / focus の状態を、ボタン（タップ・キーボード）でも作れるようにする
+  document.querySelectorAll('[data-toggle]').forEach((b) => b.addEventListener('click', () => {
+    const on = b.getAttribute('aria-pressed') !== 'true';
+    b.setAttribute('aria-pressed', String(on));
+    document.querySelectorAll(b.dataset.toggle).forEach((el) => el.classList.toggle(b.dataset.class || 'is-on', on));
+  }));
+})();
+</script>
 </body>
 </html>

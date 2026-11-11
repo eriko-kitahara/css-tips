@@ -44,8 +44,14 @@
   .stg > :nth-child(7) { --k: 6; } .stg > :nth-child(8) { --k: 7; }
   .before .stg { --base: 520ms; }
   .after  .stg { --base: 680ms; }
+  /* 「動きを減らす」設定: ページ装飾の動きだけ止める。
+     教材デモ（motion: true のデモ定義 → .stage.motion-demo の中身）は止めない＝動きを見ること自体が学習内容のため。
+     ただし装飾（.rise / .stg / .stage 自身）は教材デモ内でも止める。 */
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation: none !important; transition: none !important; }
+    *:not(.motion-demo):not(.motion-demo *),
+    *:not(.motion-demo):not(.motion-demo *)::before,
+    *:not(.motion-demo):not(.motion-demo *)::after { animation: none !important; transition: none !important; }
+    .rise, .stg > *, .stage { animation: none !important; }
   }
 
   /* ===== Card ===== */
@@ -127,6 +133,23 @@
   .solo .panel { grid-column: 1 / -1; }
   .solo .stage { min-height: 190px; }
 
+  /* ===== 教材デモの操作（再生・切り替えボタン / 動き軽減時の案内） ===== */
+  .demo-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 14px; }
+  .play-btn { appearance: none; font: inherit; font-size: 14px; font-weight: 700; color: #fff; background: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 8px 20px; min-height: 44px; cursor: pointer; }
+  .play-btn:hover { background: #3c5a80; }
+  .play-btn:focus-visible { outline: 3px solid var(--accent-line); outline-offset: 2px; }
+  .play-btn[aria-pressed="true"] { background: #fff; color: var(--accent); }
+  .banner, .rm-note:not([hidden]), .env-note:not([hidden]) { margin: 0 0 14px; padding: 8px 14px; font-size: 13px; line-height: 1.6; color: var(--warn); background: var(--warn-soft); border: 1px solid var(--warn-line); border-radius: 10px; }
+  .banner { margin: 0 0 14px; font-weight: 700; }
+  .banner b { margin-right: 6px; }
+  .xtra { margin-top: 22px; }
+  .xtra h2 { font-size: 16px; margin: 0 0 6px; }
+  .xtra p { font-size: 14px; color: var(--sub); margin: 0 0 12px; }
+  .xtra table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .xtra th, .xtra td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .xtra th { color: var(--sub); font-size: 12px; font-weight: 700; }
+  .xtra code { font-family: var(--mono); font-size: 12.5px; color: var(--accent); }
+
   @media (max-width: 760px) {
     .card { padding: 28px 20px; border-radius: 16px; }
     h1 { font-size: 22px; }
@@ -135,11 +158,12 @@
   }
 
   /* ===== プロパティ別デモCSS（demos/*.json の demo_css） ===== */
+  .mini { font-family: var(--mono); font-size: 12px; line-height: 1.7; color: #2a3550; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; white-space: pre; overflow: auto; }
   .ld { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .ldc { padding: 16px 18px; border-radius: 12px; background: light-dark(#ffffff, #161c28); color: light-dark(#1c2433, #e8edf4); border: 1px solid light-dark(#d5dbe5, #3a4457); }
-  .ldc.l { color-scheme: light; } .ldc.d { color-scheme: dark; }
+  .ldc.l { color-scheme: light; } .ldc.d { color-scheme: dark; } .ldc.s { color-scheme: light dark; }
   .ldc h4 { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .02em; color: light-dark(#4a6b94, #9db6d6); }
-  .ldc p { font-size: 14px; margin: 4px 0 12px; }
+  .ldc p { font-size: 13.5px; margin: 4px 0 12px; color: inherit; }
   .ldb { display: inline-block; font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 8px; background: light-dark(#4a6b94, #9db6d6); color: light-dark(#ffffff, #10161f); }
   @media (max-width: 520px) { .ld { grid-template-columns: 1fr; } }
 </style>
@@ -148,35 +172,69 @@
 <main class="card">
   <header class="head">
     <div class="eyebrow rise"><span>CSS TIPS · No.35 · カラー・ダークモード</span><code>light-dark()</code></div>
-    <h1 class="rise" style="--i:1">ライト/ダーク両方の色をCSS関数一つで指定</h1>
-    <p class="lead rise" style="--i:2">ライト/ダーク両方の色をCSS関数一つで指定できる</p>
+    <h1 class="rise" style="--i:1">ライト／ダークの色指定を1つにまとめる</h1>
+    <p class="lead rise" style="--i:2">color-scheme と組み合わせて、ライト／ダークの色を1つの宣言で切り替えられる</p>
   </header>
 
-  <div class="compare solo">
-    <section class="panel after rise" style="--i:3">
-      <div class="panel-h"><span class="badge">DEMO</span><h2>同じ light-dark() の指定が、color-scheme に応じて色を切り替える</h2></div>
-      <p class="cap">左は color-scheme: light、右は dark。CSSの記述はどちらも同じ</p>
+  <p class="banner" role="note"><b>前提</b>light-dark() は color-scheme の指定とセットで使います。color-scheme を指定しないと、常に1つ目（ライト）の値になります。</p>
+  <div class="compare">
+    <div class="arrow rise" style="--i:4" aria-hidden="true">→</div>
+    <section class="panel before rise" style="--i:3">
+      <div class="panel-h"><span class="badge">BEFORE</span><h2>配色の分岐を別々に書く</h2></div>
+      <p class="cap">メディアクエリで、ライトとダークの値を別々の場所に書く</p>
       <div class="stage">
-        <div class="ld stg"><div class="ldc l"><h4>color-scheme: light</h4><p>同じCSSで色が決まる</p><span class="ldb">ボタン</span></div><div class="ldc d"><h4>color-scheme: dark</h4><p>同じCSSで色が決まる</p><span class="ldb">ボタン</span></div></div>
+        <div class="mini">body {
+  background: #fff;
+  color: #111;
+}
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #111;
+    color: #f5f5f5;
+  }
+}</div>
+      </div>
+    </section>
+    <section class="panel after">
+      <div class="panel-h"><span class="badge">AFTER</span><h2>light-dark()で1つの宣言にまとめる</h2></div>
+      <p class="cap">1つの宣言に、ライト時の値とダーク時の値を並べて書く</p>
+      <div class="stage">
+        <div class="mini">:root { color-scheme: light dark; }
+body {
+  background: light-dark(#fff, #111);
+  color: light-dark(#111, #f5f5f5);
+}</div>
       </div>
     </section>
   </div>
 
+  <section class="xtra" aria-label="color-scheme による切り替え">
+    <h2>color-scheme しだいで、同じ light-dark() の結果が変わる</h2>
+    <p>下の4枚はすべて同じ light-dark() の指定です。違うのは color-scheme だけです。</p>
+    <div class="ld">
+      <div class="ldc l"><h4>color-scheme: light</h4><p>1つ目（ライト）の値</p><span class="ldb">ボタン</span></div>
+      <div class="ldc d"><h4>color-scheme: dark</h4><p>2つ目（ダーク）の値</p><span class="ldb">ボタン</span></div>
+      <div class="ldc s"><h4>color-scheme: light dark</h4><p>OS・ブラウザの設定に従う（いまの設定が反映）</p><span class="ldb">ボタン</span></div>
+      <div class="ldc "><h4>指定なし</h4><p>常に1つ目（ライト）の値。OSがダークでも変わらない</p><span class="ldb">ボタン</span></div>
+    </div>
+  </section>
 
   <figure class="code rise" style="--i:9">
     <figcaption>CSS</figcaption>
-    <pre>:root { color-scheme: light dark; }
+    <pre>:root {
+  color-scheme: light dark;  /* ← これが前提 */
+}
 
-.card {
-  background: light-dark(#ffffff, #161c28);
-  color: light-dark(#1c2433, #e8edf4);
+body {
+  background: light-dark(#fff, #111);
+  color: light-dark(#111, #f5f5f5);
 }</pre>
   </figure>
 
   <div class="notes">
     <section class="note rise" style="--i:10">
       <h3>用途</h3>
-      ダークモード対応のLP/サイトで、CSS変数やメディアクエリの記述量を減らして配色を切り替えたいとき
+      ライト／ダーク両対応のサイトで、配色の分岐をシンプルに書きたいとき
     </section>
     <section class="note caution rise" style="--i:11">
       <h3>注意</h3>
@@ -184,7 +242,7 @@
     </section>
     <section class="note rise" style="--i:12">
       <h3>ブラウザ対応</h3>
-      最新CSS。対応ブラウザ要確認
+      主要ブラウザで利用可能。color-scheme の指定とセットで使う
     </section>
   </div>
 </main>

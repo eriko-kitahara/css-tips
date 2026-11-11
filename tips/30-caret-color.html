@@ -44,8 +44,14 @@
   .stg > :nth-child(7) { --k: 6; } .stg > :nth-child(8) { --k: 7; }
   .before .stg { --base: 520ms; }
   .after  .stg { --base: 680ms; }
+  /* 「動きを減らす」設定: ページ装飾の動きだけ止める。
+     教材デモ（motion: true のデモ定義 → .stage.motion-demo の中身）は止めない＝動きを見ること自体が学習内容のため。
+     ただし装飾（.rise / .stg / .stage 自身）は教材デモ内でも止める。 */
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation: none !important; transition: none !important; }
+    *:not(.motion-demo):not(.motion-demo *),
+    *:not(.motion-demo):not(.motion-demo *)::before,
+    *:not(.motion-demo):not(.motion-demo *)::after { animation: none !important; transition: none !important; }
+    .rise, .stg > *, .stage { animation: none !important; }
   }
 
   /* ===== Card ===== */
@@ -127,6 +133,23 @@
   .solo .panel { grid-column: 1 / -1; }
   .solo .stage { min-height: 190px; }
 
+  /* ===== 教材デモの操作（再生・切り替えボタン / 動き軽減時の案内） ===== */
+  .demo-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 14px; }
+  .play-btn { appearance: none; font: inherit; font-size: 14px; font-weight: 700; color: #fff; background: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 8px 20px; min-height: 44px; cursor: pointer; }
+  .play-btn:hover { background: #3c5a80; }
+  .play-btn:focus-visible { outline: 3px solid var(--accent-line); outline-offset: 2px; }
+  .play-btn[aria-pressed="true"] { background: #fff; color: var(--accent); }
+  .banner, .rm-note:not([hidden]), .env-note:not([hidden]) { margin: 0 0 14px; padding: 8px 14px; font-size: 13px; line-height: 1.6; color: var(--warn); background: var(--warn-soft); border: 1px solid var(--warn-line); border-radius: 10px; }
+  .banner { margin: 0 0 14px; font-weight: 700; }
+  .banner b { margin-right: 6px; }
+  .xtra { margin-top: 22px; }
+  .xtra h2 { font-size: 16px; margin: 0 0 6px; }
+  .xtra p { font-size: 14px; color: var(--sub); margin: 0 0 12px; }
+  .xtra table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .xtra th, .xtra td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .xtra th { color: var(--sub); font-size: 12px; font-weight: 700; }
+  .xtra code { font-family: var(--mono); font-size: 12.5px; color: var(--accent); }
+
   @media (max-width: 760px) {
     .card { padding: 28px 20px; border-radius: 16px; }
     h1 { font-size: 22px; }
@@ -135,28 +158,35 @@
   }
 
   /* ===== プロパティ別デモCSS（demos/*.json の demo_css） ===== */
-  .cc { display: grid; gap: 12px; }
   .cc label { display: grid; gap: 4px; font-size: 12px; font-weight: 700; color: var(--sub); }
   .cc input { font: inherit; font-size: 15px; padding: 10px 12px; background: #fff; color: var(--ink); border: 1px solid #cbd3df; border-radius: 8px; outline: none; transition: border-color .25s var(--ease), box-shadow .25s var(--ease); }
   .cc input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,107,148,.18); }
-  .cc .col { caret-color: var(--warn); }
+  .after .cc input { caret-color: #ff6600; }
 </style>
 </head>
 <body>
 <main class="card">
   <header class="head">
     <div class="eyebrow rise"><span>CSS TIPS · No.30 · フォーム・細部の作り込み</span><code>caret-color</code></div>
-    <h1 class="rise" style="--i:1">input内のテキストカーソル（キャレット）の色を自由に変更</h1>
-    <p class="lead rise" style="--i:2">input内のテキストカーソル（キャレット）の色を自由に変更できる</p>
+    <h1 class="rise" style="--i:1">入力カーソル（キャレット）の色を変更</h1>
+    <p class="lead rise" style="--i:2">入力カーソル（キャレット）の色もCSSで変えられる</p>
   </header>
 
-  <p class="hint rise" style="--i:2"><b>TRY IT</b><span>2つの入力欄をクリックして、キャレット（入力位置の縦線）の色を比べてください</span></p>
-  <div class="compare solo try">
-    <section class="panel after rise" style="--i:3">
-      <div class="panel-h"><span class="badge">DEMO</span><h2>caret-color で、入力位置の縦線の色を変えられる</h2></div>
-      <p class="cap">ブランドカラーに合わせたり、暗い背景で見やすくしたりできる</p>
+  <p class="hint rise" style="--i:2"><b>TRY IT</b><span>入力欄をクリックして、点滅する入力カーソルの色を左右で比べてください</span></p>
+  <div class="compare try">
+    <div class="arrow rise" style="--i:4" aria-hidden="true">→</div>
+    <section class="panel before rise" style="--i:3">
+      <div class="panel-h"><span class="badge">BEFORE</span><h2>既定色のカーソル</h2></div>
+      <p class="cap">指定しないと、カーソルは入力文字と同じ色（既定）で表示される</p>
       <div class="stage">
-        <div class="cc stg"><label>caret-color: auto（標準）<input type="text" value="ここに入力"></label><label>caret-color: アンバー<input class="col" type="text" value="ここに入力"></label></div>
+        <label class="cc">既定のカーソル<input type="text" value="ここをクリック" aria-label="既定のカーソルの入力欄"></label>
+      </div>
+    </section>
+    <section class="panel after">
+      <div class="panel-h"><span class="badge">AFTER</span><h2>ブランドカラーに統一</h2></div>
+      <p class="cap">caret-color: #ff6600 で、カーソルだけをブランドカラーにできる</p>
+      <div class="stage">
+        <label class="cc">caret-color: #ff6600<input type="text" value="ここをクリック" aria-label="caret-color を指定した入力欄"></label>
       </div>
     </section>
   </div>
@@ -164,23 +194,24 @@
 
   <figure class="code rise" style="--i:9">
     <figcaption>CSS</figcaption>
-    <pre>input {
-  caret-color: #c76b00;
+    <pre>input,
+textarea {
+  caret-color: #ff6600;
 }</pre>
   </figure>
 
   <div class="notes">
     <section class="note rise" style="--i:10">
       <h3>用途</h3>
-      ブランドカラーにこだわったフォームデザインで、入力カーソルの色まで統一したい細部の作り込み
+      フォームの細部までブランドカラーを合わせたいとき
     </section>
     <section class="note caution rise" style="--i:11">
       <h3>注意</h3>
-      細部の調整なので、優先度は高くしすぎない。
+      細部の調整なので、優先度は高くしすぎない。 カーソルの色は、背景との差が小さいと見えにくくなるので、薄い色は避ける。
     </section>
     <section class="note rise" style="--i:12">
       <h3>ブラウザ対応</h3>
-      主要ブラウザ対応良好
+      主要ブラウザで利用可能
     </section>
   </div>
 </main>

@@ -162,11 +162,16 @@
   .hy2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
   .hy2 figure { margin: 0; min-width: 0; }
   .hy2 figcaption { font-family: var(--mono); font-size: 10.5px; line-height: 1.4; color: var(--sub); margin-bottom: 6px; min-width: 0; overflow-wrap: anywhere; }
-  .hy { width: min(112px, 100%); padding: 6px 8px; background: #fff; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; line-height: 1.6; }
+  .hy2 figcaption b { color: var(--accent); }
+  .hy { width: min(112px, 100%); margin: 0; padding: 6px 8px; background: #fff; border: 1px solid var(--line); border-radius: 8px; font: inherit; font-size: 13px; line-height: 1.6; }
   .hy.bw { overflow-wrap: break-word; }
   .hy.auto { hyphens: auto; }
   .hy.ng { border-style: dashed; }
+  .hy.fixed { width: fit-content; max-width: 100%; white-space: pre; border: 2px solid var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
   .hy-note { display: block; margin: 12px 0 0; min-width: 0; overflow-wrap: anywhere; font-size: 11.5px; color: var(--sub); line-height: 1.6; }
+  .xtra.live { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px 14px; }
+  .hy-status { font-size: 13px; font-weight: 700; margin: 12px 0 0; min-width: 0; overflow-wrap: anywhere; }
+  .hy-status.on { color: #1d6b3c; } .hy-status.off { color: var(--warn); }
   @media (max-width: 560px) { .hy2 { grid-template-columns: minmax(0, 1fr); gap: 14px; } }
 </style>
 </head>
@@ -183,21 +188,31 @@
     <div class="arrow rise" style="--i:4" aria-hidden="true">→</div>
     <section class="panel before rise" style="--i:3">
       <div class="panel-h"><span class="badge">BEFORE</span><h2>長い単語がはみ出す／不自然に折れる</h2></div>
-      <p class="cap">指定なしでは長い単語がはみ出し、overflow-wrap: break-word ではハイフンなしで途中で切れる</p>
+      <p class="cap">指定なしでは長い単語が枠からはみ出し、overflow-wrap: break-word ではハイフンなしで単語の途中で強制的に折れる</p>
       <div class="stage">
-        <div class="hy-wrap"><div class="hy2"><figure><figcaption>指定なし</figcaption><p class="hy" lang="en">Internationalization of accessibility documentation.</p></figure><figure><figcaption>overflow-wrap: break-word</figcaption><p class="hy bw" lang="en">Internationalization of accessibility documentation.</p></figure></div></div>
+        <div class="hy-wrap"><div class="hy2"><figure><figcaption>指定なし：はみ出す</figcaption><p class="hy" lang="en">Internationalization of accessibility documentation.</p></figure><figure><figcaption>overflow-wrap: break-word：単語の途中で強制的に折れる</figcaption><p class="hy bw" lang="en">Internationalization of accessibility documentation.</p></figure></div></div>
       </div>
     </section>
     <section class="panel after">
       <div class="panel-h"><span class="badge">AFTER</span><h2>自然な位置でハイフンを入れて折り返す</h2></div>
-      <p class="cap">lang="en" と hyphens: auto で、英語の分割位置にハイフンを入れて折り返す</p>
+      <p class="cap">対応環境で lang="en" と hyphens: auto を使うと、英語の分割位置にハイフンを付けて折り返す（下は期待される表示イメージ）</p>
       <div class="stage">
-        <div class="hy-wrap"><div class="hy2"><figure><figcaption>lang="en" + hyphens: auto</figcaption><p class="hy auto" lang="en">Internationalization of accessibility documentation.</p></figure><figure><figcaption>lang が英語ではない（このページは lang="ja"）</figcaption><p class="hy auto ng">Internationalization of accessibility documentation.</p></figure></div>
-          <p class="hy-note">期待される表示：左は単語の途中にハイフン（-）が入って折り返されます。入らない場合は、その環境で言語の辞書が使えていません。</p></div>
+        <div class="hy-wrap"><div class="hy2"><figure><figcaption><b>期待される表示イメージ</b>（固定表示・実行結果ではありません）<br>lang="en" + hyphens: auto</figcaption><pre class="hy fixed" lang="en" aria-label="期待される表示イメージ：Internationalization of accessibility documentation. がハイフン付きで折り返された例">Internation-
+alization of
+accessibil-
+ity documen-
+tation.</pre></figure><figure><figcaption>lang が英語ではない場合：分割されず、はみ出す<br>（このページは lang="ja"）</figcaption><p class="hy auto ng">Internationalization of accessibility documentation.</p></figure></div>
+          <p class="hy-note">左は、対応環境で期待される表示を示した固定のイメージです（分割位置は一例）。実際のブラウザでの表示は、下のライブデモで確認できます。</p></div>
       </div>
     </section>
   </div>
 
+  <section class="xtra live" aria-label="ライブデモ">
+    <h2>ライブデモ：lang="en" と hyphens: auto を実際に適用</h2>
+    <p>ブラウザに対象言語の辞書がない場合、ハイフンが表示されないことがあります。</p>
+    <div class="hy2"><figure><figcaption>lang="en" + hyphens: auto（実際の表示）</figcaption><p class="hy auto" id="live-auto" lang="en">Internationalization of accessibility documentation.</p></figure><figure><figcaption>lang="en" のみ・hyphens なし（比較用）</figcaption><p class="hy" lang="en">Internationalization of accessibility documentation.</p></figure></div>
+    <p class="hy-status" id="live-status" aria-live="polite"></p>
+  </section>
 
   <figure class="code rise" style="--i:9">
     <figcaption>CSS</figcaption>
@@ -228,5 +243,40 @@ p {
     </section>
   </div>
 </main>
+<script>
+(() => {
+  const mq = matchMedia('(prefers-reduced-motion: reduce)');
+  const sync = () => document.querySelectorAll('.rm-note').forEach((n) => { n.hidden = !mq.matches; });
+  sync(); if (mq.addEventListener) mq.addEventListener('change', sync);
+  // 再生: .play を付け直して、毎回最初から再生する
+  const replay = (el) => { el.classList.remove('play'); void el.offsetWidth; el.classList.add('play'); };
+  document.querySelectorAll('[data-replay]').forEach((b) => b.addEventListener('click', () => document.querySelectorAll(b.dataset.replay).forEach(replay)));
+  document.querySelectorAll('[data-hover-replay]').forEach((el) => {
+    el.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') replay(el); });
+    el.addEventListener('click', (e) => { if (e.pointerType !== 'mouse') replay(el); });
+    el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); replay(el); } });
+  });
+  // 切り替え: hover / focus の状態を、ボタン（タップ・キーボード）でも作れるようにする
+  document.querySelectorAll('[data-toggle]').forEach((b) => b.addEventListener('click', () => {
+    const on = b.getAttribute('aria-pressed') !== 'true';
+    b.setAttribute('aria-pressed', String(on));
+    document.querySelectorAll(b.dataset.toggle).forEach((el) => el.classList.toggle(b.dataset.class || 'is-on', on));
+  }));
+})();
+</script>
+<script>
+(() => {
+  const live = document.getElementById('live-auto');
+  const status = document.getElementById('live-status');
+  if (live && status) {
+    // 辞書が使えて分割できていれば、長い単語が枠からはみ出さない
+    const ok = live.scrollWidth <= live.clientWidth + 1;
+    status.className = 'hy-status ' + (ok ? 'on' : 'off');
+    status.textContent = ok
+      ? 'お使いの環境では、ハイフン分割が働いています。'
+      : 'お使いの環境では、ハイフンが表示されていません（言語の辞書が使えない可能性があります）。上の「期待される表示イメージ」が対応環境での表示です。';
+  }
+})();
+</script>
 </body>
 </html>

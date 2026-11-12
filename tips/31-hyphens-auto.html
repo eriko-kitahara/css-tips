@@ -142,6 +142,8 @@
   .banner, .rm-note:not([hidden]), .env-note:not([hidden]) { margin: 0 0 14px; padding: 8px 14px; font-size: 13px; line-height: 1.6; color: var(--warn); background: var(--warn-soft); border: 1px solid var(--warn-line); border-radius: 10px; }
   .banner { margin: 0 0 14px; font-weight: 700; }
   .banner b { margin-right: 6px; }
+  .sec-label { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-size: 14px; font-weight: 700; color: var(--ink); }
+  .sec-label b { flex: none; font-size: 11px; letter-spacing: .08em; color: #fff; background: var(--accent); border-radius: 999px; padding: 1px 10px; }
   .xtra { margin-top: 22px; }
   .xtra h2 { font-size: 16px; margin: 0 0 6px; }
   .xtra p { font-size: 14px; color: var(--sub); margin: 0 0 12px; }
@@ -169,9 +171,25 @@
   .hy.ng { border-style: dashed; }
   .hy.fixed { width: fit-content; max-width: 100%; white-space: pre; border: 2px solid var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
   .hy-note { display: block; margin: 12px 0 0; min-width: 0; overflow-wrap: anywhere; font-size: 11.5px; color: var(--sub); line-height: 1.6; }
-  .xtra.live { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px 14px; }
-  .hy-status { font-size: 13px; font-weight: 700; margin: 12px 0 0; min-width: 0; overflow-wrap: anywhere; }
-  .hy-status.on { color: #1d6b3c; } .hy-status.off { color: var(--warn); }
+  .xtra.live { margin-top: 40px; background: var(--bg); border: 2px dashed var(--accent-line); border-radius: 16px; padding: 22px 22px 20px; }
+  .live .sec-label { margin-bottom: 4px; }
+  .live h2 { font-size: 20px; margin: 0 0 8px; }
+  .live .dict { font-size: 13.5px; color: var(--ink); background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 8px 12px; margin: 0 0 16px; }
+  .live .lv { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  .live .lc { min-width: 0; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px 16px; }
+  .live .lc h3 { font-size: 17px; line-height: 1.4; margin: 0 0 6px; overflow-wrap: anywhere; }
+  .live .lc .cd { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .live .lc .cd code { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 6px; padding: 1px 8px; }
+  .live .hy { width: min(112px, 100%); }
+  .hy-badge { display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 700; border-radius: 999px; padding: 1px 12px; color: var(--sub); background: var(--bg); border: 1px solid var(--line); }
+  .hy-badge.on { color: #1d6b3c; background: #e7f5ec; border-color: #b7dfc5; }
+  .hy-badge.off { color: var(--warn); background: var(--warn-soft); border-color: var(--warn-line); }
+  .hy-status { display: none; margin: 16px 0 0; padding: 12px 16px; border-radius: 10px; font-size: 13.5px; line-height: 1.7; min-width: 0; overflow-wrap: anywhere; }
+  .hy-status.on, .hy-status.off { display: block; }
+  .hy-status b { display: block; font-size: 15px; margin-bottom: 2px; }
+  .hy-status.on { color: #1d6b3c; background: #e7f5ec; border: 1px solid #b7dfc5; }
+  .hy-status.off { color: #6a4510; background: var(--warn-soft); border: 1px solid var(--warn-line); }
+  @media (max-width: 560px) { .live .lv { grid-template-columns: minmax(0, 1fr); } .xtra.live { padding: 18px 14px 16px; } }
   @media (max-width: 560px) { .hy2 { grid-template-columns: minmax(0, 1fr); gap: 14px; } }
 </style>
 </head>
@@ -183,6 +201,7 @@
     <p class="lead rise" style="--i:2">長い英単語を、言語ルールに沿って自然にハイフン分割できる</p>
   </header>
 
+  <p class="sec-label"><b>① 理解する</b>hyphens: auto が、何をする CSS か</p>
   <p class="banner" role="note"><b>ポイント</b>hyphens: auto は、要素（または html）の lang 属性を見て「どの言語のルールで単語を分割するか」を決めます。lang が合っていないと分割されません。</p>
   <div class="compare">
     <div class="arrow rise" style="--i:4" aria-hidden="true">→</div>
@@ -207,11 +226,25 @@ tation.</pre></figure><figure><figcaption>lang が英語ではない場合：分
     </section>
   </div>
 
-  <section class="xtra live" aria-label="ライブデモ">
-    <h2>ライブデモ：lang="en" と hyphens: auto を実際に適用</h2>
-    <p>ブラウザに対象言語の辞書がない場合、ハイフンが表示されないことがあります。</p>
-    <div class="hy2"><figure><figcaption>lang="en" + hyphens: auto（実際の表示）</figcaption><p class="hy auto" id="live-auto" lang="en">Internationalization of accessibility documentation.</p></figure><figure><figcaption>lang="en" のみ・hyphens なし（比較用）</figcaption><p class="hy" lang="en">Internationalization of accessibility documentation.</p></figure></div>
-    <p class="hy-status" id="live-status" aria-live="polite"></p>
+  <section class="xtra live" aria-labelledby="live-h">
+    <p class="sec-label"><b>② 試す</b>自分のブラウザ環境で、実際にどう表示されるか</p>
+    <h2 id="live-h">実際のブラウザで試してみる</h2>
+    <p class="dict">このデモはブラウザの言語辞書に依存します。環境によっては lang="en" + hyphens:auto でもハイフンが表示されない場合があります。</p>
+    <div class="lv">
+      <div class="lc">
+        <h3>英語として判定</h3>
+        <div class="cd"><code>lang="en"</code><code>hyphens: auto</code></div>
+        <p class="hy auto" id="live-en" lang="en">Internationalization of accessibility documentation.</p>
+        <span class="hy-badge" id="live-badge">判定中…</span>
+      </div>
+      <div class="lc">
+        <h3>日本語ページとして判定</h3>
+        <div class="cd"><code>lang="ja"</code><code>hyphens: auto</code></div>
+        <p class="hy auto ng" id="live-ja" lang="ja">Internationalization of accessibility documentation.</p>
+        <span class="hy-badge">分割なし（想定どおり）</span>
+      </div>
+    </div>
+    <div class="hy-status" id="live-status" role="status" aria-live="polite"></div>
   </section>
 
   <figure class="code rise" style="--i:9">
@@ -266,15 +299,18 @@ p {
 </script>
 <script>
 (() => {
-  const live = document.getElementById('live-auto');
+  const en = document.getElementById('live-en');
+  const badge = document.getElementById('live-badge');
   const status = document.getElementById('live-status');
-  if (live && status) {
+  if (en && badge && status) {
     // 辞書が使えて分割できていれば、長い単語が枠からはみ出さない
-    const ok = live.scrollWidth <= live.clientWidth + 1;
+    const ok = en.scrollWidth <= en.clientWidth + 1;
+    badge.className = 'hy-badge ' + (ok ? 'on' : 'off');
+    badge.textContent = ok ? 'この環境：ハイフン分割あり' : 'この環境：ハイフン分割なし';
     status.className = 'hy-status ' + (ok ? 'on' : 'off');
-    status.textContent = ok
-      ? 'お使いの環境では、ハイフン分割が働いています。'
-      : 'お使いの環境では、ハイフンが表示されていません（言語の辞書が使えない可能性があります）。上の「期待される表示イメージ」が対応環境での表示です。';
+    status.innerHTML = ok
+      ? '<b>この環境では英語のハイフネーション辞書が使われています</b>左の欄で、単語の途中にハイフンが入って折り返されています。'
+      : '<b>この環境では英語のハイフネーション辞書が使われていません</b>これは失敗ではなく、この環境での結果です。辞書が使える環境では、上の「期待される表示イメージ」のようにハイフンが入って折り返されます。';
   }
 })();
 </script>

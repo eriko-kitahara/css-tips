@@ -271,7 +271,7 @@ p + p { margin-top: .8em; }
 @media (max-width: 720px) { .vgrid { grid-template-columns: 1fr; } }
 
 /* ===== 教材デモ共通（.teach = 学習用の動き。装飾の動きとは別扱いで、reduced-motion でも止めない） ===== */
-.demo-tag { position: absolute; z-index: 6; left: 10px; bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .04em; color: #fff; background: rgba(27,27,34,.72); border-radius: 999px; padding: 0 10px; pointer-events: none; }
+.demo-tag { white-space: nowrap; max-width: calc(100% - 20px); overflow: hidden; text-overflow: ellipsis; position: absolute; z-index: 6; left: 10px; bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .04em; color: #fff; background: rgba(27,27,34,.72); border-radius: 999px; padding: 0 10px; pointer-events: none; }
 .demo-note { font-size: 12.5px; color: var(--sub); margin-top: 10px; padding: 8px 12px; border: 1px dashed var(--ac-line); border-radius: 10px; background: #fff; }
 .demo-note b { color: var(--ac); }
 .vctl .btn:not(.solid), .tools .btn:not(.solid) { min-height: 40px; padding: 4px 14px; }
@@ -313,8 +313,11 @@ p + p { margin-top: .8em; }
   .strip svg { width: 100%; height: auto; display: block; border-radius: 8px; border: 1px solid var(--ac-line); }
   .strip figcaption { font-size: 11.5px; font-weight: 700; color: #38415a; margin-top: 2px; line-height: 1.4; }
   .strip .src { font-weight: 800; color: var(--ac); }
+  .demo2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  .demo2 > * { min-width: 0; }
+  .demo2 .tline { margin-top: 0; }
   .modetxt { margin-top: 10px; font-size: 13.5px; }
-  @media (max-width: 720px) { .ab, .roles3 { grid-template-columns: 1fr; } .strip { grid-template-columns: 1fr 1fr; } .hero-art { display: none; } .tline { --lw: 56px; } }
+  @media (max-width: 720px) { .demo2 { grid-template-columns: 1fr; } .ab, .roles3 { grid-template-columns: 1fr; } .strip { grid-template-columns: 1fr 1fr; } .hero-art { display: none; } .tline { --lw: 56px; } }
 
 </style>
 </head>
@@ -404,7 +407,9 @@ p + p { margin-top: .8em; }
       <label class="scrub" for="seek">時間<input type="range" id="seek" min="0" max="80" value="30"><output id="o-seek" for="seek">3.0秒</output></label>
     </div>
     <div class="teach">
-      <div class="vframe"><svg id="scr" viewBox="0 0 800 450" role="img" aria-label="再生中の映像"></svg><div class="hud"><span class="tl rec" id="hudRoll">A-ROLL</span><span class="tr" id="hudT">0.0 / 8.0s</span></div><span class="demo-tag">疑似デモ（図形による再現・実際の映像ではありません）</span></div>
+      <div class="demo2"><div class="d2a">
+      <div class="vframe"><svg id="scr" viewBox="0 0 800 450" role="img" aria-label="再生中の映像"></svg><div class="hud"><span class="tl rec" id="hudRoll">A-ROLL</span><span class="tr" id="hudT">0.0 / 8.0s</span></div><span class="demo-tag">疑似デモ（実際の映像ではありません）</span></div>
+      </div><div class="d2b">
       <div class="tline" aria-hidden="true">
         <div class="rowwrap">
           <div class="row"><span class="nm">映像2<br>(B)</span><div class="trk" id="trB"></div></div>
@@ -414,6 +419,7 @@ p + p { margin-top: .8em; }
         </div>
       </div>
       <p class="modetxt" id="modetxt" aria-live="polite"></p>
+      </div></div>
       <div class="strip" id="strip"></div>
     </div>
     <p class="demo-note"><b>疑似デモです。</b>実際の動画素材ではなく、図形・イラスト・テキストで「Aロールだけ」と「Bロールあり」の違いを再現したものです。</p>
@@ -468,10 +474,10 @@ p + p { margin-top: .8em; }
   const $ = (s) => document.querySelector(s);
   const T = 8;
   const WORDS = [['この商品は', 0.4, 1.9], ['軽くて', 2.2, 3.6], ['持ち運びやすいです', 4.0, 6.9]];
-  const CLIPS = [{ id: 1, a: 2.2, b: 3.9, name: '商品を持つ様子' }, { id: 2, a: 4.0, b: 6.7, name: 'バッグへ入れる様子' }];
+  const CLIPS = [{ id: 1, a: 2.2, b: 4.0, name: '商品を持つ様子' }, { id: 2, a: 4.0, b: 6.7, name: 'バッグへ入れる様子' }];
   const MODES = {
     a: { txt: '<b>Aロールだけ：</b>最後まで、話している人の映像が続きます。', clips: false },
-    b: { txt: '<b>Bロールあり：</b>「軽くて」で商品を持つ映像、「持ち運びやすい」でバッグへ入れる映像に切り替わります。音声はそのままです。', clips: true, ok: true },
+    b: { txt: '<b>Bロールあり：</b>「軽くて」で商品を持つ映像、「持ち運びやすい」でバッグへ入れる映像に切り替わります。音声はそのままで、話している人は左上に小さく残ります。', clips: true, ok: true },
     x: { txt: '<b>合わないBロール（悪い例）：</b>話の内容と関係のない風景が重なっています。映像が増えても、話の内容は補足されません。', clips: true, ok: false },
   };
   const ease = (t) => (t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
@@ -515,10 +521,18 @@ p + p { margin-top: .8em; }
     }
     return '<rect x="110" y="372" width="580" height="54" rx="12" fill="rgba(20,20,28,.72)"/><text x="400" y="408" text-anchor="middle" font-size="27" font-family="sans-serif">' + tsp + '</text>';
   }
+  // Bロール中も、話している人（Aロール）を左上に小さく残す。人物が消えて「突然現れる」印象を避ける
+  function pip(t) {
+    return '<svg x="22" y="22" width="190" height="146" viewBox="262 96 276 214" overflow="hidden">' + aroll(t) + '</svg><rect x="22" y="22" width="190" height="146" rx="8" fill="none" stroke="#fff" stroke-width="4"/><rect x="22" y="146" width="190" height="22" fill="rgba(20,20,28,.72)"/><text x="117" y="162" text-anchor="middle" font-size="14" font-weight="700" fill="#fff" font-family="sans-serif">Aロール（話している人）</text>';
+  }
   function frame(mode, t) {
     const c = MODES[mode].clips ? clipAt(t) : null;
-    const body = c ? (MODES[mode].ok ? (c.id === 1 ? b1(t, c) : b2(t, c)) : scenic(t, c)) : aroll(t);
-    return body + subtitle(t);
+    if (!c) return aroll(t) + subtitle(t);
+    const raw = MODES[mode].ok ? (c.id === 1 ? b1(t, c) : b2(t, c)) : scenic(t, c);
+    // 前後が別のBロールと続いていない端だけ、ごく短くなじませる（切り替わり自体は分かる長さ）
+    const prev = CLIPS.find((k) => k.b === c.a), next = CLIPS.find((k) => k.a === c.b);
+    const a = Math.min(prev ? 1 : V.clamp((t - c.a) / 0.15), next ? 1 : V.clamp((c.b - t) / 0.15));
+    return (a < 1 ? aroll(t) + '<g opacity="' + a.toFixed(2) + '">' + raw + '</g>' : raw) + pip(t) + subtitle(t);
   }
   let mode = 'a', t = 3, stop = null;
   const scr = $('#scr'), seek = $('#seek'), play = $('#play');

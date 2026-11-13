@@ -271,7 +271,7 @@ p + p { margin-top: .8em; }
 @media (max-width: 720px) { .vgrid { grid-template-columns: 1fr; } }
 
 /* ===== 教材デモ共通（.teach = 学習用の動き。装飾の動きとは別扱いで、reduced-motion でも止めない） ===== */
-.demo-tag { position: absolute; z-index: 6; left: 10px; bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .04em; color: #fff; background: rgba(27,27,34,.72); border-radius: 999px; padding: 0 10px; pointer-events: none; }
+.demo-tag { white-space: nowrap; max-width: calc(100% - 20px); overflow: hidden; text-overflow: ellipsis; position: absolute; z-index: 6; left: 10px; bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .04em; color: #fff; background: rgba(27,27,34,.72); border-radius: 999px; padding: 0 10px; pointer-events: none; }
 .demo-note { font-size: 12.5px; color: var(--sub); margin-top: 10px; padding: 8px 12px; border: 1px dashed var(--ac-line); border-radius: 10px; background: #fff; }
 .demo-note b { color: var(--ac); }
 .vctl .btn:not(.solid), .tools .btn:not(.solid) { min-height: 40px; padding: 4px 14px; }
@@ -309,7 +309,7 @@ p + p { margin-top: .8em; }
   .lane .stat { font-size: 12.5px; color: #38415a; margin-top: 4px; }
   .lane .stat b { font-family: var(--mono); color: var(--ac); }
   .lane .demo-tag { left: auto; right: 10px; top: 10px; bottom: auto; }
-  .vctl2 { margin-top: 12px; }
+  .tools .vctl { flex: 1 1 100%; margin-top: 2px; }
   .bigdisc { font-size: 14px; font-weight: 800; line-height: 1.6; padding: 10px 14px; border: 2px solid var(--ac); border-radius: 12px; background: var(--ac-soft); margin-top: 12px; }
   @media (max-width: 720px) { .fps3 { grid-template-columns: 1fr; } .hero-art { display: none; } }
 
@@ -386,8 +386,8 @@ p + p { margin-top: .8em; }
     <div class="sec-h"><span class="sec-n">2</span><h2>同じ動きを、24・30・60fps 相当で並べる</h2></div>
     <p class="sec-sub">同じ速さで動くボールを、1秒に何回「位置を更新するか」だけを変えて表示します。縦のしるしは、記録されたコマの位置です。</p>
     <div class="bigdisc">このデモは、実際のフレームレートを完全に再現するものではなく、見え方の違いを理解するためのデモです。</div>
-    <div class="tools" role="group" aria-label="動きの条件" style="margin-top:12px">
-      <span class="lab">動きの条件</span>
+    <div class="tools" role="group" aria-label="動きの条件と再生" style="margin-top:12px">
+      <span class="lab">動きの条件と再生</span>
       <span class="seg" role="radiogroup" aria-label="ボールの速さ">
         <label><input type="radio" name="spd" value="slow"><span>ゆっくり</span></label>
         <label><input type="radio" name="spd" value="mid" checked><span>ふつう</span></label>
@@ -395,14 +395,15 @@ p + p { margin-top: .8em; }
       </span>
       <label class="tgl"><input type="checkbox" id="t-slow"><span class="sw"></span><span>スロー再生（1/2の速さ）</span></label>
       <label class="tgl"><input type="checkbox" id="t-tick" checked><span class="sw"></span><span>コマの位置を表示</span></label>
-    </div>
-    <div class="teach">
-      <div class="lanes" id="lanes"></div>
-      <div class="vctl vctl2">
+      <div class="vctl">
         <button type="button" class="btn solid" id="play">▶ 再生</button>
+        <button type="button" class="btn" id="replay">もう一度見る</button>
         <button type="button" class="btn" id="back" aria-label="コマ戻し（60分の1秒戻る）">◀ 1/60秒</button><button type="button" class="btn" id="fwd" aria-label="コマ送り（60分の1秒進む）">1/60秒 ▶</button>
         <label class="scrub" for="prog">位置<input type="range" id="prog" min="0" max="1000" value="500"><output id="o-prog" for="prog">0.9秒</output></label>
       </div>
+    </div>
+    <div class="teach">
+      <div class="lanes" id="lanes"></div>
     </div>
     <p class="demo-note"><b>疑似デモです。</b>実際の動画ではなく、お使いの画面（多くは1秒に60回の更新）の上で、位置の更新回数だけを変えて見せています。そのため、60fps相当は画面の更新回数以上には滑らかになりません。また、30fps相当・24fps相当では、画面の更新との兼ね合いで、コマの切り替わりのリズムが少し不揃いに見えることがあります。</p>
     <p class="rm-note" role="note" hidden>お使いの端末は「動きを減らす」設定です。自動では動きません。▶再生は10段階のコマ送りで進みます。「1/60秒」ボタンやスライダーで、位置の更新回数の違いを確認できます。</p>
@@ -486,11 +487,12 @@ p + p { margin-top: .8em; }
   document.querySelectorAll('input[name=spd]').forEach((r) => r.addEventListener('change', () => { halt(); spd = r.value; build(); render(); }));
   $('#t-slow').addEventListener('change', (e) => { halt(); rate = e.target.checked ? 0.5 : 1; build(); render(); });
   $('#t-tick').addEventListener('change', (e) => { ticks = e.target.checked; lanes.querySelectorAll('.ticks').forEach((g) => { g.style.display = ticks ? '' : 'none'; }); });
-  play.addEventListener('click', () => {
-    if (stop) { halt(); return; }
-    const p0 = +prog.value >= 995 ? 0 : +prog.value; play.textContent = '⏸ 一時停止';
-    stop = V.run(T() * 1000 * (1 - p0 / 1000), (k) => { prog.value = Math.round(p0 + (1000 - p0) * k); render(); }, () => { stop = null; play.textContent = '▶ もう一度'; });
-  });
+  function start(p0) {
+    play.textContent = '⏸ 一時停止';
+    stop = V.run(T() * 1000 * (1 - p0 / 1000), (k) => { prog.value = Math.round(p0 + (1000 - p0) * k); render(); }, () => { stop = null; play.textContent = '▶ 再生'; });
+  }
+  play.addEventListener('click', () => { if (stop) { halt(); return; } start(+prog.value >= 995 ? 0 : +prog.value); });
+  $('#replay').addEventListener('click', () => { halt(); prog.value = 0; render(); start(0); });
   prog.addEventListener('input', () => { halt(); render(); });
   const stepBy = (d) => { halt(); const t = V.clamp(Math.round(prog.value / 1000 * T() * 60) / 60 + d / 60, 0, T()); prog.value = Math.round(t / T() * 1000); render(); };
   $('#back').addEventListener('click', () => stepBy(-1));

@@ -271,7 +271,7 @@ p + p { margin-top: .8em; }
 @media (max-width: 720px) { .vgrid { grid-template-columns: 1fr; } }
 
 /* ===== 教材デモ共通（.teach = 学習用の動き。装飾の動きとは別扱いで、reduced-motion でも止めない） ===== */
-.demo-tag { position: absolute; z-index: 6; left: 10px; bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .04em; color: #fff; background: rgba(27,27,34,.72); border-radius: 999px; padding: 0 10px; pointer-events: none; }
+.demo-tag { white-space: nowrap; max-width: calc(100% - 20px); overflow: hidden; text-overflow: ellipsis; position: absolute; z-index: 6; left: 10px; bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .04em; color: #fff; background: rgba(27,27,34,.72); border-radius: 999px; padding: 0 10px; pointer-events: none; }
 .demo-note { font-size: 12.5px; color: var(--sub); margin-top: 10px; padding: 8px 12px; border: 1px dashed var(--ac-line); border-radius: 10px; background: #fff; }
 .demo-note b { color: var(--ac); }
 .vctl .btn:not(.solid), .tools .btn:not(.solid) { min-height: 40px; padding: 4px 14px; }
@@ -485,7 +485,8 @@ p + p { margin-top: .8em; }
       <div class="card"><div class="kicker">店舗・施設紹介</div><p>外観・店内の広さはワイド、スタッフはミディアム、メニューや設備の細部はクローズアップ。</p></div>
       <div class="card"><div class="kicker">インタビュー・ショート動画</div><p>基本はミディアム、強調したい一言で寄る。ショートでは画面が小さいため、細部は寄ると伝わりやすい。</p></div>
     </div>
-    <div class="ex" aria-label="AI動画生成での指示文の例（英語）"><b>AI動画生成の画角指定の例</b><br>wide shot of a cafe storefront with a staff member<br>medium shot of the staff member holding an iced drink<br>close-up of the iced drink cup logo</div>
+    <div class="ex" aria-label="AI動画生成での指示文の例（英語）"><b>画角指定の例（個人の学習・検証用）</b><br>wide shot of a cafe storefront with a staff member<br>medium shot of the staff member holding an iced drink<br>close-up of the iced drink cup logo</div>
+    <p class="demo-note"><b>ご注意：</b>クライアント案件など、AIの利用に制限がある場合は使わないでください。この例は、画角の用語を理解したうえで、個人の学習・検証として試すための参考です。AIを使うことを前提にした内容ではありません。</p>
   </section>
 
   <section class="sec rise">

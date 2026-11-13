@@ -271,7 +271,7 @@ p + p { margin-top: .8em; }
 @media (max-width: 720px) { .vgrid { grid-template-columns: 1fr; } }
 
 /* ===== 教材デモ共通（.teach = 学習用の動き。装飾の動きとは別扱いで、reduced-motion でも止めない） ===== */
-.demo-tag { position: absolute; z-index: 6; left: 10px; bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .04em; color: #fff; background: rgba(27,27,34,.72); border-radius: 999px; padding: 0 10px; pointer-events: none; }
+.demo-tag { white-space: nowrap; max-width: calc(100% - 20px); overflow: hidden; text-overflow: ellipsis; position: absolute; z-index: 6; left: 10px; bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .04em; color: #fff; background: rgba(27,27,34,.72); border-radius: 999px; padding: 0 10px; pointer-events: none; }
 .demo-note { font-size: 12.5px; color: var(--sub); margin-top: 10px; padding: 8px 12px; border: 1px dashed var(--ac-line); border-radius: 10px; background: #fff; }
 .demo-note b { color: var(--ac); }
 .vctl .btn:not(.solid), .tools .btn:not(.solid) { min-height: 40px; padding: 4px 14px; }
@@ -310,12 +310,15 @@ p + p { margin-top: .8em; }
   .tline .jn { position: absolute; top: -1px; bottom: -1px; width: 0; border-left: 2px dashed #1b1b22; z-index: 2; }
   .tline .jn::after { content: attr(data-l); position: absolute; top: -17px; left: 4px; font-size: 10.5px; font-weight: 800; color: #1b1b22; white-space: nowrap; }
   .tline .ph { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--ac); z-index: 3; }
-  .strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 14px; }
+  .strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
   .strip figure { margin: 0; }
   .strip svg { width: 100%; height: auto; display: block; border-radius: 8px; border: 1px solid var(--ac-line); background: #000; }
   .strip figcaption { font-size: 11.5px; font-weight: 700; color: #38415a; margin-top: 2px; line-height: 1.4; }
+  .demo2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  .demo2 > * { min-width: 0; }
+  .demo2 .tline { margin-top: 0; }
   .modetxt { margin-top: 10px; font-size: 13.5px; }
-  @media (max-width: 720px) { .three { grid-template-columns: 1fr; } .strip { grid-template-columns: 1fr 1fr; } .hero-art { display: none; } .tline { --lw: 56px; } }
+  @media (max-width: 720px) { .demo2 { grid-template-columns: 1fr; } .three { grid-template-columns: 1fr; } .strip { grid-template-columns: 1fr 1fr; } .hero-art { display: none; } .tline { --lw: 56px; } }
 
 </style>
 </head>
@@ -403,7 +406,9 @@ p + p { margin-top: .8em; }
       <label class="scrub" for="seek">時間<input type="range" id="seek" min="0" max="60" value="15"><output id="o-seek" for="seek">1.5秒</output></label>
     </div>
     <div class="teach">
-      <div class="vframe"><svg id="scr" viewBox="0 0 800 450" role="img" aria-label="再生中の映像"></svg><div class="hud"><span class="tl rec" id="hudClip">A</span><span class="tr" id="hudTc">—</span><span class="br" id="hudEv"></span></div><span class="demo-tag">疑似デモ（図形による再現・実際の映像ではありません）</span></div>
+      <div class="demo2"><div class="d2a">
+      <div class="vframe"><svg id="scr" viewBox="0 0 800 450" role="img" aria-label="再生中の映像"></svg><div class="hud"><span class="tl rec" id="hudClip">A</span><span class="tr" id="hudTc">—</span><span class="br" id="hudEv"></span></div><span class="demo-tag">疑似デモ（実際の映像ではありません）</span></div>
+      </div><div class="d2b">
       <div class="tline" aria-hidden="true">
         <div class="row"><span class="nm">素材A<br>(歩く)</span><div class="track" id="trSrc"></div></div>
         <div class="rowwrap" style="margin-top:16px">
@@ -412,6 +417,7 @@ p + p { margin-top: .8em; }
         </div>
       </div>
       <p class="modetxt" id="modetxt" aria-live="polite"></p>
+      </div></div>
       <div class="strip" id="strip"></div>
     </div>
     <p class="demo-note"><b>疑似デモです。</b>実際の動画ではなく、図形で「つなぎ方の違い」を再現したものです。どのつなぎ方が良いかではなく、見え方の違いを確認するためのものです。</p>

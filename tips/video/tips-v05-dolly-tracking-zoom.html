@@ -271,7 +271,7 @@ p + p { margin-top: .8em; }
 @media (max-width: 720px) { .vgrid { grid-template-columns: 1fr; } }
 
 /* ===== 教材デモ共通（.teach = 学習用の動き。装飾の動きとは別扱いで、reduced-motion でも止めない） ===== */
-.demo-tag { position: absolute; z-index: 6; left: 10px; bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .04em; color: #fff; background: rgba(27,27,34,.72); border-radius: 999px; padding: 0 10px; pointer-events: none; }
+.demo-tag { white-space: nowrap; max-width: calc(100% - 20px); overflow: hidden; text-overflow: ellipsis; position: absolute; z-index: 6; left: 10px; bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .04em; color: #fff; background: rgba(27,27,34,.72); border-radius: 999px; padding: 0 10px; pointer-events: none; }
 .demo-note { font-size: 12.5px; color: var(--sub); margin-top: 10px; padding: 8px 12px; border: 1px dashed var(--ac-line); border-radius: 10px; background: #fff; }
 .demo-note b { color: var(--ac); }
 .vctl .btn:not(.solid), .tools .btn:not(.solid) { min-height: 40px; padding: 4px 14px; }
@@ -491,10 +491,9 @@ p + p { margin-top: .8em; }
     for (const x of [-5.5, 5.5]) { if (15 - c.cz < 0.5) continue; const a = P(x - 0.08, 4.5, 15, c), b = P(x + 0.08, 0, 15, c); g += '<rect x="' + a[0].toFixed(1) + '" y="' + a[1].toFixed(1) + '" width="' + Math.max(1, b[0] - a[0]).toFixed(1) + '" height="' + (b[1] - a[1]).toFixed(1) + '" fill="#8a7d73"/>'; }
     // 人物（z=10）
     if (SZ - c.cz > 0.5) {
-      const s = c.f / (SZ - c.cz), sx = c.sx, ph = Math.sin(e * 60) * 0.18;
+      const s = c.f / (SZ - c.cz), sx = c.sx; // 人物は立ち姿のまま（歩行・上下動のアニメーションはなし）。トラッキングでは横にだけ移動する
       const feet = P(sx, 0, SZ, c), head = P(sx, 1.62, SZ, c), top = P(sx, 1.5, SZ, c), mid = P(sx, 0.85, SZ, c);
-      g += '<line x1="' + feet[0] + '" y1="' + feet[1] + '" x2="' + (mid[0] + ph * s) + '" y2="' + mid[1] + '" stroke="#2f3b5c" stroke-width="' + (0.16 * s).toFixed(1) + '" stroke-linecap="round"/>';
-      g += '<line x1="' + (feet[0] + 0.25 * s * (c.sx !== 0 ? 0.6 : 0)) + '" y1="' + feet[1] + '" x2="' + (mid[0] - ph * s) + '" y2="' + mid[1] + '" stroke="#2f3b5c" stroke-width="' + (0.16 * s).toFixed(1) + '" stroke-linecap="round"/>';
+      for (const dx of [-0.11, 0.11]) g += '<line x1="' + (feet[0] + dx * s) + '" y1="' + feet[1] + '" x2="' + (mid[0] + dx * s) + '" y2="' + mid[1] + '" stroke="#2f3b5c" stroke-width="' + (0.17 * s).toFixed(1) + '" stroke-linecap="round"/>';
       g += '<rect x="' + (mid[0] - 0.28 * s).toFixed(1) + '" y="' + top[1].toFixed(1) + '" width="' + (0.56 * s).toFixed(1) + '" height="' + (mid[1] - top[1]).toFixed(1) + '" rx="' + (0.1 * s).toFixed(1) + '" fill="#ef3b4b"/>';
       g += '<circle cx="' + head[0].toFixed(1) + '" cy="' + head[1].toFixed(1) + '" r="' + (0.2 * s).toFixed(1) + '" fill="#f5cfae"/>';
     }

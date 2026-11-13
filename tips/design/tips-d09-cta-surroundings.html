@@ -238,7 +238,9 @@ p + p { margin-top: .8em; }
   .l-cta { flex: none; display: inline-flex; align-items: center; justify-content: center; width: min(200px, 100%); height: 52px; border-radius: 10px; font-size: 16px; font-weight: 800; background: #ff7a00; color: #fff; border: 2px solid #ffd000; }
   .l-sec { display: inline-flex; align-items: center; justify-content: center; height: 52px; padding: 0 14px; border-radius: 10px; font-size: 14px; font-weight: 800; color: #fff; }
   .l-sec.s1 { background: #1d6fe8; } .l-sec.s2 { background: #16a34a; }
-  .l-sticker { position: absolute; right: 2px; top: -34px; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; text-align: center; font-size: 12px; line-height: 1.1; font-weight: 800; color: #e11d48; background: #facc15; border: 2px solid #e11d48; transform: rotate(10deg); }
+  .l-off { position: absolute; right: 2px; top: -34px; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; align-content: center; text-align: center; font-size: 12px; line-height: 1.1; font-weight: 800; color: #e11d48; background: #facc15; border: 2px solid #e11d48; transform: rotate(10deg); }
+  .l-off .pre { display: none; font-style: normal; }
+  .l-off b { font-size: 14px; }
   .l-note { margin-top: 8px; font-size: 12px; font-weight: 800; color: #e11d48; }
   /* 切り口A: 余白 */
   .k-space .l-row { margin-bottom: 16px; }
@@ -247,15 +249,21 @@ p + p { margin-top: .8em; }
   .k-space .l-note { margin-top: 22px; }
   /* 切り口B: 競合する要素を弱める（大きさ・塗り・飾り） */
   .k-mute .l-badge { font-size: 11px; font-weight: 700; padding: 1px 8px; }
-  .k-mute .l-sec { height: 40px; padding: 0 6px; font-size: 13px; font-weight: 700; background: transparent; border: 0; text-decoration: underline; text-underline-offset: 3px; }
-  .k-mute .l-sticker { display: none; }
+  .k-mute .l-sec { height: 44px; padding: 0 14px; font-size: 13.5px; font-weight: 700; border: 2px solid currentColor; }
+  .k-mute .l-sec.s1 { background: #fff; color: #1d6fe8; } .k-mute .l-sec.s2 { background: #fff; color: #16a34a; }
+  /* 30%OFF: 丸い強いバッジ → 主CTAの直下に置く小さな補足コピー（消さずに残す） */
+  .k-mute .l-btns .l-cta { order: 0; } .k-mute .l-btns .l-sec { order: 2; }
+  .k-mute .l-off { position: static; order: 1; flex-basis: 100%; width: auto; height: auto; display: block; text-align: left; border: 0; border-radius: 0; background: none; transform: none; font-size: 12.5px; font-weight: 700; margin-top: -3px; }
+  .k-mute .l-off .pre { display: inline; } .k-mute .l-off b, .k-mute .l-off .off { display: inline; font-size: inherit; }
+  .k-space.k-mute .l-off { margin-top: -11px; }
   .k-mute .l-note { font-weight: 400; }
   /* 切り口C: アクセント色をCTAへ集中（他は落ち着いた色に） */
   .k-focus .l-badge { background: #eceff8 !important; color: #44507a !important; }
   .k-focus .l-h { color: #1b1830; }
   .k-focus .l-sec { background: #44507a; color: #fff; }
-  .k-focus.k-mute .l-sec, .k-mute.k-focus .l-sec { background: transparent; color: #44507a; }
-  .k-focus .l-sticker { background: #eceff8; color: #44507a; border-color: #c6cbe0; }
+  .k-focus.k-mute .l-sec { background: #fff; color: #44507a; border-color: #aab2cc; }
+  .k-focus .l-off { background: #eceff8; color: #44507a; border-color: #c6cbe0; }
+  .k-focus.k-mute .l-off { background: none; color: #44507a; }
   .k-focus .l-note { color: #44507a; }
   .k-focus .l-cta { background: var(--acc); border-color: var(--acc); }
   .ms { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 12.5px; color: var(--sub); }
@@ -274,7 +282,7 @@ p + p { margin-top: .8em; }
 
   .l-cta { white-space: nowrap; }
   @media (max-width: 400px) { .pane { padding: 12px; } .stage { padding: 10px; } .lp { padding: 10px; } .l-cta { font-size: 15px; } }
-  @media (max-width: 720px) { .build { grid-template-columns: 1fr; } .hero-art { display: none; } .l-sticker { top: -30px; } }
+  @media (max-width: 720px) { .build { grid-template-columns: 1fr; } .hero-art { display: none; } .l-off { top: -30px; } }
 
 </style>
 </head>
@@ -298,7 +306,7 @@ p + p { margin-top: .8em; }
     <p class="sec-sub">ボタンだけを大きくしたり派手にしても、周りに同じくらい強い要素が多いと<b>埋もれます</b>。目立つかどうかは、ボタン単体ではなく、周辺との視覚的な差で決まります。</p>
     <div class="grid3 lev3">
       <div class="card"><div class="kicker">切り口 A</div><div class="big">余白をつくる</div><p>ボタンの周りに空きをつくると、他の要素と切り離されて見えます。</p></div>
-      <div class="card"><div class="kicker">切り口 B</div><div class="big">競合を弱める</div><p>近くのバッジ・飾り・別のボタンの強さをおさえて、役割を一段下げます。</p></div>
+      <div class="card"><div class="kicker">切り口 B</div><div class="big">競合を弱める</div><p>近くのバッジ・飾り・別のボタンを消さずに、強さをおさえて役割を一段下げます（塗りボタン→枠線ボタン、大きなバッジ→小さな補足）。</p></div>
       <div class="card"><div class="kicker">切り口 C</div><div class="big">色を集中させる</div><p>アクセント色を、CTAだけに使います。他の要素は落ち着いた色に。</p></div>
     </div>
   </section>
@@ -319,11 +327,11 @@ p + p { margin-top: .8em; }
             <div class="l-row"><span class="l-badge b1">期間限定</span><span class="l-badge b2">送料無料</span><span class="l-badge b3">満足度No.1</span></div>
             <div class="l-h">新生活応援セール開催中</div>
             <div class="l-sub">はじめての方限定。まずは気軽にお試しください。</div>
-            <div class="l-btns"><span class="l-sticker" aria-hidden="true">30%<br>OFF</span><span class="l-cta" data-cta>無料で試してみる</span><span class="l-sec s1">カタログ請求</span><span class="l-sec s2">お問い合わせ</span></div>
+            <div class="l-btns"><span class="l-off"><i class="pre">今なら</i><b>30%</b><span class="off">OFF</span></span><span class="l-cta" data-cta>無料で試してみる</span><span class="l-sec s1">カタログ請求</span><span class="l-sec s2">お問い合わせ</span></div>
             <div class="l-note">※ 数量限定・先着順</div>
           </div></div>
-        <div class="ms" data-ms><span>ボタンのサイズ <b data-size>—</b></span><span>いちばん近い要素まで <b data-near>—</b></span></div>
-        <p class="cap2">バッジ・ステッカー・別のボタンが同じくらい強く、CTAが埋もれます。</p>
+        <div class="ms" data-ms><span>ボタンのサイズ <b data-size>—</b></span><span>いちばん近い競合要素まで <b data-near>—</b></span></div>
+        <p class="cap2">バッジ・30%OFF・別のボタンが主CTAと同じくらい強く、視線が散ります。</p>
       </div>
       <div class="pane after">
         <div class="pane-h"><span class="badge">AFTER</span><h3>周りを整理した</h3></div>
@@ -331,11 +339,11 @@ p + p { margin-top: .8em; }
             <div class="l-row"><span class="l-badge b1">期間限定</span><span class="l-badge b2">送料無料</span><span class="l-badge b3">満足度No.1</span></div>
             <div class="l-h">新生活応援セール開催中</div>
             <div class="l-sub">はじめての方限定。まずは気軽にお試しください。</div>
-            <div class="l-btns"><span class="l-sticker" aria-hidden="true">30%<br>OFF</span><span class="l-cta" data-cta>無料で試してみる</span><span class="l-sec s1">カタログ請求</span><span class="l-sec s2">お問い合わせ</span></div>
+            <div class="l-btns"><span class="l-off"><i class="pre">今なら</i><b>30%</b><span class="off">OFF</span></span><span class="l-cta" data-cta>無料で試してみる</span><span class="l-sec s1">カタログ請求</span><span class="l-sec s2">お問い合わせ</span></div>
             <div class="l-note">※ 数量限定・先着順</div>
           </div></div>
-        <div class="ms" data-ms><span>ボタンのサイズ <b data-size>—</b></span><span>いちばん近い要素まで <b data-near>—</b></span></div>
-        <p class="cap2">CTA周辺に余白、競合要素は弱く、アクセント色はCTAだけ。ボタンは大きくしていません。</p>
+        <div class="ms" data-ms><span>ボタンのサイズ <b data-size>—</b></span><span>いちばん近い競合要素まで <b data-near>—</b></span></div>
+        <p class="cap2">Before と同じ情報を、すべて残しています。主CTA・セカンダリー（枠線ボタン）・補足の優先順位だけを整理しました。ボタンは大きくしていません。</p>
       </div>
     </div>
     <p class="verdict" id="sameSize" aria-live="polite">サイズを測っています…</p>
@@ -348,13 +356,13 @@ p + p { margin-top: .8em; }
       <div class="tools" role="group" aria-label="周りの整理">
         <span class="lab">周りを整理する（右のデモだけに効きます）</span>
         <div class="lever"><label class="tgl"><input type="checkbox" data-k="k-space"><span class="sw"></span><span>A. 余白をつくる</span></label><small>ボタンの周りをあける</small></div>
-        <div class="lever"><label class="tgl"><input type="checkbox" data-k="k-mute"><span class="sw"></span><span>B. 競合を弱める</span></label><small>バッジ・別ボタン・ステッカーをおさえる</small></div>
+        <div class="lever"><label class="tgl"><input type="checkbox" data-k="k-mute"><span class="sw"></span><span>B. 競合を弱める</span></label><small>別ボタンは枠線に、30%OFF は小さな補足に。消さずに弱める</small></div>
         <div class="lever"><label class="tgl"><input type="checkbox" data-k="k-focus"><span class="sw"></span><span>C. 色をCTAに集中</span></label><small>アクセント色はCTAだけに</small></div>
         <label class="tgl"><input type="checkbox" id="t-blur2"><span class="sw"></span><span>ぼかして見る</span></label>
         <div class="btnrow"><button type="button" class="btn" id="k-off">ぜんぶ OFF（Before）</button><button type="button" class="btn" id="k-on">ぜんぶ ON（After）</button></div>
         <div class="readout" aria-hidden="true">
           <div>ボタンのサイズ<b id="r-size">—</b></div>
-          <div>ボタンからいちばん近い要素まで<b id="r-near">—</b></div>
+          <div>ボタンからいちばん近い競合要素まで<b id="r-near">—</b></div>
           <div>彩度の高い色の数（画面全体）<b id="r-col">—</b></div>
         </div>
       </div>
@@ -363,7 +371,7 @@ p + p { margin-top: .8em; }
             <div class="l-row"><span class="l-badge b1">期間限定</span><span class="l-badge b2">送料無料</span><span class="l-badge b3">満足度No.1</span></div>
             <div class="l-h">新生活応援セール開催中</div>
             <div class="l-sub">はじめての方限定。まずは気軽にお試しください。</div>
-            <div class="l-btns"><span class="l-sticker" aria-hidden="true">30%<br>OFF</span><span class="l-cta" data-cta>無料で試してみる</span><span class="l-sec s1">カタログ請求</span><span class="l-sec s2">お問い合わせ</span></div>
+            <div class="l-btns"><span class="l-off"><i class="pre">今なら</i><b>30%</b><span class="off">OFF</span></span><span class="l-cta" data-cta>無料で試してみる</span><span class="l-sec s1">カタログ請求</span><span class="l-sec s2">お問い合わせ</span></div>
             <div class="l-note">※ 数量限定・先着順</div>
           </div></div>
         <p class="verdict" id="verdict" aria-live="polite"></p>
@@ -420,7 +428,7 @@ p + p { margin-top: .8em; }
   // CTAのサイズと、いちばん近い（表示されている）要素までの距離を実測
   function measure(root) {
     const cta = root.querySelector('[data-cta]'), c = rectOf(cta);
-    const others = $$X(root, '.l-badge, .l-h, .l-sub, .l-sec, .l-sticker, .l-note').filter((e) => e.offsetParent !== null || getComputedStyle(e).position === 'fixed');
+    const others = $$X(root, '.l-badge, .l-h, .l-sub, .l-sec, .l-note').filter((e) => e.offsetParent !== null || getComputedStyle(e).position === 'fixed');
     const near = Math.min(...others.map((e) => gap(c, rectOf(e))));
     return { w: Math.round(c.width), h: Math.round(c.height), near: Math.round(near) };
   }
@@ -436,14 +444,14 @@ p + p { margin-top: .8em; }
   function static_() {
     const b = fill(bw, ms[0]), a = fill(aw, ms[1]);
     $('#sameSize').innerHTML = '<b>ボタンのサイズ：</b>Before ' + b.w + '×' + b.h + 'px ／ After ' + a.w + '×' + a.h + 'px → ' + (b.w === a.w && b.h === a.h ? '<b>同じです。</b>' : '違いがあります。') +
-      ' 一方、いちばん近い他の要素までの距離は <b>' + b.near + 'px → ' + a.near + 'px</b> に変わっています。';
+      ' 一方、いちばん近い競合要素（補足コピーを除く）までの距離は <b>' + b.near + 'px → ' + a.near + 'px</b> に変わっています。';
   }
   // ---- 1つずつ足す ----
   const live = $('#liveStage'), boxes = $$('[data-k]');
   const sat = (css) => { const m = css.match(/[\d.]+/g).map(Number); const [r, g, b] = m.slice(0, 3).map((x) => x / 255); if (m[3] === 0) return 0; return Math.max(r, g, b) - Math.min(r, g, b); }; // 彩度は「色の濃さ（最大−最小）」で見る
   function colors() {
     const set = new Set();
-    $$X(live, '.l-badge, .l-h, .l-sec, .l-cta, .l-sticker, .l-note').forEach((e) => {
+    $$X(live, '.l-badge, .l-h, .l-sec, .l-cta, .l-off, .l-note').forEach((e) => {
       const cs = getComputedStyle(e);
       [cs.backgroundColor, cs.color].forEach((c) => { if (c.startsWith('rgba(') && /,\s*0\)$/.test(c)) return; if (sat(c) > 0.25) set.add(c); });
     });

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ja" data-series="design">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>中央揃え、なんでも使ってない？ 左揃えの方が読みやすい場面｜なんとなくで決めないデザイン</title>
+<style>
+/* ===== シリーズTips 共通ベース（既存CSS Tipsの作法を踏襲：トークン / .rise / reduced-motion / 640px以下は1カラム） ===== */
+:root {
+  --ink: #1b1f2a;
+  --sub: #566074;
+  --line: #e5e8ee;
+  --bg: #f4f6f9;
+  --ease: cubic-bezier(.22, .7, .25, 1);
+  --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", "Meiryo", sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Roboto Mono", Menlo, monospace;
+  --ok: #17683a; --ok-soft: #e8f5ec;
+  --ng: #b42318; --ng-soft: #fdecea;
+  color-scheme: light;
+}
+/* ----- シリーズ別カラー（c1→c2 のグラデーション。--ac は白地の文字に使える濃い色） ----- */
+[data-series="css"]    { --c1:#3b9cf6; --c2:#19c3d6; --ac:#1a5fa6; --ac-soft:#e8f3fd; --ac-line:#bcdaf3; --page:#f1f7fc; --hero:linear-gradient(135deg,#dff0ff,#d9f7fa); }
+[data-series="design"] { --c1:#ff5fa2; --c2:#8b5cf6; --ac:#9d2a72; --ac-soft:#fbeef6; --ac-line:#efc9e2; --page:#fbf6fa; --hero:linear-gradient(135deg,#ffe4f0,#ece5ff); }
+[data-series="ai"]     { --c1:#b6e04a; --c2:#22a861; --ac:#17683a; --ac-soft:#eef8e4; --ac-line:#cde7b2; --page:#f5f9ef; --hero:linear-gradient(135deg,#eefad0,#d8f3e2); }
+[data-series="video"]  { --c1:#ff9f43; --c2:#ef3b4b; --ac:#b4321f; --ac-soft:#fff1ea; --ac-line:#f6cdb8; --page:#fcf7f3; --hero:linear-gradient(135deg,#ffeedb,#ffe1e3); }
+:root { --grad: linear-gradient(90deg, var(--c1), var(--c2)); }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--page); color: var(--ink); font-family: var(--font); line-height: 1.75; -webkit-font-smoothing: antialiased; }
+a { color: var(--ac); text-underline-offset: 3px; }
+code, pre, kbd { font-family: var(--mono); }
+img, svg { max-width: 100%; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+/* ===== Motion（opacity:0 は keyframes 側のみ＝動きを切っても内容は必ず見える） ===== */
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+@keyframes pop  { from { opacity: 0; transform: scale(.94); } }
+.rise { animation: rise .5s var(--ease) calc(var(--i, 0) * 80ms) backwards; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* ===== Hero ===== */
+.hero { position: relative; overflow: hidden; background: var(--hero); border-bottom: 1px solid var(--ac-line); padding: 0 0 44px; }
+.hero::before { content: ""; display: block; height: 6px; background: var(--grad); }
+.hero::after { content: ""; position: absolute; right: -90px; top: -70px; width: 340px; height: 340px; border-radius: 50%; background: var(--grad); opacity: .16; pointer-events: none; }
+.hero .wrap { position: relative; z-index: 1; padding-top: 28px; display: grid; grid-template-columns: 1fr auto; gap: 24px 40px; align-items: center; }
+.pill-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.series { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; letter-spacing: .04em; color: var(--ac); background: #fff; border: 1px solid var(--ac-line); border-radius: 999px; padding: 4px 14px 4px 10px; }
+.series::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--grad); }
+.tipno { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--sub); }
+h1 { font-size: clamp(25px, 4.4vw, 38px); line-height: 1.4; letter-spacing: .01em; margin: 16px 0 14px; font-weight: 800; }
+.lead { font-size: clamp(15px, 2vw, 17px); color: #38415a; max-width: 38em; }
+.lead b { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--c1) 35%, transparent) 62%); font-weight: 700; }
+.hero-art { width: 200px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.meta span { font-size: 12px; color: var(--sub); background: rgba(255,255,255,.75); border: 1px solid var(--ac-line); border-radius: 999px; padding: 1px 12px; }
+
+/* ===== Section ===== */
+main { padding: 36px 0 24px; }
+.sec { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 30px 32px 32px; margin-bottom: 22px; box-shadow: 0 1px 2px rgba(27,31,42,.04), 0 18px 40px -26px rgba(27,31,42,.22); }
+.sec-h { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.sec-n { flex: none; width: 30px; height: 30px; border-radius: 10px; background: var(--grad); color: #1b1f2a; display: grid; place-items: center; font-size: 14px; font-weight: 800; }
+[data-series="design"] .sec-n, [data-series="video"] .sec-n { color: #fff; }
+h2 { font-size: clamp(19px, 2.8vw, 23px); line-height: 1.45; font-weight: 800; }
+.sec-sub { color: var(--sub); font-size: 14.5px; margin: 0 0 20px 42px; }
+h3 { font-size: 16px; line-height: 1.5; }
+p + p { margin-top: .8em; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.card { background: var(--ac-soft); border: 1px solid var(--ac-line); border-radius: 16px; padding: 18px 20px; transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
+.card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -16px rgba(27,31,42,.35); }
+.card .kicker { font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--ac); }
+.card .big { font-size: 28px; font-weight: 800; line-height: 1.3; margin: 4px 0 4px; }
+.card p { font-size: 14px; color: #38415a; }
+
+/* ===== Before / After ===== */
+.ba { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; position: relative; }
+.pane { min-width: 0; border: 1px solid var(--line); border-radius: 16px; padding: 18px; background: #fff; }
+.pane.after { border-color: var(--ac-line); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c2) 10%, transparent); }
+.pane-h { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.badge { flex: none; font-size: 11px; font-weight: 800; letter-spacing: .08em; border-radius: 999px; padding: 1px 11px; color: var(--sub); background: var(--bg); border: 1px solid var(--line); }
+.after .badge { color: #fff; background: var(--ac); border-color: var(--ac); }
+.pane-h h3 { font-size: 15px; }
+.cap { font-size: 13px; color: var(--sub); margin-top: 10px; }
+
+/* ===== Callout ===== */
+.note { border-radius: 14px; padding: 14px 18px 15px; font-size: 14.5px; background: var(--ac-soft); border: 1px solid var(--ac-line); }
+.note h3 { display: flex; align-items: center; gap: 8px; font-size: 13px; letter-spacing: .05em; color: var(--ac); margin-bottom: 3px; }
+.note h3::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.note.warn { background: #fff7e8; border-color: #efd7a6; }
+.note.warn h3 { color: #8a5300; }
+.notes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+/* ===== Code ===== */
+.code { margin: 14px 0 0; border-radius: 14px; overflow: hidden; border: 1px solid var(--ac-line); background: #f8faf8; }
+.code figcaption { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; font-weight: 800; letter-spacing: .06em; color: var(--ac); padding: 8px 14px; background: var(--ac-soft); border-bottom: 1px solid var(--ac-line); }
+.code pre { font-size: 13.5px; line-height: 1.75; padding: 14px 16px; overflow-x: auto; color: #23304a; tab-size: 2; }
+.code.dark { background: #14201a; border-color: #243a2d; }
+.code.dark figcaption { background: #1b2c22; color: #b9e78a; border-color: #243a2d; }
+.code.dark pre { color: #e4f1e0; }
+.btn { appearance: none; border: 1px solid var(--ac-line); background: #fff; color: var(--ac); font: inherit; font-size: 12px; font-weight: 800; letter-spacing: .04em; border-radius: 999px; padding: 3px 14px; cursor: pointer; transition: background .2s var(--ease), transform .2s var(--ease); }
+.btn:hover { background: var(--ac-soft); }
+.btn:active { transform: scale(.97); }
+.btn:focus-visible, input:focus-visible, summary:focus-visible, button:focus-visible { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 2px; }
+.btn.solid { background: var(--ac); border-color: var(--ac); color: #fff; padding: 6px 18px; font-size: 13.5px; }
+.btn.solid:hover { background: color-mix(in srgb, var(--ac) 88%, #000); }
+.tk-add { color: #0e6b32; background: #e3f6e8; } .tk-del { color: #a4281c; background: #fdeceb; }
+
+/* ===== Steps ===== */
+.steps { list-style: none; counter-reset: s; display: grid; gap: 12px; }
+.steps > li { counter-increment: s; position: relative; padding: 14px 16px 14px 58px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.steps > li::before { content: counter(s); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--grad); color: #1b1f2a; font-weight: 800; font-size: 14px; }
+[data-series="design"] .steps > li::before, [data-series="video"] .steps > li::before { color: #fff; }
+.steps h3 { font-size: 15.5px; }
+.steps p { font-size: 14px; color: #38415a; margin-top: 2px; }
+
+/* ===== Check list / refs ===== */
+.chk { list-style: none; display: grid; gap: 8px; }
+.chk li { position: relative; padding-left: 30px; font-size: 14.5px; }
+.chk li::before { content: "✓"; position: absolute; left: 0; top: 2px; width: 20px; height: 20px; border-radius: 6px; background: var(--ac); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 800; line-height: 1; }
+.refs { font-size: 13px; color: var(--sub); padding: 6px 4px 54px; }
+.refs h2 { font-size: 13px; letter-spacing: .08em; color: var(--sub); margin-bottom: 6px; }
+.refs li { margin-left: 1.2em; word-break: break-all; }
+.refs .by { margin-top: 10px; }
+.tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; padding: 0 9px; border-radius: 999px; }
+.tag.ok { color: var(--ok); background: var(--ok-soft); }
+.tag.ng { color: var(--ng); background: var(--ng-soft); }
+.rows .tag, .judge .tag { font-size: 0; }
+.rows .tag::before, .judge .tag::before { font-size: 11px; }
+.rows .tag.ok::before, .judge .tag.ok::before { content: "✓ OK"; }
+.rows .tag.ng::before, .judge .tag.ng::before { content: "✕ 不足"; }
+
+@media (max-width: 720px) {
+  .wrap { padding: 0 14px; }
+  .hero .wrap { grid-template-columns: 1fr; }
+  .hero-art { display: none; }
+  .sec { padding: 22px 16px 24px; border-radius: 16px; }
+  .sec-sub { margin-left: 0; }
+  .grid2, .grid3, .ba, .notes { grid-template-columns: 1fr; }
+}
+
+/* ===== 操作部品（design シリーズの追加ページ用。meta の "css":["parts.css"] で読み込む） ===== */
+.tools { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; margin: 0 0 16px; padding: 8px 14px; background: var(--ac-soft); border: 1px solid var(--ac-line); border-radius: 14px; }
+.tools .lab { font-size: 12.5px; font-weight: 800; color: var(--ac); letter-spacing: .04em; }
+.tools > * { min-width: 0; }
+
+/* トグルスイッチ（実体は checkbox。キーボードはスペースで切り替え） */
+.tgl { position: relative; display: inline-flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 700; cursor: pointer; min-height: 44px; }
+.tgl input { position: absolute; opacity: 0; width: 100%; height: 100%; left: 0; top: 0; margin: 0; cursor: pointer; }
+.tgl .sw { flex: none; width: 42px; height: 24px; border-radius: 999px; background: #b4bccb; position: relative; transition: background .2s var(--ease); }
+.tgl .sw::after { content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.35); transition: transform .2s var(--ease); }
+.tgl input:checked + .sw { background: var(--ac); }
+.tgl input:checked + .sw::after { transform: translateX(18px); }
+.tgl input:focus-visible + .sw { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 2px; }
+
+/* 切り替えボタン（実体は radio） */
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; border: 1px solid var(--ac-line); border-radius: 24px; background: #fff; padding: 3px; }
+.seg label { position: relative; cursor: pointer; }
+.seg input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.seg span { display: block; padding: 10px 15px; min-height: 42px; border-radius: 999px; font-size: 13px; font-weight: 800; line-height: 22px; color: var(--ac); }
+.seg input:checked + span { background: var(--ac); color: #fff; }
+.seg input:focus-visible + span { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 1px; }
+
+/* スライダー */
+.rng { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; font-size: 13.5px; font-weight: 700; min-height: 44px; }
+.rng input[type=range] { width: min(240px, 100%); accent-color: var(--ac); height: 28px; }
+.rng output { font-family: var(--mono); font-weight: 800; color: var(--ac); min-width: 4.2em; }
+
+/* 結果の読み上げ・まとめ欄 */
+.verdict { margin-top: 12px; padding: 12px 16px; border-radius: 12px; font-size: 14px; background: #fff; border: 1px solid var(--ac-line); border-left: 5px solid var(--c2); }
+.verdict b { color: var(--ac); }
+
+/* 選び方の表（カード型） */
+.pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pick .card .q { font-size: 14.5px; font-weight: 800; line-height: 1.5; margin: 2px 0 6px; }
+.pick .card p { font-size: 13.5px; }
+.pick .card .go { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 800; color: #fff; background: var(--ac); border-radius: 999px; padding: 1px 11px; }
+.fig { margin: 0; }
+.fig figcaption { font-size: 12.5px; color: var(--sub); margin-top: 8px; }
+.judge2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ctr-note { font-size: 12.5px; color: var(--sub); }
+
+@media (max-width: 720px) {
+  .seg { display: flex; width: 100%; }
+  .seg label { flex: 1 1 auto; }
+  .seg span { text-align: center; padding: 10px 10px; border-radius: 18px; }
+  .pick, .judge2 { grid-template-columns: 1fr; }
+  .tools { gap: 2px 14px; }
+}
+
+/* ===== このページ専用 ===== */
+
+  .hero-art { width: 190px; }
+  .al { display: grid; gap: 14px; }
+  .al > div { display: grid; gap: 7px; }
+  .al i { display: block; height: 10px; border-radius: 999px; background: var(--grad); opacity: .85; }
+  .al .c { justify-items: center; } .al .l { justify-items: start; }
+  .al .c i:nth-child(1) { width: 60%; } .al .c i:nth-child(2) { width: 90%; } .al .c i:nth-child(3) { width: 74%; } .al .c i:nth-child(4) { width: 82%; }
+  .al .l i:nth-child(1) { width: 60%; } .al .l i:nth-child(2) { width: 90%; } .al .l i:nth-child(3) { width: 74%; } .al .l i:nth-child(4) { width: 82%; }
+  .al .tit { font-size: 11px; font-weight: 800; color: var(--ac); letter-spacing: .08em; }
+
+  .stage { border: 1px solid var(--line); background: #fff; border-radius: 12px; padding: 24px 22px; min-height: 200px; display: flex; flex-direction: column; justify-content: center; }
+  .ctr { text-align: center; } .lft { text-align: left; }
+  .ln { display: block; }
+  .mk .ln::before { content: ""; display: inline-block; width: 4px; height: 1.05em; margin-right: 6px; vertical-align: -.18em; background: var(--c1); border-radius: 2px; }
+  .catch { font-size: clamp(17px, 4.9vw, 22px); font-weight: 800; line-height: 1.5; color: #17142b; }
+  .sub { font-size: 14px; color: #4b5470; margin-top: 6px; }
+  .go { display: inline-block; margin-top: 14px; background: var(--ac); color: #fff; font-weight: 800; font-size: 14px; border-radius: 999px; padding: 8px 22px; }
+  .long { font-size: 15px; line-height: 1.85; color: #2c3050; }
+  .long h4 { font-size: 16px; color: #17142b; margin-bottom: 6px; line-height: 1.5; }
+  .bul { list-style: none; margin-top: 12px; font-size: 14.5px; color: #2c3050; line-height: 1.8; }
+  .bul .ln::after { content: none; }
+  .bul .bd { color: var(--ac); font-weight: 800; margin-right: .3em; }
+  .tcap { font-size: 12.5px; color: var(--sub); margin-top: 10px; }
+  .vs { display: flex; align-items: center; gap: 8px; margin: 8px 0 0; font-size: 12.5px; font-weight: 800; }
+  .vs .ok { color: var(--ok); } .vs .mid { color: #8a5300; }
+  .sub2 { font-size: 16px; font-weight: 800; margin: 26px 0 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .sub2 .tag { font-size: 11px; }
+  .gap2 { display: grid; gap: 8px; }
+  .meas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
+  .meas > div { background: var(--ac-soft); border: 1px solid var(--ac-line); border-radius: 12px; padding: 10px 14px; font-size: 13px; }
+  .meas b { display: block; font-family: var(--font); font-size: 22px; line-height: 1.3; color: var(--ac); }
+  .meas small { font-size: 12px; color: var(--sub); }
+  @media (max-width: 720px) { .hero-art { display: none; } .meas { grid-template-columns: 1fr 1fr; } .stage { padding: 20px 16px; } }
+
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <div class="pill-row rise"><span class="series">なんとなくで決めないデザイン</span><span class="tipno">TIPS D-07 / 中央揃えと左揃え</span></div>
+      <h1 class="rise" style="--i:1">中央揃え、なんでも使ってない？<br>左揃えの方が読みやすい場面</h1>
+      <p class="lead rise" style="--i:2">短い見出しは中央揃えでも使いやすいが、<b>複数行の文章や箇条書きは左揃えの方が行頭を追いやすい。</b></p>
+      <div class="meta rise" style="--i:3"><span>難易度：初級</span><span>LP・フォーム・カード・テロップの配置判断に</span><span>文章量を変えて試せるデモつき</span></div>
+    </div>
+    <div class="hero-art rise" style="--i:2" aria-hidden="true">
+      <div class="al"><div class="c"><span class="tit">中央揃え</span><i></i><i></i><i></i><i></i></div><div class="l"><span class="tit">左揃え</span><i></i><i></i><i></i><i></i></div></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">1</span><h2>まず、考え方：「中央がダメ」ではなく「文章量で選ぶ」</h2></div>
+    <p class="sec-sub">中央揃えは、短い見出しやキャッチコピーではバランスを取りやすい一方、複数行になると<b>行ごとに開始位置が変わる</b>ため、次の行頭を追いにくくなることがあります。左揃えは行頭が揃うため、文章量が増えたときに読み進めやすくなります。</p>
+    <div class="grid3">
+      <div class="card"><div class="kicker">中央揃えが向く</div><p><b>短い見出し・キャッチコピー・ボタン。</b>1〜2行で、読むというより「見る」もの。左右対称を見せたい場面。</p></div>
+      <div class="card"><div class="kicker">左揃えが向く</div><p><b>複数行の説明文・箇条書き・フォーム。</b>行頭が揃い、次の行の読み始めを探さずに済む。</p></div>
+      <div class="card"><div class="kicker">選ぶ基準</div><p><b>文章量と読み方。</b>「何行になるか」「頭から順に読ませるか」で決める。</p></div>
+    </div>
+  </section>
+
+  <section class="sec rise" id="cmp">
+    <div class="sec-h"><span class="sec-n">2</span><h2>見た目で比べる：同じ文章を、中央揃えと左揃えで</h2></div>
+    <p class="sec-sub">スイッチを入れると、<b>各行の読み始めの位置</b>に印が付きます。印がそろうか、ばらけるかを見てください。</p>
+    <div class="tools">
+      <span class="lab">見方を変える</span>
+      <label class="tgl"><input type="checkbox" id="t-mk"><span class="sw"></span><span>各行の読み始めに印をつける</span></label>
+    </div>
+
+    <h3 class="sub2"><span class="tag ok">短い文</span>キャッチコピー：どちらも成立する</h3>
+    <div class="ba">
+      <div class="pane">
+        <div class="pane-h"><span class="badge">中央揃え</span><h3>短い文では、まとまりよく見える</h3></div>
+        <div class="stage"><div class="ctr"><div class="catch">はじめての方へ、<span style="display:inline-block">やさしく。</span></div><div class="sub">無料でお試しできます</div><span class="go">まずは体験する</span></div></div>
+        <p class="vs"><span class="ok">◎ 左右対称で安定する</span></p>
+      </div>
+      <div class="pane">
+        <div class="pane-h"><span class="badge">左揃え</span><h3>左揃えでも読める</h3></div>
+        <div class="stage"><div class="lft"><div class="catch">はじめての方へ、<span style="display:inline-block">やさしく。</span></div><div class="sub">無料でお試しできます</div><span class="go">まずは体験する</span></div></div>
+        <p class="vs"><span class="ok">○ 読みやすさは変わらない</span></p>
+      </div>
+    </div>
+    <p class="tcap">1〜2行なら、行頭がそろわなくても視線の迷いは小さく、中央揃えも成立します。「どちらが正しいか」ではなく、画面全体の流れで選べます。</p>
+
+    <h3 class="sub2"><span class="tag ng">長文・箇条書き</span>説明文：左揃えの方が追いやすい</h3>
+    <div class="ba">
+      <div class="pane">
+        <div class="pane-h"><span class="badge">BEFORE</span><h3>中央揃え</h3></div>
+        <div class="stage"><div class="ctr long">
+            <h4>はじめての方へ</h4>
+            <p><span class="ln">はじめての方でも迷わず</span><span class="ln">使えるように、登録から</span><span class="ln">利用開始までの流れを</span><span class="ln">3ステップにまとめました。</span><span class="ln">必要なものは、</span><span class="ln">メールアドレスだけです。</span></p>
+            <ul class="bul"><li class="ln"><span class="bd">・</span>登録は無料です</li><li class="ln"><span class="bd">・</span>いつでも解約できます</li><li class="ln"><span class="bd">・</span>サポートは平日9〜18時</li><li class="ln"><span class="bd">・</span>領収書はマイページから</li></ul>
+        </div></div>
+        <p class="vs"><span class="mid">△ 行ごとに開始位置が変わり、次の行頭を追いにくい</span></p>
+      </div>
+      <div class="pane after">
+        <div class="pane-h"><span class="badge">AFTER</span><h3>左揃え</h3></div>
+        <div class="stage"><div class="lft long">
+            <h4>はじめての方へ</h4>
+            <p><span class="ln">はじめての方でも迷わず</span><span class="ln">使えるように、登録から</span><span class="ln">利用開始までの流れを</span><span class="ln">3ステップにまとめました。</span><span class="ln">必要なものは、</span><span class="ln">メールアドレスだけです。</span></p>
+            <ul class="bul"><li class="ln"><span class="bd">・</span>登録は無料です</li><li class="ln"><span class="bd">・</span>いつでも解約できます</li><li class="ln"><span class="bd">・</span>サポートは平日9〜18時</li><li class="ln"><span class="bd">・</span>領収書はマイページから</li></ul>
+        </div></div>
+        <p class="vs"><span class="ok">◎ 行頭がそろい、次の行を探さずに読める</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">3</span><h2>自分で動かす：文章を長くしていくと、どうなる？</h2></div>
+    <p class="sec-sub">行数を増やして、<b>行頭の位置がどう変わるか</b>を見てください。下の数字は、各行の読み始めの位置を実際に測った値です。</p>
+    <div class="tools">
+      <span class="lab">文章の量</span>
+      <label class="rng" for="n">行数<input type="range" id="n" min="1" max="6" value="1"><output id="o-n" for="n">1行</output></label>
+    </div>
+    <div class="ba" id="liveBa">
+      <div class="pane"><div class="pane-h"><span class="badge">中央揃え</span></div><div class="stage"><div class="ctr long mk" id="lc"><p></p></div></div></div>
+      <div class="pane after"><div class="pane-h"><span class="badge">左揃え</span></div><div class="stage"><div class="lft long mk" id="ll"><p></p></div></div></div>
+    </div>
+    <div class="meas" aria-hidden="true">
+      <div><small>中央揃え：行頭の位置の種類</small><b id="mc">—</b><small id="mc2"></small></div>
+      <div><small>左揃え：行頭の位置の種類</small><b id="ml">—</b><small id="ml2"></small></div>
+    </div>
+    <p class="verdict" id="verdict" aria-live="polite">スライダーを動かすと、ここに判定が出ます。</p>
+    <noscript><p class="cap">JavaScriptが無効のため、このデモは動きません。上の「中央揃え／左揃え」の比較が同じ内容です。</p></noscript>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">4</span><h2>実務での使いどころ</h2></div>
+    <p class="sec-sub">文章量が増えたときの配置判断に使えます。</p>
+    <div class="grid3">
+      <div class="card"><div class="kicker">LPの説明文・カード本文</div><p>見出しは中央、説明文は左揃え、という組み合わせはよくあります。見出しと本文で別の判断をしてよい。</p></div>
+      <div class="card"><div class="kicker">フォーム・箇条書き</div><p>ラベル・入力欄・箇条書きは、行頭がそろう左揃えが基本。中央揃えにすると、項目を見つけにくくなります。</p></div>
+      <div class="card"><div class="kicker">動画の説明テロップ</div><p>1〜2行の短いテロップは中央でも成立。説明が長くなるなら、左揃えか、行数を減らす。</p></div>
+    </div>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">5</span><h2>判断するときのポイント</h2></div>
+    <ol class="steps">
+      <li><h3>何行になるかを見る</h3><p>1〜2行なら中央揃えでも成立しやすい。3行以上になるなら、左揃えを検討します。</p></li>
+      <li><h3>「見る」ものか「読む」ものかを見る</h3><p>キャッチコピーやボタンは「見る」もの。説明文や条件は「頭から順に読む」もの。読ませたいほど左揃えが向きます。</p></li>
+      <li><h3>スマホ幅で行数が増えないか確認する</h3><p>PCで1行だった見出しが、スマホで3行になって中央揃えがつらくなることがあります。画面幅ごとに確認します。</p></li>
+    </ol>
+    <ul class="chk" style="margin-top:18px">
+      <li>文章が3行以上なら、左揃えにできているか</li>
+      <li>箇条書き・フォームは、行頭がそろっているか</li>
+      <li>スマホ幅にしたとき、中央揃えの行数が増えていないか</li>
+    </ul>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">6</span><h2>注意点</h2></div>
+    <div class="notes">
+      <div class="note warn"><h3>中央揃えが合う場面もある</h3>短いキャッチコピーやボタン、左右対称を意図したレイアウトでは、中央揃えが合うこともあります。「中央揃えはダメ」ではなく、情報量と用途で使い分けます。</div><div class="note warn"><h3>実際の文字量で確認する</h3>複数行になるほど、行頭位置の差は大きくなります。ダミー文ではなく、実際の文字量で確認します。</div>
+      <div class="note warn"><h3>混在させるときは軸を意識する</h3>中央の見出しの下に左揃えの本文を置くと、見出しと本文の軸がずれて見えることがあります。本文のブロックの幅をそろえるなど、全体の軸を確認します。</div>
+    </div>
+  </section>
+
+  <section class="refs">
+    <h2>参考・出典</h2>
+    <ul><li><a href="https://www.adobe.com/jp/creativecloud/roc/blog/design/typography.html" target="_blank" rel="noopener">Adobe「タイポグラフィとは？基礎知識とコツを解説」</a>（スプレッドシート記載の参考URL）</li></ul>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  $('#t-mk').addEventListener('change', (e) => $('#cmp').classList.toggle('mk', e.target.checked));
+  const LINES = ['はじめての方でも迷わず', '使えるように、登録から', '利用開始までの流れを', '3ステップにまとめました。', '必要なものは、', 'メールアドレスだけです。'];
+  const lc = $('#lc p'), ll = $('#ll p'), n = $('#n');
+  const html = (k) => LINES.slice(0, k).map((t) => '<span class="ln">' + t + '</span>').join('');
+  // 各行の読み始め（最初の文字）のx座標を実測して、位置が何種類あるかを数える
+  const starts = (root) => {
+    const xs = [...root.querySelectorAll('.ln')].map((ln) => { const r = document.createRange(); r.selectNodeContents(ln); const q = r.getClientRects()[0]; return q ? Math.round(q.left) : 0; });
+    const uniq = [...new Set(xs.map((x) => Math.round(x / 2) * 2))];
+    return { count: uniq.length, spread: xs.length ? Math.max(...xs) - Math.min(...xs) : 0 };
+  };
+  function update() {
+    const k = +n.value; $('#o-n').textContent = k + '行';
+    lc.innerHTML = html(k); ll.innerHTML = html(k);
+    const c = starts(lc), l = starts(ll);
+    $('#mc').textContent = c.count + ' か所'; $('#mc2').textContent = '最大 ' + c.spread + 'px ずれる';
+    $('#ml').textContent = l.count + ' か所'; $('#ml2').textContent = 'ずれ ' + l.spread + 'px';
+    let t;
+    if (k <= 2) t = '<b>1〜2行：</b>中央揃えでも、行頭のずれは小さく、読みづらさはほとんどありません。短い見出しやキャッチコピーなら中央揃えで成立します。';
+    else if (k <= 4) t = '<b>3〜4行：</b>中央揃えでは、行ごとに開始位置が変わり始めます。まだ読めますが、行数が増えるほど次の行頭を追う手間が増えます。';
+    else t = '<b>5行以上：</b>中央揃えでは、行頭の位置が行ごとに大きく変わります。文章ブロックでは、行頭がそろう左揃えの方が追いやすくなります。';
+    $('#verdict').innerHTML = t;
+  }
+  n.addEventListener('input', update);
+  update();
+})();
+</script>
+</body>
+</html>

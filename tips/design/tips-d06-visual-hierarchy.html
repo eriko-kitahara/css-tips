@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ja" data-series="design">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>文字サイズ、全部同じ強さになってない？ 情報の優先順位をつける｜なんとなくで決めないデザイン</title>
+<style>
+/* ===== シリーズTips 共通ベース（既存CSS Tipsの作法を踏襲：トークン / .rise / reduced-motion / 640px以下は1カラム） ===== */
+:root {
+  --ink: #1b1f2a;
+  --sub: #566074;
+  --line: #e5e8ee;
+  --bg: #f4f6f9;
+  --ease: cubic-bezier(.22, .7, .25, 1);
+  --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", "Meiryo", sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Roboto Mono", Menlo, monospace;
+  --ok: #17683a; --ok-soft: #e8f5ec;
+  --ng: #b42318; --ng-soft: #fdecea;
+  color-scheme: light;
+}
+/* ----- シリーズ別カラー（c1→c2 のグラデーション。--ac は白地の文字に使える濃い色） ----- */
+[data-series="css"]    { --c1:#3b9cf6; --c2:#19c3d6; --ac:#1a5fa6; --ac-soft:#e8f3fd; --ac-line:#bcdaf3; --page:#f1f7fc; --hero:linear-gradient(135deg,#dff0ff,#d9f7fa); }
+[data-series="design"] { --c1:#ff5fa2; --c2:#8b5cf6; --ac:#9d2a72; --ac-soft:#fbeef6; --ac-line:#efc9e2; --page:#fbf6fa; --hero:linear-gradient(135deg,#ffe4f0,#ece5ff); }
+[data-series="ai"]     { --c1:#b6e04a; --c2:#22a861; --ac:#17683a; --ac-soft:#eef8e4; --ac-line:#cde7b2; --page:#f5f9ef; --hero:linear-gradient(135deg,#eefad0,#d8f3e2); }
+[data-series="video"]  { --c1:#ff9f43; --c2:#ef3b4b; --ac:#b4321f; --ac-soft:#fff1ea; --ac-line:#f6cdb8; --page:#fcf7f3; --hero:linear-gradient(135deg,#ffeedb,#ffe1e3); }
+:root { --grad: linear-gradient(90deg, var(--c1), var(--c2)); }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--page); color: var(--ink); font-family: var(--font); line-height: 1.75; -webkit-font-smoothing: antialiased; }
+a { color: var(--ac); text-underline-offset: 3px; }
+code, pre, kbd { font-family: var(--mono); }
+img, svg { max-width: 100%; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+/* ===== Motion（opacity:0 は keyframes 側のみ＝動きを切っても内容は必ず見える） ===== */
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+@keyframes pop  { from { opacity: 0; transform: scale(.94); } }
+.rise { animation: rise .5s var(--ease) calc(var(--i, 0) * 80ms) backwards; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* ===== Hero ===== */
+.hero { position: relative; overflow: hidden; background: var(--hero); border-bottom: 1px solid var(--ac-line); padding: 0 0 44px; }
+.hero::before { content: ""; display: block; height: 6px; background: var(--grad); }
+.hero::after { content: ""; position: absolute; right: -90px; top: -70px; width: 340px; height: 340px; border-radius: 50%; background: var(--grad); opacity: .16; pointer-events: none; }
+.hero .wrap { position: relative; z-index: 1; padding-top: 28px; display: grid; grid-template-columns: 1fr auto; gap: 24px 40px; align-items: center; }
+.pill-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.series { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; letter-spacing: .04em; color: var(--ac); background: #fff; border: 1px solid var(--ac-line); border-radius: 999px; padding: 4px 14px 4px 10px; }
+.series::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--grad); }
+.tipno { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--sub); }
+h1 { font-size: clamp(25px, 4.4vw, 38px); line-height: 1.4; letter-spacing: .01em; margin: 16px 0 14px; font-weight: 800; }
+.lead { font-size: clamp(15px, 2vw, 17px); color: #38415a; max-width: 38em; }
+.lead b { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--c1) 35%, transparent) 62%); font-weight: 700; }
+.hero-art { width: 200px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.meta span { font-size: 12px; color: var(--sub); background: rgba(255,255,255,.75); border: 1px solid var(--ac-line); border-radius: 999px; padding: 1px 12px; }
+
+/* ===== Section ===== */
+main { padding: 36px 0 24px; }
+.sec { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 30px 32px 32px; margin-bottom: 22px; box-shadow: 0 1px 2px rgba(27,31,42,.04), 0 18px 40px -26px rgba(27,31,42,.22); }
+.sec-h { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.sec-n { flex: none; width: 30px; height: 30px; border-radius: 10px; background: var(--grad); color: #1b1f2a; display: grid; place-items: center; font-size: 14px; font-weight: 800; }
+[data-series="design"] .sec-n, [data-series="video"] .sec-n { color: #fff; }
+h2 { font-size: clamp(19px, 2.8vw, 23px); line-height: 1.45; font-weight: 800; }
+.sec-sub { color: var(--sub); font-size: 14.5px; margin: 0 0 20px 42px; }
+h3 { font-size: 16px; line-height: 1.5; }
+p + p { margin-top: .8em; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.card { background: var(--ac-soft); border: 1px solid var(--ac-line); border-radius: 16px; padding: 18px 20px; transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
+.card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -16px rgba(27,31,42,.35); }
+.card .kicker { font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--ac); }
+.card .big { font-size: 28px; font-weight: 800; line-height: 1.3; margin: 4px 0 4px; }
+.card p { font-size: 14px; color: #38415a; }
+
+/* ===== Before / After ===== */
+.ba { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; position: relative; }
+.pane { min-width: 0; border: 1px solid var(--line); border-radius: 16px; padding: 18px; background: #fff; }
+.pane.after { border-color: var(--ac-line); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c2) 10%, transparent); }
+.pane-h { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.badge { flex: none; font-size: 11px; font-weight: 800; letter-spacing: .08em; border-radius: 999px; padding: 1px 11px; color: var(--sub); background: var(--bg); border: 1px solid var(--line); }
+.after .badge { color: #fff; background: var(--ac); border-color: var(--ac); }
+.pane-h h3 { font-size: 15px; }
+.cap { font-size: 13px; color: var(--sub); margin-top: 10px; }
+
+/* ===== Callout ===== */
+.note { border-radius: 14px; padding: 14px 18px 15px; font-size: 14.5px; background: var(--ac-soft); border: 1px solid var(--ac-line); }
+.note h3 { display: flex; align-items: center; gap: 8px; font-size: 13px; letter-spacing: .05em; color: var(--ac); margin-bottom: 3px; }
+.note h3::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.note.warn { background: #fff7e8; border-color: #efd7a6; }
+.note.warn h3 { color: #8a5300; }
+.notes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+/* ===== Code ===== */
+.code { margin: 14px 0 0; border-radius: 14px; overflow: hidden; border: 1px solid var(--ac-line); background: #f8faf8; }
+.code figcaption { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; font-weight: 800; letter-spacing: .06em; color: var(--ac); padding: 8px 14px; background: var(--ac-soft); border-bottom: 1px solid var(--ac-line); }
+.code pre { font-size: 13.5px; line-height: 1.75; padding: 14px 16px; overflow-x: auto; color: #23304a; tab-size: 2; }
+.code.dark { background: #14201a; border-color: #243a2d; }
+.code.dark figcaption { background: #1b2c22; color: #b9e78a; border-color: #243a2d; }
+.code.dark pre { color: #e4f1e0; }
+.btn { appearance: none; border: 1px solid var(--ac-line); background: #fff; color: var(--ac); font: inherit; font-size: 12px; font-weight: 800; letter-spacing: .04em; border-radius: 999px; padding: 3px 14px; cursor: pointer; transition: background .2s var(--ease), transform .2s var(--ease); }
+.btn:hover { background: var(--ac-soft); }
+.btn:active { transform: scale(.97); }
+.btn:focus-visible, input:focus-visible, summary:focus-visible, button:focus-visible { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 2px; }
+.btn.solid { background: var(--ac); border-color: var(--ac); color: #fff; padding: 6px 18px; font-size: 13.5px; }
+.btn.solid:hover { background: color-mix(in srgb, var(--ac) 88%, #000); }
+.tk-add { color: #0e6b32; background: #e3f6e8; } .tk-del { color: #a4281c; background: #fdeceb; }
+
+/* ===== Steps ===== */
+.steps { list-style: none; counter-reset: s; display: grid; gap: 12px; }
+.steps > li { counter-increment: s; position: relative; padding: 14px 16px 14px 58px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.steps > li::before { content: counter(s); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--grad); color: #1b1f2a; font-weight: 800; font-size: 14px; }
+[data-series="design"] .steps > li::before, [data-series="video"] .steps > li::before { color: #fff; }
+.steps h3 { font-size: 15.5px; }
+.steps p { font-size: 14px; color: #38415a; margin-top: 2px; }
+
+/* ===== Check list / refs ===== */
+.chk { list-style: none; display: grid; gap: 8px; }
+.chk li { position: relative; padding-left: 30px; font-size: 14.5px; }
+.chk li::before { content: "✓"; position: absolute; left: 0; top: 2px; width: 20px; height: 20px; border-radius: 6px; background: var(--ac); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 800; line-height: 1; }
+.refs { font-size: 13px; color: var(--sub); padding: 6px 4px 54px; }
+.refs h2 { font-size: 13px; letter-spacing: .08em; color: var(--sub); margin-bottom: 6px; }
+.refs li { margin-left: 1.2em; word-break: break-all; }
+.refs .by { margin-top: 10px; }
+.tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; padding: 0 9px; border-radius: 999px; }
+.tag.ok { color: var(--ok); background: var(--ok-soft); }
+.tag.ng { color: var(--ng); background: var(--ng-soft); }
+.rows .tag, .judge .tag { font-size: 0; }
+.rows .tag::before, .judge .tag::before { font-size: 11px; }
+.rows .tag.ok::before, .judge .tag.ok::before { content: "✓ OK"; }
+.rows .tag.ng::before, .judge .tag.ng::before { content: "✕ 不足"; }
+
+@media (max-width: 720px) {
+  .wrap { padding: 0 14px; }
+  .hero .wrap { grid-template-columns: 1fr; }
+  .hero-art { display: none; }
+  .sec { padding: 22px 16px 24px; border-radius: 16px; }
+  .sec-sub { margin-left: 0; }
+  .grid2, .grid3, .ba, .notes { grid-template-columns: 1fr; }
+}
+
+/* ===== 操作部品（design シリーズの追加ページ用。meta の "css":["parts.css"] で読み込む） ===== */
+.tools { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; margin: 0 0 16px; padding: 8px 14px; background: var(--ac-soft); border: 1px solid var(--ac-line); border-radius: 14px; }
+.tools .lab { font-size: 12.5px; font-weight: 800; color: var(--ac); letter-spacing: .04em; }
+.tools > * { min-width: 0; }
+
+/* トグルスイッチ（実体は checkbox。キーボードはスペースで切り替え） */
+.tgl { position: relative; display: inline-flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 700; cursor: pointer; min-height: 44px; }
+.tgl input { position: absolute; opacity: 0; width: 100%; height: 100%; left: 0; top: 0; margin: 0; cursor: pointer; }
+.tgl .sw { flex: none; width: 42px; height: 24px; border-radius: 999px; background: #b4bccb; position: relative; transition: background .2s var(--ease); }
+.tgl .sw::after { content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.35); transition: transform .2s var(--ease); }
+.tgl input:checked + .sw { background: var(--ac); }
+.tgl input:checked + .sw::after { transform: translateX(18px); }
+.tgl input:focus-visible + .sw { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 2px; }
+
+/* 切り替えボタン（実体は radio） */
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; border: 1px solid var(--ac-line); border-radius: 24px; background: #fff; padding: 3px; }
+.seg label { position: relative; cursor: pointer; }
+.seg input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.seg span { display: block; padding: 10px 15px; min-height: 42px; border-radius: 999px; font-size: 13px; font-weight: 800; line-height: 22px; color: var(--ac); }
+.seg input:checked + span { background: var(--ac); color: #fff; }
+.seg input:focus-visible + span { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 1px; }
+
+/* スライダー */
+.rng { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; font-size: 13.5px; font-weight: 700; min-height: 44px; }
+.rng input[type=range] { width: min(240px, 100%); accent-color: var(--ac); height: 28px; }
+.rng output { font-family: var(--mono); font-weight: 800; color: var(--ac); min-width: 4.2em; }
+
+/* 結果の読み上げ・まとめ欄 */
+.verdict { margin-top: 12px; padding: 12px 16px; border-radius: 12px; font-size: 14px; background: #fff; border: 1px solid var(--ac-line); border-left: 5px solid var(--c2); }
+.verdict b { color: var(--ac); }
+
+/* 選び方の表（カード型） */
+.pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pick .card .q { font-size: 14.5px; font-weight: 800; line-height: 1.5; margin: 2px 0 6px; }
+.pick .card p { font-size: 13.5px; }
+.pick .card .go { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 800; color: #fff; background: var(--ac); border-radius: 999px; padding: 1px 11px; }
+.fig { margin: 0; }
+.fig figcaption { font-size: 12.5px; color: var(--sub); margin-top: 8px; }
+.judge2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ctr-note { font-size: 12.5px; color: var(--sub); }
+
+@media (max-width: 720px) {
+  .seg { display: flex; width: 100%; }
+  .seg label { flex: 1 1 auto; }
+  .seg span { text-align: center; padding: 10px 10px; border-radius: 18px; }
+  .pick, .judge2 { grid-template-columns: 1fr; }
+  .tools { gap: 2px 14px; }
+}
+
+/* ===== このページ専用 ===== */
+
+  .hero-art { width: 190px; }
+  .stack { display: grid; gap: 8px; }
+  .stack i { display: block; border-radius: 999px; background: var(--grad); height: 18px; }
+  .stack i:nth-child(1) { width: 62%; height: 26px; }
+  .stack i:nth-child(2) { width: 100%; height: 10px; opacity: .5; }
+  .stack i:nth-child(3) { width: 86%; height: 10px; opacity: .5; }
+  .stack i:nth-child(4) { width: 52%; height: 7px; opacity: .3; }
+
+  /* ---- 比較で使う文章ブロック（強弱は4つのクラスの組み合わせだけで決まる） ---- */
+  .stage { border: 1px solid var(--line); background: #fff; border-radius: 12px; padding: 22px; transition: filter .25s var(--ease); }
+  .hb { position: relative; }
+  .hb p, .hb h4 { font-size: 15px; font-weight: 400; color: #444; line-height: 1.7; margin: 0 0 4px; letter-spacing: 0; }
+  .h-cta { display: inline-block; margin-top: 8px; font-size: 15px; color: #444; border: 1px solid #b6b6c0; padding: 6px 14px; border-radius: 6px; }
+  .k-size .h-eyebrow { font-size: 12.5px; } .k-size .h-head { font-size: clamp(22px, 5.2vw, 28px); line-height: 1.35; } .k-size .h-body { font-size: 16px; } .k-size .h-note { font-size: 12.5px; }
+  .k-weight .h-eyebrow { font-weight: 800; letter-spacing: .08em; } .k-weight .h-head { font-weight: 800; } .k-weight .h-cta { font-weight: 800; }
+  .k-color .h-eyebrow { color: var(--ac); } .k-color .h-head { color: #17142b; } .k-color .h-body { color: #34324a; } .k-color .h-note { color: #666676; }
+  .k-color .h-cta { color: #fff; background: var(--ac); border-color: var(--ac); }
+  .k-space .h-eyebrow { margin-bottom: 8px; } .k-space .h-head { margin-bottom: 14px; } .k-space .h-body { margin-bottom: 12px; } .k-space .h-note { margin-bottom: 20px; }
+  .hb p, .hb h4, .h-cta { transition: color .25s var(--ease), font-size .25s var(--ease), margin .25s var(--ease), background .25s var(--ease); }
+
+  /* 読む順番バッジ */
+  .hb .h-head::before, .hb .h-body::before, .hb .h-note::before { display: none; }
+  .show-ord .hb .h-head::before, .show-ord .hb .h-body::before, .show-ord .hb .h-note::before {
+    display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: 8px; border-radius: 50%; vertical-align: middle;
+    background: #8b8fa0; color: #fff; font-size: 12px; font-weight: 800; line-height: 1; letter-spacing: 0; font-family: var(--font); content: "?";
+  }
+  .show-ord .hb.lvl .h-head::before { content: "1"; background: var(--ac); }
+  .show-ord .hb.lvl .h-body::before { content: "2"; background: #6f7690; }
+  .show-ord .hb.lvl .h-note::before { content: "3"; background: #9aa0b4; }
+  .blurred .stage { filter: blur(3px); }
+  .cap2 { font-size: 12.5px; color: var(--sub); margin-top: 10px; }
+  .tags4 { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .tags4 span { font-size: 11.5px; font-weight: 800; border-radius: 999px; padding: 1px 10px; border: 1px solid var(--line); color: var(--sub); background: #fff; }
+  .tags4 span.on { color: #fff; background: var(--ac); border-color: var(--ac); }
+
+  /* ---- 1つずつ足す ---- */
+  .build { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 20px; align-items: start; }
+  .build .tools { display: grid; gap: 0; margin: 0; }
+  .lever { display: grid; grid-template-columns: 1fr; }
+  .lever small { display: block; margin: -6px 0 6px 51px; font-size: 12px; color: var(--sub); }
+  .readout { margin-top: 10px; display: grid; gap: 4px; font-size: 12.5px; color: var(--sub); }
+  .readout div { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px dashed var(--line); padding: 2px 0; }
+  .readout b { font-family: var(--mono); color: var(--ink); text-align: right; }
+  .btnrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .btnrow .btn { min-height: 40px; padding: 4px 16px; }
+
+  @media (max-width: 720px) {
+    .build { grid-template-columns: 1fr; }
+    .hero-art { display: none; }
+  }
+
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <div class="pill-row rise"><span class="series">なんとなくで決めないデザイン</span><span class="tipno">TIPS D-06 / 情報の優先順位</span></div>
+      <h1 class="rise" style="--i:1">文字サイズ、全部同じ強さに<br>なってない？<br>情報の優先順位をつける</h1>
+      <p class="lead rise" style="--i:2">見出し・本文・補足に<b>強弱をつける</b>と、読む順番を自然に伝えられる。</p>
+      <div class="meta rise" style="--i:3"><span>難易度：初級</span><span>LP・バナー・カード・料金表の整理に</span><span>強弱を1つずつ足して試せるデモつき</span></div>
+    </div>
+    <div class="hero-art rise" style="--i:2" aria-hidden="true"><div class="stack"><i></i><i></i><i></i><i></i></div></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">1</span><h2>まず、考え方：全部を同じ強さで置かない</h2></div>
+    <p class="sec-sub">すべての文字を同じ大きさ・太さ・色で置くと、どこから読めばいいか分かりません。情報の重要度に合わせて、サイズ・太さ・色・余白などの差をつけると、視線を<b>「見出し → 本文 → 補足」</b>のように導きやすくなります。</p>
+    <div class="grid3">
+      <div class="card"><div class="kicker">見出し</div><p>いちばん伝えたいこと。<b>大きく・太く・濃く</b>。</p></div>
+      <div class="card"><div class="kicker">本文</div><p>読んでもらう説明。<b>読みやすいサイズ</b>で、見出しより一段おさえる。</p></div>
+      <div class="card"><div class="kicker">補足</div><p>注意書きなど。<b>少し控えめ</b>に。ただし読める濃さは保つ。</p></div>
+    </div>
+    <p class="cap">大きさだけで階層を作るのではなく、<b>サイズ・太さ・色・余白</b>など複数の要素を組み合わせて、優先順位を伝えます。</p>
+  </section>
+
+
+  <section class="sec rise" id="cmp">
+    <div class="sec-h"><span class="sec-n">2</span><h2>Before / After：同じ文章で、強弱だけ変える</h2></div>
+    <p class="sec-sub">文章も情報も同じ。スイッチで「読む順番」を出したり、ぼかして見たりすると、<b>最初にどこを見るか</b>の違いがはっきりします。</p>
+    <div class="tools">
+      <span class="lab">見方を変える</span>
+      <label class="tgl"><input type="checkbox" id="t-ord"><span class="sw"></span><span>最初に見る順番を表示</span></label>
+      <label class="tgl"><input type="checkbox" id="t-blur"><span class="sw"></span><span>ぼかして見る（目を細めたとき）</span></label>
+    </div>
+    <div class="ba">
+      <div class="pane">
+        <div class="pane-h"><span class="badge">BEFORE</span><h3>すべて同じ強さ</h3></div>
+        <div class="stage"><div class="hb">
+            <p class="h-eyebrow">春の新生活キャンペーン</p>
+            <h4 class="h-head">入会金が0円になります</h4>
+            <p class="h-body">4月30日までのお申し込みで、入会金11,000円が無料。月会費はそのままで、いつでも退会できます。</p>
+            <p class="h-note">※ 一部店舗は対象外です。詳しくは店舗にお問い合わせください。</p>
+            <span class="h-cta">無料体験を予約する</span>
+        </div></div>
+        <div class="tags4"><span>サイズ 同じ</span><span>太さ 同じ</span><span>色 同じ</span><span>余白 同じ</span></div>
+        <p class="cap2">どこから読めばいいか分かりません。「？」は、視線の行き先が決まらない状態です。</p>
+      </div>
+      <div class="pane after">
+        <div class="pane-h"><span class="badge">AFTER</span><h3>見出し／本文／補足に強弱あり</h3></div>
+        <div class="stage"><div class="hb k-size k-weight k-color k-space lvl">
+            <p class="h-eyebrow">春の新生活キャンペーン</p>
+            <h4 class="h-head">入会金が0円になります</h4>
+            <p class="h-body">4月30日までのお申し込みで、入会金11,000円が無料。月会費はそのままで、いつでも退会できます。</p>
+            <p class="h-note">※ 一部店舗は対象外です。詳しくは店舗にお問い合わせください。</p>
+            <span class="h-cta">無料体験を予約する</span>
+        </div></div>
+        <div class="tags4"><span class="on">サイズ 差をつけた</span><span class="on">太さ 差をつけた</span><span class="on">色 差をつけた</span><span class="on">余白 差をつけた</span></div>
+        <p class="cap2">最初に見出し、次に本文、最後に補足。ぼかしても、見出しの位置が分かります。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">3</span><h2>自分で動かす：4つの強弱を1つずつ足してみる</h2></div>
+    <p class="sec-sub">サイズだけ、太さだけ…と1つずつ足すと、<b>どの道具がどれだけ効くか</b>が見えます。</p>
+    <div class="build">
+      <div class="tools" role="group" aria-label="強弱の道具">
+        <span class="lab">足す道具</span>
+        <div class="lever"><label class="tgl"><input type="checkbox" data-k="k-size"><span class="sw"></span><span>サイズ</span></label><small>見出しを大きく、補足を小さく</small></div>
+        <div class="lever"><label class="tgl"><input type="checkbox" data-k="k-weight"><span class="sw"></span><span>太さ</span></label><small>見出しを太く</small></div>
+        <div class="lever"><label class="tgl"><input type="checkbox" data-k="k-color"><span class="sw"></span><span>色</span></label><small>見出しは濃く、補足はやや薄く（読める範囲で）</small></div>
+        <div class="lever"><label class="tgl"><input type="checkbox" data-k="k-space"><span class="sw"></span><span>余白</span></label><small>見出しの下・補足の上をあける</small></div>
+        <div class="btnrow"><button type="button" class="btn" id="all-off">ぜんぶ OFF（Before）</button><button type="button" class="btn" id="all-on">ぜんぶ ON（After）</button></div>
+      </div>
+      <div>
+        <div class="live" id="live">
+          <div class="stage"><div class="hb" id="liveHb">
+            <p class="h-eyebrow">春の新生活キャンペーン</p>
+            <h4 class="h-head">入会金が0円になります</h4>
+            <p class="h-body">4月30日までのお申し込みで、入会金11,000円が無料。月会費はそのままで、いつでも退会できます。</p>
+            <p class="h-note">※ 一部店舗は対象外です。詳しくは店舗にお問い合わせください。</p>
+            <span class="h-cta">無料体験を予約する</span>
+          </div></div>
+        </div>
+        <p class="verdict" id="verdict" aria-live="polite">道具を足すと、ここに「最初にどこを見るか」の判定が出ます。</p>
+      </div>
+    </div>
+    <noscript><p class="cap">JavaScriptが無効のため、このデモは動きません。上の Before / After が同じ内容の比較です。</p></noscript>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">4</span><h2>実務での使いどころ</h2></div>
+    <p class="sec-sub">情報量が増えて「全部同じに見える」ときの整理に使えます。</p>
+    <div class="grid3">
+      <div class="card"><div class="kicker">LP・バナー・カードUI</div><p>見出し・説明・注意書きの3段階をまず決める。迷ったら「一番見せたいもの」を1つだけ最強にする。</p></div>
+      <div class="card"><div class="kicker">料金表・プレゼン</div><p>金額・プラン名・条件のうち、最初に見せたいものを決めて強弱をつける。条件は小さくしても、読める濃さは保つ。</p></div>
+      <div class="card"><div class="kicker">動画テロップ</div><p>短い時間で読ませるため、主役の言葉だけを大きく太く。補足は控えめに。</p></div>
+    </div>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">5</span><h2>判断するときのポイント</h2></div>
+    <ol class="steps">
+      <li><h3>まず「一番見せたいものは何か」を決める</h3><p>強弱をつける前に、これを決めます。それを最も強くします。決まっていないまま強弱をつけると、全部が少しずつ強くなり、結局どれも目立ちません。</p></li>
+      <li><h3>強弱は、4つの道具を少しずつ組み合わせる</h3><p>サイズだけに頼らず、太さ・色・余白を併用します。サイズを上げすぎなくても階層ができます。</p></li>
+      <li><h3>階層は、必要な段階だけに絞る</h3><p>強調する要素や階層を増やしすぎると、優先順位が分かりにくくなります。見出し・本文・補足の3段階で足りるなら、それ以上増やしません。</p></li><li><h3>ぼかして見て、順番が見えるか確認する</h3><p>目を細めたとき、見出し → 本文 → 補足の順に視線が動くかを確認します。</p></li>
+    </ol>
+    <ul class="chk" style="margin-top:18px">
+      <li>最初に見る場所が、すぐに1か所決まるか</li>
+      <li>見出し・本文・補足の3段階が見分けられるか</li>
+      <li>補足は控えめでも、読める濃さが残っているか</li>
+    </ul>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">6</span><h2>注意点</h2></div>
+    <div class="notes">
+      <div class="note warn"><h3>何でも大きく・太くしない</h3>強調する要素や階層を増やしすぎると、逆に優先順位が分かりにくくなります。まず「一番見せたいものは何か」を決め、必要な段階だけに絞ります。</div>
+      <div class="note warn"><h3>補足を薄くしすぎない</h3>補足は控えめにしても、注意書きや条件は読めなければ意味がありません。薄くしすぎず、実際の画面で読めるかを確認します。</div>
+    </div>
+  </section>
+
+  <section class="refs">
+    <h2>参考・出典</h2>
+    <ul><li><a href="https://www.nngroup.com/articles/principles-visual-design/" target="_blank" rel="noopener">Nielsen Norman Group「5 Principles of Visual Design in UX」</a>（スプレッドシート記載の参考URL）</li></ul>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s), $$ = (s) => [...document.querySelectorAll(s)];
+  const cmp = $('#cmp');
+  $('#t-ord').addEventListener('change', (e) => { cmp.classList.toggle('show-ord', e.target.checked); live.classList.toggle('show-ord', e.target.checked); });
+  $('#t-blur').addEventListener('change', (e) => { cmp.classList.toggle('blurred', e.target.checked); live.classList.toggle('blurred', e.target.checked); });
+  // ---- 1つずつ足す ----
+  const live = $('#live'), hb = $('#liveHb'), boxes = $$('[data-k]');
+  const MSG = {
+    0: '<b>すべて同じ強さです。</b>どこから読めばいいか決められません。',
+    size: '<b>サイズだけ：</b>見出しの位置は分かりますが、太さや色が同じなので、本文や補足との差が弱いままです。',
+    weight: '<b>太さだけ：</b>見出しに少し視線が向きますが、サイズが同じなので、まだ目立ち方が弱いです。',
+    color: '<b>色だけ：</b>濃淡の差では、順番がほとんど伝わりません。他の道具と組み合わせて効きます。',
+    space: '<b>余白だけ：</b>見出しの周りに間ができ、まとまりは見えますが、強さの差はつきません。',
+    many: '<b>道具が重なるほど、順番がはっきりします。</b>見出し → 本文 → 補足の順に読む流れができてきました。',
+    all: '<b>4つを組み合わせると、最初に見る場所が見出しに決まります。</b>1つの道具を極端に上げるより、少しずつ重ねる方が自然です。',
+  };
+  function update() {
+    const on = boxes.filter((b) => b.checked).map((b) => b.dataset.k);
+    boxes.forEach((b) => hb.classList.toggle(b.dataset.k, b.checked));
+    hb.classList.toggle('lvl', on.length >= 2);
+    $('#verdict').innerHTML = on.length === 0 ? MSG[0] : on.length === 1 ? MSG[on[0].replace('k-', '')] : on.length === 4 ? MSG.all : MSG.many;
+  }
+  boxes.forEach((b) => b.addEventListener('change', update));
+  $('#all-off').addEventListener('click', () => { boxes.forEach((b) => (b.checked = false)); update(); });
+  $('#all-on').addEventListener('click', () => { boxes.forEach((b) => (b.checked = true)); update(); });
+  update();
+})();
+</script>
+</body>
+</html>

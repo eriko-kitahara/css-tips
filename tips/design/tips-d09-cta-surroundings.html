@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ja" data-series="design">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ボタン、目立たせたいなら大きくする前に「周り」を見る｜なんとなくで決めないデザイン</title>
+<style>
+/* ===== シリーズTips 共通ベース（既存CSS Tipsの作法を踏襲：トークン / .rise / reduced-motion / 640px以下は1カラム） ===== */
+:root {
+  --ink: #1b1f2a;
+  --sub: #566074;
+  --line: #e5e8ee;
+  --bg: #f4f6f9;
+  --ease: cubic-bezier(.22, .7, .25, 1);
+  --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", "Meiryo", sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Roboto Mono", Menlo, monospace;
+  --ok: #17683a; --ok-soft: #e8f5ec;
+  --ng: #b42318; --ng-soft: #fdecea;
+  color-scheme: light;
+}
+/* ----- シリーズ別カラー（c1→c2 のグラデーション。--ac は白地の文字に使える濃い色） ----- */
+[data-series="css"]    { --c1:#3b9cf6; --c2:#19c3d6; --ac:#1a5fa6; --ac-soft:#e8f3fd; --ac-line:#bcdaf3; --page:#f1f7fc; --hero:linear-gradient(135deg,#dff0ff,#d9f7fa); }
+[data-series="design"] { --c1:#ff5fa2; --c2:#8b5cf6; --ac:#9d2a72; --ac-soft:#fbeef6; --ac-line:#efc9e2; --page:#fbf6fa; --hero:linear-gradient(135deg,#ffe4f0,#ece5ff); }
+[data-series="ai"]     { --c1:#b6e04a; --c2:#22a861; --ac:#17683a; --ac-soft:#eef8e4; --ac-line:#cde7b2; --page:#f5f9ef; --hero:linear-gradient(135deg,#eefad0,#d8f3e2); }
+[data-series="video"]  { --c1:#ff9f43; --c2:#ef3b4b; --ac:#b4321f; --ac-soft:#fff1ea; --ac-line:#f6cdb8; --page:#fcf7f3; --hero:linear-gradient(135deg,#ffeedb,#ffe1e3); }
+:root { --grad: linear-gradient(90deg, var(--c1), var(--c2)); }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--page); color: var(--ink); font-family: var(--font); line-height: 1.75; -webkit-font-smoothing: antialiased; }
+a { color: var(--ac); text-underline-offset: 3px; }
+code, pre, kbd { font-family: var(--mono); }
+img, svg { max-width: 100%; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+/* ===== Motion（opacity:0 は keyframes 側のみ＝動きを切っても内容は必ず見える） ===== */
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+@keyframes pop  { from { opacity: 0; transform: scale(.94); } }
+.rise { animation: rise .5s var(--ease) calc(var(--i, 0) * 80ms) backwards; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* ===== Hero ===== */
+.hero { position: relative; overflow: hidden; background: var(--hero); border-bottom: 1px solid var(--ac-line); padding: 0 0 44px; }
+.hero::before { content: ""; display: block; height: 6px; background: var(--grad); }
+.hero::after { content: ""; position: absolute; right: -90px; top: -70px; width: 340px; height: 340px; border-radius: 50%; background: var(--grad); opacity: .16; pointer-events: none; }
+.hero .wrap { position: relative; z-index: 1; padding-top: 28px; display: grid; grid-template-columns: 1fr auto; gap: 24px 40px; align-items: center; }
+.pill-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.series { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; letter-spacing: .04em; color: var(--ac); background: #fff; border: 1px solid var(--ac-line); border-radius: 999px; padding: 4px 14px 4px 10px; }
+.series::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--grad); }
+.tipno { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--sub); }
+h1 { font-size: clamp(25px, 4.4vw, 38px); line-height: 1.4; letter-spacing: .01em; margin: 16px 0 14px; font-weight: 800; }
+.lead { font-size: clamp(15px, 2vw, 17px); color: #38415a; max-width: 38em; }
+.lead b { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--c1) 35%, transparent) 62%); font-weight: 700; }
+.hero-art { width: 200px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.meta span { font-size: 12px; color: var(--sub); background: rgba(255,255,255,.75); border: 1px solid var(--ac-line); border-radius: 999px; padding: 1px 12px; }
+
+/* ===== Section ===== */
+main { padding: 36px 0 24px; }
+.sec { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 30px 32px 32px; margin-bottom: 22px; box-shadow: 0 1px 2px rgba(27,31,42,.04), 0 18px 40px -26px rgba(27,31,42,.22); }
+.sec-h { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.sec-n { flex: none; width: 30px; height: 30px; border-radius: 10px; background: var(--grad); color: #1b1f2a; display: grid; place-items: center; font-size: 14px; font-weight: 800; }
+[data-series="design"] .sec-n, [data-series="video"] .sec-n { color: #fff; }
+h2 { font-size: clamp(19px, 2.8vw, 23px); line-height: 1.45; font-weight: 800; }
+.sec-sub { color: var(--sub); font-size: 14.5px; margin: 0 0 20px 42px; }
+h3 { font-size: 16px; line-height: 1.5; }
+p + p { margin-top: .8em; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.card { background: var(--ac-soft); border: 1px solid var(--ac-line); border-radius: 16px; padding: 18px 20px; transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
+.card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -16px rgba(27,31,42,.35); }
+.card .kicker { font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--ac); }
+.card .big { font-size: 28px; font-weight: 800; line-height: 1.3; margin: 4px 0 4px; }
+.card p { font-size: 14px; color: #38415a; }
+
+/* ===== Before / After ===== */
+.ba { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; position: relative; }
+.pane { min-width: 0; border: 1px solid var(--line); border-radius: 16px; padding: 18px; background: #fff; }
+.pane.after { border-color: var(--ac-line); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c2) 10%, transparent); }
+.pane-h { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.badge { flex: none; font-size: 11px; font-weight: 800; letter-spacing: .08em; border-radius: 999px; padding: 1px 11px; color: var(--sub); background: var(--bg); border: 1px solid var(--line); }
+.after .badge { color: #fff; background: var(--ac); border-color: var(--ac); }
+.pane-h h3 { font-size: 15px; }
+.cap { font-size: 13px; color: var(--sub); margin-top: 10px; }
+
+/* ===== Callout ===== */
+.note { border-radius: 14px; padding: 14px 18px 15px; font-size: 14.5px; background: var(--ac-soft); border: 1px solid var(--ac-line); }
+.note h3 { display: flex; align-items: center; gap: 8px; font-size: 13px; letter-spacing: .05em; color: var(--ac); margin-bottom: 3px; }
+.note h3::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.note.warn { background: #fff7e8; border-color: #efd7a6; }
+.note.warn h3 { color: #8a5300; }
+.notes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+/* ===== Code ===== */
+.code { margin: 14px 0 0; border-radius: 14px; overflow: hidden; border: 1px solid var(--ac-line); background: #f8faf8; }
+.code figcaption { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; font-weight: 800; letter-spacing: .06em; color: var(--ac); padding: 8px 14px; background: var(--ac-soft); border-bottom: 1px solid var(--ac-line); }
+.code pre { font-size: 13.5px; line-height: 1.75; padding: 14px 16px; overflow-x: auto; color: #23304a; tab-size: 2; }
+.code.dark { background: #14201a; border-color: #243a2d; }
+.code.dark figcaption { background: #1b2c22; color: #b9e78a; border-color: #243a2d; }
+.code.dark pre { color: #e4f1e0; }
+.btn { appearance: none; border: 1px solid var(--ac-line); background: #fff; color: var(--ac); font: inherit; font-size: 12px; font-weight: 800; letter-spacing: .04em; border-radius: 999px; padding: 3px 14px; cursor: pointer; transition: background .2s var(--ease), transform .2s var(--ease); }
+.btn:hover { background: var(--ac-soft); }
+.btn:active { transform: scale(.97); }
+.btn:focus-visible, input:focus-visible, summary:focus-visible, button:focus-visible { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 2px; }
+.btn.solid { background: var(--ac); border-color: var(--ac); color: #fff; padding: 6px 18px; font-size: 13.5px; }
+.btn.solid:hover { background: color-mix(in srgb, var(--ac) 88%, #000); }
+.tk-add { color: #0e6b32; background: #e3f6e8; } .tk-del { color: #a4281c; background: #fdeceb; }
+
+/* ===== Steps ===== */
+.steps { list-style: none; counter-reset: s; display: grid; gap: 12px; }
+.steps > li { counter-increment: s; position: relative; padding: 14px 16px 14px 58px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.steps > li::before { content: counter(s); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--grad); color: #1b1f2a; font-weight: 800; font-size: 14px; }
+[data-series="design"] .steps > li::before, [data-series="video"] .steps > li::before { color: #fff; }
+.steps h3 { font-size: 15.5px; }
+.steps p { font-size: 14px; color: #38415a; margin-top: 2px; }
+
+/* ===== Check list / refs ===== */
+.chk { list-style: none; display: grid; gap: 8px; }
+.chk li { position: relative; padding-left: 30px; font-size: 14.5px; }
+.chk li::before { content: "✓"; position: absolute; left: 0; top: 2px; width: 20px; height: 20px; border-radius: 6px; background: var(--ac); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 800; line-height: 1; }
+.refs { font-size: 13px; color: var(--sub); padding: 6px 4px 54px; }
+.refs h2 { font-size: 13px; letter-spacing: .08em; color: var(--sub); margin-bottom: 6px; }
+.refs li { margin-left: 1.2em; word-break: break-all; }
+.refs .by { margin-top: 10px; }
+.tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; padding: 0 9px; border-radius: 999px; }
+.tag.ok { color: var(--ok); background: var(--ok-soft); }
+.tag.ng { color: var(--ng); background: var(--ng-soft); }
+.rows .tag, .judge .tag { font-size: 0; }
+.rows .tag::before, .judge .tag::before { font-size: 11px; }
+.rows .tag.ok::before, .judge .tag.ok::before { content: "✓ OK"; }
+.rows .tag.ng::before, .judge .tag.ng::before { content: "✕ 不足"; }
+
+@media (max-width: 720px) {
+  .wrap { padding: 0 14px; }
+  .hero .wrap { grid-template-columns: 1fr; }
+  .hero-art { display: none; }
+  .sec { padding: 22px 16px 24px; border-radius: 16px; }
+  .sec-sub { margin-left: 0; }
+  .grid2, .grid3, .ba, .notes { grid-template-columns: 1fr; }
+}
+
+/* ===== 操作部品（design シリーズの追加ページ用。meta の "css":["parts.css"] で読み込む） ===== */
+.tools { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; margin: 0 0 16px; padding: 8px 14px; background: var(--ac-soft); border: 1px solid var(--ac-line); border-radius: 14px; }
+.tools .lab { font-size: 12.5px; font-weight: 800; color: var(--ac); letter-spacing: .04em; }
+.tools > * { min-width: 0; }
+
+/* トグルスイッチ（実体は checkbox。キーボードはスペースで切り替え） */
+.tgl { position: relative; display: inline-flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 700; cursor: pointer; min-height: 44px; }
+.tgl input { position: absolute; opacity: 0; width: 100%; height: 100%; left: 0; top: 0; margin: 0; cursor: pointer; }
+.tgl .sw { flex: none; width: 42px; height: 24px; border-radius: 999px; background: #b4bccb; position: relative; transition: background .2s var(--ease); }
+.tgl .sw::after { content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.35); transition: transform .2s var(--ease); }
+.tgl input:checked + .sw { background: var(--ac); }
+.tgl input:checked + .sw::after { transform: translateX(18px); }
+.tgl input:focus-visible + .sw { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 2px; }
+
+/* 切り替えボタン（実体は radio） */
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; border: 1px solid var(--ac-line); border-radius: 24px; background: #fff; padding: 3px; }
+.seg label { position: relative; cursor: pointer; }
+.seg input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.seg span { display: block; padding: 10px 15px; min-height: 42px; border-radius: 999px; font-size: 13px; font-weight: 800; line-height: 22px; color: var(--ac); }
+.seg input:checked + span { background: var(--ac); color: #fff; }
+.seg input:focus-visible + span { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 1px; }
+
+/* スライダー */
+.rng { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; font-size: 13.5px; font-weight: 700; min-height: 44px; }
+.rng input[type=range] { width: min(240px, 100%); accent-color: var(--ac); height: 28px; }
+.rng output { font-family: var(--mono); font-weight: 800; color: var(--ac); min-width: 4.2em; }
+
+/* 結果の読み上げ・まとめ欄 */
+.verdict { margin-top: 12px; padding: 12px 16px; border-radius: 12px; font-size: 14px; background: #fff; border: 1px solid var(--ac-line); border-left: 5px solid var(--c2); }
+.verdict b { color: var(--ac); }
+
+/* 選び方の表（カード型） */
+.pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pick .card .q { font-size: 14.5px; font-weight: 800; line-height: 1.5; margin: 2px 0 6px; }
+.pick .card p { font-size: 13.5px; }
+.pick .card .go { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 800; color: #fff; background: var(--ac); border-radius: 999px; padding: 1px 11px; }
+.fig { margin: 0; }
+.fig figcaption { font-size: 12.5px; color: var(--sub); margin-top: 8px; }
+.judge2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ctr-note { font-size: 12.5px; color: var(--sub); }
+
+@media (max-width: 720px) {
+  .seg { display: flex; width: 100%; }
+  .seg label { flex: 1 1 auto; }
+  .seg span { text-align: center; padding: 10px 10px; border-radius: 18px; }
+  .pick, .judge2 { grid-template-columns: 1fr; }
+  .tools { gap: 2px 14px; }
+}
+
+/* ===== このページ専用 ===== */
+
+  .hero-art { width: 190px; }
+  .halo { position: relative; width: 190px; height: 130px; display: grid; place-items: center; }
+  .halo::before, .halo::after { content: ""; position: absolute; border-radius: 50%; border: 2px dashed var(--c2); opacity: .35; }
+  .halo::before { inset: 4px; } .halo::after { inset: -14px 6px; opacity: .18; }
+  .halo b { position: relative; z-index: 1; display: grid; place-items: center; width: 118px; height: 38px; border-radius: 10px; background: var(--grad); color: #fff; font-size: 14px; letter-spacing: .04em; box-shadow: 0 14px 24px -12px rgba(139,92,246,.7); }
+
+  /* ---- 3つの切り口 ---- */
+  .lev3 .big { font-size: 20px; }
+
+  /* ---- LPの一部（CTAは同じサイズ（PC幅 200×52px）。変えるのは「周り」だけ） ---- */
+  .stage { border: 1px solid var(--line); background: #f6f7fb; border-radius: 12px; padding: 16px; transition: filter .25s var(--ease); }
+  .blurred .stage { filter: blur(2.6px); }
+  .lp { --acc: #c0206a; background: #fff; border: 1px solid #dfe2ee; border-radius: 14px; padding: 14px; font-size: 14px; color: #2c3050; }
+  .l-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .l-badge { font-size: 12px; font-weight: 800; border-radius: 6px; padding: 3px 9px; }
+  .l-badge.b1 { background: #e11d48; color: #fff; } .l-badge.b2 { background: #facc15; color: #7a1d00; } .l-badge.b3 { background: #16a34a; color: #fff; }
+  .l-h { font-size: 20px; line-height: 1.4; font-weight: 800; color: #e11d48; margin-bottom: 4px; }
+  .l-sub { font-size: 13.5px; color: #2c3050; margin-bottom: 10px; }
+  .l-btns { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
+  .l-cta { flex: none; display: inline-flex; align-items: center; justify-content: center; width: min(200px, 100%); height: 52px; border-radius: 10px; font-size: 16px; font-weight: 800; background: #ff7a00; color: #fff; border: 2px solid #ffd000; }
+  .l-sec { display: inline-flex; align-items: center; justify-content: center; height: 52px; padding: 0 14px; border-radius: 10px; font-size: 14px; font-weight: 800; color: #fff; }
+  .l-sec.s1 { background: #1d6fe8; } .l-sec.s2 { background: #16a34a; }
+  .l-sticker { position: absolute; right: 2px; top: -34px; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; text-align: center; font-size: 12px; line-height: 1.1; font-weight: 800; color: #e11d48; background: #facc15; border: 2px solid #e11d48; transform: rotate(10deg); }
+  .l-note { margin-top: 8px; font-size: 12px; font-weight: 800; color: #e11d48; }
+  /* 切り口A: 余白 */
+  .k-space .l-row { margin-bottom: 16px; }
+  .k-space .l-sub { margin-bottom: 20px; }
+  .k-space .l-btns { margin-top: 30px; gap: 16px; }
+  .k-space .l-note { margin-top: 22px; }
+  /* 切り口B: 競合する要素を弱める（大きさ・塗り・飾り） */
+  .k-mute .l-badge { font-size: 11px; font-weight: 700; padding: 1px 8px; }
+  .k-mute .l-sec { height: 40px; padding: 0 6px; font-size: 13px; font-weight: 700; background: transparent; border: 0; text-decoration: underline; text-underline-offset: 3px; }
+  .k-mute .l-sticker { display: none; }
+  .k-mute .l-note { font-weight: 400; }
+  /* 切り口C: アクセント色をCTAへ集中（他は落ち着いた色に） */
+  .k-focus .l-badge { background: #eceff8 !important; color: #44507a !important; }
+  .k-focus .l-h { color: #1b1830; }
+  .k-focus .l-sec { background: #44507a; color: #fff; }
+  .k-focus.k-mute .l-sec, .k-mute.k-focus .l-sec { background: transparent; color: #44507a; }
+  .k-focus .l-sticker { background: #eceff8; color: #44507a; border-color: #c6cbe0; }
+  .k-focus .l-note { color: #44507a; }
+  .k-focus .l-cta { background: var(--acc); border-color: var(--acc); }
+  .ms { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 12.5px; color: var(--sub); }
+  .ms b { font-family: var(--mono); color: var(--ink); }
+  .ms .tag { font-size: 11px; }
+  .cap2 { font-size: 12.5px; color: var(--sub); margin-top: 8px; }
+
+  .build { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 20px; align-items: start; }
+  .build .tools { display: grid; gap: 0; margin: 0; }
+  .btnrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .btnrow .btn { min-height: 40px; padding: 4px 16px; }
+  .readout { margin-top: 12px; display: grid; gap: 4px; font-size: 12.5px; color: var(--sub); }
+  .readout div { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px dashed var(--line); padding: 2px 0; }
+  .readout b { font-family: var(--mono); color: var(--ink); text-align: right; }
+  .lever small { display: block; margin: -6px 0 6px 51px; font-size: 12px; color: var(--sub); }
+
+  .l-cta { white-space: nowrap; }
+  @media (max-width: 400px) { .pane { padding: 12px; } .stage { padding: 10px; } .lp { padding: 10px; } .l-cta { font-size: 15px; } }
+  @media (max-width: 720px) { .build { grid-template-columns: 1fr; } .hero-art { display: none; } .l-sticker { top: -30px; } }
+
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <div class="pill-row rise"><span class="series">なんとなくで決めないデザイン</span><span class="tipno">TIPS D-09 / CTAボタン</span></div>
+      <h1 class="rise" style="--i:1">ボタン、目立たせたいなら<br>大きくする前に「周り」を見る</h1>
+      <p class="lead rise" style="--i:2">CTAはサイズだけでなく、<b>周囲の余白・色・競合する要素</b>を整理すると目立たせやすい。</p>
+      <div class="meta rise" style="--i:3"><span>難易度：初級</span><span>LPのCTA・フォーム・バナーに</span><span>ボタンのサイズは変えずに比べるデモつき</span></div>
+    </div>
+    <div class="hero-art rise" style="--i:2" aria-hidden="true"><div class="halo"><b>無料で試す</b></div></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">1</span><h2>まず、考え方：ボタンは「周りとの差」で目立つ</h2></div>
+    <p class="sec-sub">ボタンだけを大きくしたり派手にしても、周りに同じくらい強い要素が多いと<b>埋もれます</b>。目立つかどうかは、ボタン単体ではなく、周辺との視覚的な差で決まります。</p>
+    <div class="grid3 lev3">
+      <div class="card"><div class="kicker">切り口 A</div><div class="big">余白をつくる</div><p>ボタンの周りに空きをつくると、他の要素と切り離されて見えます。</p></div>
+      <div class="card"><div class="kicker">切り口 B</div><div class="big">競合を弱める</div><p>近くのバッジ・飾り・別のボタンの強さをおさえて、役割を一段下げます。</p></div>
+      <div class="card"><div class="kicker">切り口 C</div><div class="big">色を集中させる</div><p>アクセント色を、CTAだけに使います。他の要素は落ち着いた色に。</p></div>
+    </div>
+  </section>
+
+
+  <section class="sec rise" id="cmp">
+    <div class="sec-h"><span class="sec-n">2</span><h2>Before / After：ボタンは同じ、周りだけ変える</h2></div>
+    <p class="sec-sub">どちらも CTA は <b>同じサイズ</b>（PC幅では 200×52px）。下の数値は実際に測った値です。違うのは周りだけです。</p>
+    <div class="tools">
+      <span class="lab">見方を変える</span>
+      <label class="tgl"><input type="checkbox" id="t-blur"><span class="sw"></span><span>ぼかして見る（ざっと眺めたとき）</span></label>
+    </div>
+    <div class="ba">
+      <div class="pane">
+        <div class="pane-h"><span class="badge">BEFORE</span><h3>周りも強い・飾りが多い・余白が少ない</h3></div>
+        <div class="stage" data-wrap="b"><div class="lp">
+            <div class="l-row"><span class="l-badge b1">期間限定</span><span class="l-badge b2">送料無料</span><span class="l-badge b3">満足度No.1</span></div>
+            <div class="l-h">新生活応援セール開催中</div>
+            <div class="l-sub">はじめての方限定。まずは気軽にお試しください。</div>
+            <div class="l-btns"><span class="l-sticker" aria-hidden="true">30%<br>OFF</span><span class="l-cta" data-cta>無料で試してみる</span><span class="l-sec s1">カタログ請求</span><span class="l-sec s2">お問い合わせ</span></div>
+            <div class="l-note">※ 数量限定・先着順</div>
+          </div></div>
+        <div class="ms" data-ms><span>ボタンのサイズ <b data-size>—</b></span><span>いちばん近い要素まで <b data-near>—</b></span></div>
+        <p class="cap2">バッジ・ステッカー・別のボタンが同じくらい強く、CTAが埋もれます。</p>
+      </div>
+      <div class="pane after">
+        <div class="pane-h"><span class="badge">AFTER</span><h3>周りを整理した</h3></div>
+        <div class="stage k-space k-mute k-focus" data-wrap="a"><div class="lp">
+            <div class="l-row"><span class="l-badge b1">期間限定</span><span class="l-badge b2">送料無料</span><span class="l-badge b3">満足度No.1</span></div>
+            <div class="l-h">新生活応援セール開催中</div>
+            <div class="l-sub">はじめての方限定。まずは気軽にお試しください。</div>
+            <div class="l-btns"><span class="l-sticker" aria-hidden="true">30%<br>OFF</span><span class="l-cta" data-cta>無料で試してみる</span><span class="l-sec s1">カタログ請求</span><span class="l-sec s2">お問い合わせ</span></div>
+            <div class="l-note">※ 数量限定・先着順</div>
+          </div></div>
+        <div class="ms" data-ms><span>ボタンのサイズ <b data-size>—</b></span><span>いちばん近い要素まで <b data-near>—</b></span></div>
+        <p class="cap2">CTA周辺に余白、競合要素は弱く、アクセント色はCTAだけ。ボタンは大きくしていません。</p>
+      </div>
+    </div>
+    <p class="verdict" id="sameSize" aria-live="polite">サイズを測っています…</p>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">3</span><h2>自分で動かす：どの整理が、どれだけ効く？</h2></div>
+    <p class="sec-sub">3つの切り口を1つずつ足してみます。<b>ボタンのサイズは、どの状態でも変わりません。</b></p>
+    <div class="build">
+      <div class="tools" role="group" aria-label="周りの整理">
+        <span class="lab">周りを整理する</span>
+        <div class="lever"><label class="tgl"><input type="checkbox" data-k="k-space"><span class="sw"></span><span>A. 余白をつくる</span></label><small>ボタンの周りをあける</small></div>
+        <div class="lever"><label class="tgl"><input type="checkbox" data-k="k-mute"><span class="sw"></span><span>B. 競合を弱める</span></label><small>バッジ・別ボタン・ステッカーをおさえる</small></div>
+        <div class="lever"><label class="tgl"><input type="checkbox" data-k="k-focus"><span class="sw"></span><span>C. 色をCTAに集中</span></label><small>アクセント色はCTAだけに</small></div>
+        <div class="btnrow"><button type="button" class="btn" id="k-off">ぜんぶ OFF（Before）</button><button type="button" class="btn" id="k-on">ぜんぶ ON（After）</button></div>
+        <div class="readout" aria-hidden="true">
+          <div>ボタンのサイズ<b id="r-size">—</b></div>
+          <div>ボタンからいちばん近い要素まで<b id="r-near">—</b></div>
+          <div>彩度の高い色の数（画面全体）<b id="r-col">—</b></div>
+        </div>
+      </div>
+      <div>
+        <div class="stage" id="liveStage"><div class="lp">
+            <div class="l-row"><span class="l-badge b1">期間限定</span><span class="l-badge b2">送料無料</span><span class="l-badge b3">満足度No.1</span></div>
+            <div class="l-h">新生活応援セール開催中</div>
+            <div class="l-sub">はじめての方限定。まずは気軽にお試しください。</div>
+            <div class="l-btns"><span class="l-sticker" aria-hidden="true">30%<br>OFF</span><span class="l-cta" data-cta>無料で試してみる</span><span class="l-sec s1">カタログ請求</span><span class="l-sec s2">お問い合わせ</span></div>
+            <div class="l-note">※ 数量限定・先着順</div>
+          </div></div>
+        <p class="verdict" id="verdict" aria-live="polite"></p>
+      </div>
+    </div>
+    <noscript><p class="cap">JavaScriptが無効のため、このデモは動きません。上の Before / After が同じ内容の比較です。</p></noscript>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">4</span><h2>実務での使いどころ</h2></div>
+    <p class="sec-sub">「ボタンをもっと目立たせて」と言われたときの判断材料になります。</p>
+    <div class="grid3">
+      <div class="card"><div class="kicker">LP・フォーム</div><p>CTAの前後に空きをつくる。送信ボタンの隣に、同じ強さの「戻る」「キャンセル」を置かない。</p></div>
+      <div class="card"><div class="kicker">バナー</div><p>飾り（星・リボン）が多いほど、ボタンが埋もれます。ボタン以外の飾りは、一段おさえる。</p></div>
+      <div class="card"><div class="kicker">動画広告の締め画面</div><p>最後の画面では、アクセント色を行動を促す1か所に集める。余白と間でCTAを際立たせる。</p></div>
+    </div>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">5</span><h2>判断するときのポイント</h2></div>
+    <ol class="steps">
+      <li><h3>先に「周りの強さ」を見る</h3><p>CTAの近くにある、バッジ・飾り・別のボタン・強い色の見出しを洗い出します。ボタンを大きくするのは、その後です。</p></li>
+      <li><h3>3つの切り口を1つずつ試す</h3><p>余白 → 競合を弱める → 色の集中の順に、1つずつ試して効き方を確認します。</p></li>
+      <li><h3>ぼかして見て、ボタンの位置が分かるか確認する</h3><p>目を細めたとき、最初にボタンが目に入るか。入らなければ、周りに競合がいます。</p></li>
+    </ol>
+    <ul class="chk" style="margin-top:18px">
+      <li>CTAと同じくらい強い要素が、近くに残っていないか</li>
+      <li>CTAの周りに、他の要素と区切れる余白があるか</li>
+      <li>アクセント色が、CTA以外にも使われていないか</li>
+    </ul>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">6</span><h2>注意点</h2></div>
+    <div class="notes">
+      <div class="note warn"><h3>CTAだけを強くしすぎない</h3>CTAだけを強くしすぎると、ページ全体の雰囲気や情報の優先順位を壊すことがあります。サイズ・色だけでなく、余白や周囲とのコントラストも含めて判断します。</div>
+      <div class="note warn"><h3>「弱める」は「消す」ではない</h3>別のボタンや補足は、役割を下げるだけで、必要な情報は残します。リンクや注意書きまで消さないようにします。</div>
+    </div>
+  </section>
+
+  <section class="refs">
+    <h2>参考・出典</h2>
+    <ul><li><a href="https://www.nngroup.com/articles/visual-hierarchy-ux-definition/" target="_blank" rel="noopener">Nielsen Norman Group「Visual Hierarchy in UX: Definition」</a>（スプレッドシート記載の参考URL）</li></ul>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s), $$ = (s) => [...document.querySelectorAll(s)];
+  $('#t-blur').addEventListener('change', (e) => { document.body.classList.toggle('blurred', e.target.checked); });
+  const rectOf = (el) => el.getBoundingClientRect();
+  const gap = (a, b) => { const dx = Math.max(a.left - b.right, b.left - a.right, 0), dy = Math.max(a.top - b.bottom, b.top - a.bottom, 0); return Math.hypot(dx, dy); };
+  // CTAのサイズと、いちばん近い（表示されている）要素までの距離を実測
+  function measure(root) {
+    const cta = root.querySelector('[data-cta]'), c = rectOf(cta);
+    const others = $$X(root, '.l-badge, .l-h, .l-sub, .l-sec, .l-sticker, .l-note').filter((e) => e.offsetParent !== null || getComputedStyle(e).position === 'fixed');
+    const near = Math.min(...others.map((e) => gap(c, rectOf(e))));
+    return { w: Math.round(c.width), h: Math.round(c.height), near: Math.round(near) };
+  }
+  function $$X(root, sel) { return [...root.querySelectorAll(sel)].filter((e) => getComputedStyle(e).display !== 'none'); }
+  function fill(root, ms) {
+    const m = measure(root);
+    ms.querySelector('[data-size]').textContent = m.w + '×' + m.h + 'px';
+    ms.querySelector('[data-near]').textContent = m.near + 'px';
+    return m;
+  }
+  const bw = document.querySelector('[data-wrap=b]'), aw = document.querySelector('[data-wrap=a]');
+  const ms = $$('[data-ms]');
+  function static_() {
+    const b = fill(bw, ms[0]), a = fill(aw, ms[1]);
+    $('#sameSize').innerHTML = '<b>ボタンのサイズ：</b>Before ' + b.w + '×' + b.h + 'px ／ After ' + a.w + '×' + a.h + 'px → ' + (b.w === a.w && b.h === a.h ? '<b>同じです。</b>' : '違いがあります。') +
+      ' 一方、いちばん近い他の要素までの距離は <b>' + b.near + 'px → ' + a.near + 'px</b> に変わっています。';
+  }
+  // ---- 1つずつ足す ----
+  const live = $('#liveStage'), boxes = $$('[data-k]');
+  const sat = (css) => { const m = css.match(/[\d.]+/g).map(Number); const [r, g, b] = m.slice(0, 3).map((x) => x / 255); if (m[3] === 0) return 0; return Math.max(r, g, b) - Math.min(r, g, b); }; // 彩度は「色の濃さ（最大−最小）」で見る
+  function colors() {
+    const set = new Set();
+    $$X(live, '.l-badge, .l-h, .l-sec, .l-cta, .l-sticker, .l-note').forEach((e) => {
+      const cs = getComputedStyle(e);
+      [cs.backgroundColor, cs.color].forEach((c) => { if (c.startsWith('rgba(') && /,\s*0\)$/.test(c)) return; if (sat(c) > 0.25) set.add(c); });
+    });
+    return set.size;
+  }
+  const NAME = { 'k-space': '余白', 'k-mute': '競合を弱める', 'k-focus': '色の集中' };
+  function update() {
+    boxes.forEach((b) => live.classList.toggle(b.dataset.k, b.checked));
+    const on = boxes.filter((b) => b.checked).map((b) => b.dataset.k), off = boxes.filter((b) => !b.checked).map((b) => NAME[b.dataset.k]);
+    $('#verdict').innerHTML = on.length === 0 ? '<b>周りが賑やかで、CTAが埋もれています。</b>ボタンのサイズを上げる前に、周りを見直します。'
+      : on.length === 3 ? '<b>ボタンのサイズはそのままで、周りの整理だけでCTAが際立ちました。</b>「大きくする」前に試す価値があります。'
+      : '<b>まだ「' + off.join('」「') + '」が残っています。</b>' + (on.length === 1 ? '1つだけでも差は出ますが、' : '') + '周りの競合要素が残るほど、CTAは埋もれやすくなります。';
+    // 計測は描画後に（transition なしなので即時）
+    const m = measure(live);
+    $('#r-size').textContent = m.w + '×' + m.h + 'px'; $('#r-near').textContent = m.near + 'px'; $('#r-col').textContent = colors() + ' 色';
+  }
+  boxes.forEach((b) => b.addEventListener('change', update));
+  $('#k-off').addEventListener('click', () => { boxes.forEach((b) => (b.checked = false)); update(); });
+  $('#k-on').addEventListener('click', () => { boxes.forEach((b) => (b.checked = true)); update(); });
+  const run = () => { static_(); update(); };
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(run); else run();
+  addEventListener('resize', run);
+})();
+</script>
+</body>
+</html>

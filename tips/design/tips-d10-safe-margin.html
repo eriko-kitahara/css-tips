@@ -193,6 +193,27 @@ p + p { margin-top: .8em; }
   .tools { gap: 2px 14px; }
 }
 
+/* ===== 操作パネルの追従（デモのセクション内だけ。親の .sec を出たら追従終了） ===== */
+.tools.stick { position: sticky; top: 8px; z-index: 30; box-shadow: 0 10px 20px -14px rgba(27,31,42,.45); }
+.tools .tgt { font-size: 12.5px; font-weight: 700; color: var(--sub); }
+@media (max-width: 720px) {
+  /* スマホ幅: 追従パネルは小さくまとめる（ラベル・補足は省く。操作対象は直下のデモ） */
+  .tools.stick { top: 6px; padding: 4px 10px; gap: 0 12px; }
+  .tools.stick .lab, .tools.stick .tgt { display: none; }
+  .tools.stick .tgl, .tools.stick .rng { min-height: 40px; }
+  .tools.stick .seg span { padding: 7px 8px; min-height: 36px; line-height: 22px; }
+  .tools.stick .rng input[type=range] { height: 24px; }
+  .tools.stick .rng { flex-wrap: nowrap; gap: 0 8px; font-size: 12.5px; min-height: 36px; flex: 1 1 100%; }
+  .tools.stick .rng input[type=range] { flex: 1 1 60px; width: auto; min-width: 60px; }
+  .tools.stick .rng output { min-width: 3em; }
+  .tools.stick .tgl { min-height: 36px; font-size: 12.5px; }
+  .tools.stick .seg { flex: 1 1 100%; }
+  /* 効果対象の隣に置く操作パネル（2列に詰めて縦を短く） */
+  .build .tools { grid-template-columns: 1fr 1fr; column-gap: 10px; }
+  .build .tools > .lab, .build .tools > .btnrow, .build .tools > .accn, .build .tools > .readout, .build .tools > .lever { grid-column: 1 / -1; }
+  .build .lever small { display: none; }
+}
+
 /* ===== このページ専用 ===== */
 
   .hero-art { width: 200px; }
@@ -270,15 +291,16 @@ p + p { margin-top: .8em; }
     <div class="sec-h"><span class="sec-n">2</span><h2>Before / After：端ギリギリと、安全領域の内側</h2></div>
     <p class="sec-sub">同じバナーを、<b>少しトリミングした状態</b>や<b>媒体UIが重なった状態</b>に切り替えて、見切れる要素を確認します。</p>
 
-    <div class="tools" role="group" aria-label="表示の切り替え">
+    <div class="tools stick" role="group" aria-label="表示の切り替え">
       <span class="lab">表示</span>
       <span class="seg" role="radiogroup" aria-label="表示モード">
-        <label><input type="radio" name="mode" value="normal" checked><span>通常表示</span></label>
-        <label><input type="radio" name="mode" value="crop"><span>少しトリミング</span></label>
-        <label><input type="radio" name="mode" value="ui"><span>媒体UIが重なる</span></label>
+        <label><input type="radio" name="mode" value="normal" checked><span>通常</span></label>
+        <label><input type="radio" name="mode" value="crop"><span>トリミング</span></label>
+        <label><input type="radio" name="mode" value="ui"><span>UIの重なり</span></label>
       </span>
       <label class="rng" for="crop" id="cropLab" aria-disabled="true">トリミング量（1辺）<input type="range" id="crop" min="0" max="12" value="7" disabled><output id="o-crop" for="crop">7%</output></label>
       <label class="tgl"><input type="checkbox" id="t-guide"><span class="sw"></span><span>安全領域のガイドを表示</span></label>
+      <span class="tgt">↓ 下の Before / After の両方に効きます</span>
     </div>
 
     <div class="ba" id="ba">

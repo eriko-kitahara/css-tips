@@ -227,7 +227,7 @@ p + p { margin-top: .8em; }
   .how4 .num { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; background: var(--grad); color: #fff; font-size: 13px; font-weight: 800; margin-bottom: 6px; }
 
   /* ---- 写真（CSSだけで描いた疑似写真。3種類で「写真が変わる」状況を再現） ---- */
-  .grid5 { --a: .4; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .grid5 { --a: .5; --s: .6; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
   .tile { min-width: 0; }
   .tile.base { grid-column: 1 / -1; }
   .tile.base .ph { aspect-ratio: 32 / 10; }
@@ -251,12 +251,14 @@ p + p { margin-top: .8em; }
   /* 対策1: 暗いオーバーレイ（下から濃く、文字の範囲は --a のまま） */
   .m1 .ov { background: linear-gradient(to top, rgba(0,0,0,var(--a)) 0%, rgba(0,0,0,var(--a)) 46%, rgba(0,0,0,calc(var(--a) * .15)) 100%); }
   /* 対策2: 文字の後ろだけぼかす（縁はなじませる） */
-  .m2 .tx::before { content: ""; position: absolute; z-index: -1; inset: -16px -22px; -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); background: rgba(0,0,0,.2); -webkit-mask-image: radial-gradient(ellipse at center, #000 52%, transparent 100%); mask-image: radial-gradient(ellipse at center, #000 52%, transparent 100%); }
+  /* 方法2: 黒は載せず、ガウスぼかし（backdrop-filter の blur 値）だけを --s に連動 */
+  .m2 .tx::before { content: ""; position: absolute; z-index: -1; inset: -4cqw -6cqw; -webkit-backdrop-filter: blur(calc(var(--s) * 16px)); backdrop-filter: blur(calc(var(--s) * 16px)); -webkit-mask-image: radial-gradient(ellipse at center, #000 60%, transparent 100%); mask-image: radial-gradient(ellipse at center, #000 60%, transparent 100%); }
   /* 対策3: 半透明の箱 */
   .m3 .tx { background: rgba(0,0,0,var(--a)); padding: 4.2cqw 4.6cqw; border-radius: 10px; left: 5%; right: auto; bottom: 7%; }
   .tile.base .m3 .tx { padding: 1.6cqw 2cqw; }
   /* 対策4: 影・アウトライン */
-  .m4 .tx { text-shadow: 0 1px 2px rgba(0,0,0,.7), 0 0 9px rgba(0,0,0,.55); -webkit-text-stroke: .5px rgba(0,0,0,.55); paint-order: stroke fill; }
+  /* 方法4: 影のぼかし半径・重ねる層の数（広がり）・黒の濃さ・縁取りの太さ、すべてを --s に連動 */
+  .m4 .tx { text-shadow: 0 1px calc(1px + var(--s) * 3px) rgba(0,0,0,calc(.25 + var(--s) * .7)), 0 0 calc(2px + var(--s) * 12px) rgba(0,0,0,calc(.2 + var(--s) * .75)), 0 0 calc(var(--s) * 28px) rgba(0,0,0,calc(var(--s) * .95)), 0 0 calc(var(--s) * 12px) rgba(0,0,0,calc(var(--s) * .9)), 0 0 calc(var(--s) * 4px) rgba(0,0,0,calc(var(--s) * .9)); -webkit-text-stroke: calc(.3px + var(--s) * 1.8px) rgba(0,0,0,calc(.3 + var(--s) * .6)); paint-order: stroke fill; }
   .est { margin-top: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 12.5px; color: var(--sub); }
   .est b { font-family: var(--mono); color: var(--ink); }
   .est .tag { font-size: 11px; }
@@ -305,7 +307,7 @@ p + p { margin-top: .8em; }
 
   <section class="sec rise" id="demo">
     <div class="sec-h"><span class="sec-n">2</span><h2>同じ写真・同じ文字で、4つの方法を比べる</h2></div>
-    <p class="sec-sub">写真を差し替えると、<b>効く方法が変わる</b>のが分かります。スライダーで調整できるのは、方法1（オーバーレイ）と方法3（箱）の濃さです。方法2・4は固定の見え方です。</p>
+    <p class="sec-sub">写真を差し替えると、<b>効く方法が変わる</b>のが分かります。「効果の強さ」を動かすと、各方法の見出し横の項目（オーバーレイ濃度・ぼかし強度・背景の濃度・影・アウトライン強度）が変わります。</p>
 
     <div class="tools stick" role="group" aria-label="比較の操作">
       <span class="lab">写真を差し替える</span>
@@ -314,7 +316,7 @@ p + p { margin-top: .8em; }
         <label><input type="radio" name="scene" value="s-busy"><span>細かい模様</span></label>
         <label><input type="radio" name="scene" value="s-dark"><span>暗めの写真</span></label>
       </span>
-      <label class="rng" for="alpha">オーバーレイ／背景の濃さ<input type="range" id="alpha" min="0" max="85" value="60"><output id="o-alpha" for="alpha">60%</output></label>
+      <label class="rng" for="alpha">効果の強さ<input type="range" id="alpha" min="0" max="100" value="60"><output id="o-alpha" for="alpha">60%</output></label>
     </div>
 
     <div class="grid5 s-sky" id="grid">
@@ -324,22 +326,22 @@ p + p { margin-top: .8em; }
         <div class="est" data-est="0"></div>
       </div>
       <div class="tile">
-        <h3><span class="badge" style="background:var(--ac);color:#fff;border-color:var(--ac)">方法1</span>暗いオーバーレイ／グラデーション<span class="tune">濃さを調整できる</span></h3>
+        <h3><span class="badge" style="background:var(--ac);color:#fff;border-color:var(--ac)">方法1</span>暗いオーバーレイ／グラデーション<span class="tune">オーバーレイ濃度</span></h3>
         <div class="ph m1"><div class="bg"></div><div class="ov"></div><div class="tx"><b>夏の週末、海へ。</b><span>7/20〜 先着100名に特典</span></div></div>
         <div class="est" data-est="1"></div>
       </div>
       <div class="tile">
-        <h3><span class="badge" style="background:var(--ac);color:#fff;border-color:var(--ac)">方法2</span>文字の後ろをぼかす</h3>
+        <h3><span class="badge" style="background:var(--ac);color:#fff;border-color:var(--ac)">方法2</span>文字の後ろをぼかす<span class="tune">ぼかし強度</span></h3>
         <div class="ph m2"><div class="bg"></div><div class="tx"><b>夏の週末、海へ。</b><span>7/20〜 先着100名に特典</span></div></div>
         <div class="est" data-est="2"></div>
       </div>
       <div class="tile">
-        <h3><span class="badge" style="background:var(--ac);color:#fff;border-color:var(--ac)">方法3</span>半透明の箱を敷く<span class="tune">濃さを調整できる</span></h3>
+        <h3><span class="badge" style="background:var(--ac);color:#fff;border-color:var(--ac)">方法3</span>半透明の箱を敷く<span class="tune">背景の濃度</span></h3>
         <div class="ph m3"><div class="bg"></div><div class="tx"><b>夏の週末、海へ。</b><span>7/20〜 先着100名に特典</span></div></div>
         <div class="est" data-est="3"></div>
       </div>
       <div class="tile">
-        <h3><span class="badge" style="background:var(--ac);color:#fff;border-color:var(--ac)">方法4</span>影・アウトライン</h3>
+        <h3><span class="badge" style="background:var(--ac);color:#fff;border-color:var(--ac)">方法4</span>影・アウトライン<span class="tune">影・アウトライン強度</span></h3>
         <div class="ph m4"><div class="bg"></div><div class="tx"><b>夏の週末、海へ。</b><span>7/20〜 先着100名に特典</span></div></div>
         <div class="est" data-est="4"></div>
       </div>
@@ -419,13 +421,14 @@ p + p { margin-top: .8em; }
   const ratioWhite = (h, a) => { const c = rgb(h).map((x) => x * (1 - a)); return 1.05 / (lum(...c) + 0.05); };
   function render() {
     const scene = document.querySelector('input[name=scene]:checked').value;
-    const a = A.value / 100;
-    grid.className = 'grid5 ' + scene; grid.style.setProperty('--a', a);
+    const a = A.value / 100 * 0.85;
+    grid.className = 'grid5 ' + scene; grid.style.setProperty('--a', a); grid.style.setProperty('--s', A.value / 100);
     $('#o-alpha').textContent = A.value + '%';
     $('#sceneNote').innerHTML = NOTE[scene];
     document.querySelectorAll('[data-est]').forEach((el) => {
       const k = el.dataset.est;
-      if (k === '2' || k === '4') { el.innerHTML = '<span>濃さスライダーの対象外（固定の見え方）。コントラスト比は数値化しにくいため、目視で確認</span>'; return; }
+      if (k === '2') { el.innerHTML = '<span>ぼかし半径</span><b>' + (A.value / 100 * 16).toFixed(1) + 'px</b><span>（背景の黒は載せていません。コントラスト比は数値化しにくいため目視で確認）</span>'; return; }
+      if (k === '4') { const sv = A.value / 100; el.innerHTML = '<span>影のぼかし半径</span><b>' + (2 + sv * 12).toFixed(1) + 'px</b><span>黒の濃さ</span><b>' + Math.round((0.2 + sv * 0.75) * 100) + '%</b><span>（目視で確認）</span>'; return; }
       const r = ratioWhite(BRIGHT[scene], k === '0' ? 0 : a);
       const ok = r >= 4.5;
       el.innerHTML = '<span>文字の背後でいちばん明るい場所の目安</span><b>' + (Math.floor(r * 100) / 100).toFixed(2) + ':1</b><span class="tag ' + (ok ? 'ok' : 'ng') + '">' + (ok ? '✓ 4.5:1 以上' : '✕ 4.5:1 未満') + '</span>';

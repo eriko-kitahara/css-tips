@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ja" data-series="video">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ワイド・ミディアム・クローズアップ、何が違う？｜動画制作でよく聞くこれ何？</title>
+<style>
+/* ===== シリーズTips 共通ベース（既存CSS Tipsの作法を踏襲：トークン / .rise / reduced-motion / 640px以下は1カラム） ===== */
+:root {
+  --ink: #1b1f2a;
+  --sub: #566074;
+  --line: #e5e8ee;
+  --bg: #f4f6f9;
+  --ease: cubic-bezier(.22, .7, .25, 1);
+  --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", "Meiryo", sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Roboto Mono", Menlo, monospace;
+  --ok: #17683a; --ok-soft: #e8f5ec;
+  --ng: #b42318; --ng-soft: #fdecea;
+  color-scheme: light;
+}
+/* ----- シリーズ別カラー（c1→c2 のグラデーション。--ac は白地の文字に使える濃い色） ----- */
+[data-series="css"]    { --c1:#3b9cf6; --c2:#19c3d6; --ac:#1a5fa6; --ac-soft:#e8f3fd; --ac-line:#bcdaf3; --page:#f1f7fc; --hero:linear-gradient(135deg,#dff0ff,#d9f7fa); }
+[data-series="design"] { --c1:#ff5fa2; --c2:#8b5cf6; --ac:#9d2a72; --ac-soft:#fbeef6; --ac-line:#efc9e2; --page:#fbf6fa; --hero:linear-gradient(135deg,#ffe4f0,#ece5ff); }
+[data-series="ai"]     { --c1:#b6e04a; --c2:#22a861; --ac:#17683a; --ac-soft:#eef8e4; --ac-line:#cde7b2; --page:#f5f9ef; --hero:linear-gradient(135deg,#eefad0,#d8f3e2); }
+[data-series="video"]  { --c1:#ff9f43; --c2:#ef3b4b; --ac:#b4321f; --ac-soft:#fff1ea; --ac-line:#f6cdb8; --page:#fcf7f3; --hero:linear-gradient(135deg,#ffeedb,#ffe1e3); }
+:root { --grad: linear-gradient(90deg, var(--c1), var(--c2)); }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--page); color: var(--ink); font-family: var(--font); line-height: 1.75; -webkit-font-smoothing: antialiased; }
+a { color: var(--ac); text-underline-offset: 3px; }
+code, pre, kbd { font-family: var(--mono); }
+img, svg { max-width: 100%; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+/* ===== Motion（opacity:0 は keyframes 側のみ＝動きを切っても内容は必ず見える） ===== */
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+@keyframes pop  { from { opacity: 0; transform: scale(.94); } }
+.rise { animation: rise .5s var(--ease) calc(var(--i, 0) * 80ms) backwards; }
+/* 「動きを減らす」設定: 装飾の動きだけを止める。
+   教材として見せる動き（.teach の中身）は止めない＝動きそのものが学習内容のため。
+   教材側は、自動再生しない・ボタンで再生・コマ送りできる、という代替手段を別に用意する。 */
+@media (prefers-reduced-motion: reduce) {
+  *:not(.teach):not(.teach *), *:not(.teach):not(.teach *)::before, *:not(.teach):not(.teach *)::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* ===== Hero ===== */
+.hero { position: relative; overflow: hidden; background: var(--hero); border-bottom: 1px solid var(--ac-line); padding: 0 0 44px; }
+.hero::before { content: ""; display: block; height: 6px; background: var(--grad); }
+.hero::after { content: ""; position: absolute; right: -90px; top: -70px; width: 340px; height: 340px; border-radius: 50%; background: var(--grad); opacity: .16; pointer-events: none; }
+.hero .wrap { position: relative; z-index: 1; padding-top: 28px; display: grid; grid-template-columns: 1fr auto; gap: 24px 40px; align-items: center; }
+.pill-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.series { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; letter-spacing: .04em; color: var(--ac); background: #fff; border: 1px solid var(--ac-line); border-radius: 999px; padding: 4px 14px 4px 10px; }
+.series::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--grad); }
+.tipno { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--sub); }
+h1 { font-size: clamp(25px, 4.4vw, 38px); line-height: 1.4; letter-spacing: .01em; margin: 16px 0 14px; font-weight: 800; }
+.lead { font-size: clamp(15px, 2vw, 17px); color: #38415a; max-width: 38em; }
+.lead b { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--c1) 35%, transparent) 62%); font-weight: 700; }
+.hero-art { width: 200px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.meta span { font-size: 12px; color: var(--sub); background: rgba(255,255,255,.75); border: 1px solid var(--ac-line); border-radius: 999px; padding: 1px 12px; }
+
+/* ===== Section ===== */
+main { padding: 36px 0 24px; }
+.sec { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 30px 32px 32px; margin-bottom: 22px; box-shadow: 0 1px 2px rgba(27,31,42,.04), 0 18px 40px -26px rgba(27,31,42,.22); }
+.sec-h { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.sec-n { flex: none; width: 30px; height: 30px; border-radius: 10px; background: var(--grad); color: #1b1f2a; display: grid; place-items: center; font-size: 14px; font-weight: 800; }
+[data-series="design"] .sec-n, [data-series="video"] .sec-n { color: #fff; }
+h2 { font-size: clamp(19px, 2.8vw, 23px); line-height: 1.45; font-weight: 800; }
+.sec-sub { color: var(--sub); font-size: 14.5px; margin: 0 0 20px 42px; }
+h3 { font-size: 16px; line-height: 1.5; }
+p + p { margin-top: .8em; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.card { background: var(--ac-soft); border: 1px solid var(--ac-line); border-radius: 16px; padding: 18px 20px; transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
+.card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -16px rgba(27,31,42,.35); }
+.card .kicker { font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--ac); }
+.card .big { font-size: 28px; font-weight: 800; line-height: 1.3; margin: 4px 0 4px; }
+.card p { font-size: 14px; color: #38415a; }
+
+/* ===== Before / After ===== */
+.ba { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; position: relative; }
+.pane { min-width: 0; border: 1px solid var(--line); border-radius: 16px; padding: 18px; background: #fff; }
+.pane.after { border-color: var(--ac-line); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c2) 10%, transparent); }
+.pane-h { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.badge { flex: none; font-size: 11px; font-weight: 800; letter-spacing: .08em; border-radius: 999px; padding: 1px 11px; color: var(--sub); background: var(--bg); border: 1px solid var(--line); }
+.after .badge { color: #fff; background: var(--ac); border-color: var(--ac); }
+.pane-h h3 { font-size: 15px; }
+.cap { font-size: 13px; color: var(--sub); margin-top: 10px; }
+
+/* ===== Callout ===== */
+.note { border-radius: 14px; padding: 14px 18px 15px; font-size: 14.5px; background: var(--ac-soft); border: 1px solid var(--ac-line); }
+.note h3 { display: flex; align-items: center; gap: 8px; font-size: 13px; letter-spacing: .05em; color: var(--ac); margin-bottom: 3px; }
+.note h3::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.note.warn { background: #fff7e8; border-color: #efd7a6; }
+.note.warn h3 { color: #8a5300; }
+.notes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+/* ===== Code ===== */
+.code { margin: 14px 0 0; border-radius: 14px; overflow: hidden; border: 1px solid var(--ac-line); background: #f8faf8; }
+.code figcaption { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; font-weight: 800; letter-spacing: .06em; color: var(--ac); padding: 8px 14px; background: var(--ac-soft); border-bottom: 1px solid var(--ac-line); }
+.code pre { font-size: 13.5px; line-height: 1.75; padding: 14px 16px; overflow-x: auto; color: #23304a; tab-size: 2; }
+.code.dark { background: #14201a; border-color: #243a2d; }
+.code.dark figcaption { background: #1b2c22; color: #b9e78a; border-color: #243a2d; }
+.code.dark pre { color: #e4f1e0; }
+.btn { appearance: none; border: 1px solid var(--ac-line); background: #fff; color: var(--ac); font: inherit; font-size: 12px; font-weight: 800; letter-spacing: .04em; border-radius: 999px; padding: 3px 14px; cursor: pointer; transition: background .2s var(--ease), transform .2s var(--ease); }
+.btn:hover { background: var(--ac-soft); }
+.btn:active { transform: scale(.97); }
+.btn:focus-visible, input:focus-visible, summary:focus-visible, button:focus-visible { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 2px; }
+.btn.solid { background: var(--ac); border-color: var(--ac); color: #fff; padding: 6px 18px; font-size: 13.5px; }
+.btn.solid:hover { background: color-mix(in srgb, var(--ac) 88%, #000); }
+.tk-add { color: #0e6b32; background: #e3f6e8; } .tk-del { color: #a4281c; background: #fdeceb; }
+
+/* ===== Steps ===== */
+.steps { list-style: none; counter-reset: s; display: grid; gap: 12px; }
+.steps > li { counter-increment: s; position: relative; padding: 14px 16px 14px 58px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.steps > li::before { content: counter(s); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--grad); color: #1b1f2a; font-weight: 800; font-size: 14px; }
+[data-series="design"] .steps > li::before, [data-series="video"] .steps > li::before { color: #fff; }
+.steps h3 { font-size: 15.5px; }
+.steps p { font-size: 14px; color: #38415a; margin-top: 2px; }
+
+/* ===== Check list / refs ===== */
+.chk { list-style: none; display: grid; gap: 8px; }
+.chk li { position: relative; padding-left: 30px; font-size: 14.5px; }
+.chk li::before { content: "✓"; position: absolute; left: 0; top: 2px; width: 20px; height: 20px; border-radius: 6px; background: var(--ac); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 800; line-height: 1; }
+.refs { font-size: 13px; color: var(--sub); padding: 6px 4px 54px; }
+.refs h2 { font-size: 13px; letter-spacing: .08em; color: var(--sub); margin-bottom: 6px; }
+.refs li { margin-left: 1.2em; word-break: break-all; }
+.refs .by { margin-top: 10px; }
+.tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; padding: 0 9px; border-radius: 999px; }
+.tag.ok { color: var(--ok); background: var(--ok-soft); }
+.tag.ng { color: var(--ng); background: var(--ng-soft); }
+.rows .tag, .judge .tag { font-size: 0; }
+.rows .tag::before, .judge .tag::before { font-size: 11px; }
+.rows .tag.ok::before, .judge .tag.ok::before { content: "✓ OK"; }
+.rows .tag.ng::before, .judge .tag.ng::before { content: "✕ 不足"; }
+
+@media (max-width: 720px) {
+  .wrap { padding: 0 14px; }
+  .hero .wrap { grid-template-columns: 1fr; }
+  .hero-art { display: none; }
+  .sec { padding: 22px 16px 24px; border-radius: 16px; }
+  .sec-sub { margin-left: 0; }
+  .grid2, .grid3, .ba, .notes { grid-template-columns: 1fr; }
+}
+
+/* ===== 操作部品（design シリーズの追加ページ用。meta の "css":["parts.css"] で読み込む） ===== */
+.tools { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; margin: 0 0 16px; padding: 8px 14px; background: var(--ac-soft); border: 1px solid var(--ac-line); border-radius: 14px; }
+.tools .lab { font-size: 12.5px; font-weight: 800; color: var(--ac); letter-spacing: .04em; }
+.tools > * { min-width: 0; }
+
+/* トグルスイッチ（実体は checkbox。キーボードはスペースで切り替え） */
+.tgl { position: relative; display: inline-flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 700; cursor: pointer; min-height: 44px; }
+.tgl input { position: absolute; opacity: 0; width: 100%; height: 100%; left: 0; top: 0; margin: 0; cursor: pointer; }
+.tgl .sw { flex: none; width: 42px; height: 24px; border-radius: 999px; background: #b4bccb; position: relative; transition: background .2s var(--ease); }
+.tgl .sw::after { content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.35); transition: transform .2s var(--ease); }
+.tgl input:checked + .sw { background: var(--ac); }
+.tgl input:checked + .sw::after { transform: translateX(18px); }
+.tgl input:focus-visible + .sw { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 2px; }
+
+/* 切り替えボタン（実体は radio） */
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; border: 1px solid var(--ac-line); border-radius: 24px; background: #fff; padding: 3px; }
+.seg label { position: relative; cursor: pointer; }
+.seg input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.seg span { display: block; padding: 10px 15px; min-height: 42px; border-radius: 999px; font-size: 13px; font-weight: 800; line-height: 22px; color: var(--ac); }
+.seg input:checked + span { background: var(--ac); color: #fff; }
+.seg input:focus-visible + span { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 1px; }
+
+/* スライダー */
+.rng { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; font-size: 13.5px; font-weight: 700; min-height: 44px; }
+.rng input[type=range] { width: min(240px, 100%); accent-color: var(--ac); height: 28px; }
+.rng output { font-family: var(--mono); font-weight: 800; color: var(--ac); min-width: 4.2em; }
+
+/* 結果の読み上げ・まとめ欄 */
+.verdict { margin-top: 12px; padding: 12px 16px; border-radius: 12px; font-size: 14px; background: #fff; border: 1px solid var(--ac-line); border-left: 5px solid var(--c2); }
+.verdict b { color: var(--ac); }
+
+/* 選び方の表（カード型） */
+.pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pick .card .q { font-size: 14.5px; font-weight: 800; line-height: 1.5; margin: 2px 0 6px; }
+.pick .card p { font-size: 13.5px; }
+.pick .card .go { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 800; color: #fff; background: var(--ac); border-radius: 999px; padding: 1px 11px; }
+.fig { margin: 0; }
+.fig figcaption { font-size: 12.5px; color: var(--sub); margin-top: 8px; }
+.judge2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ctr-note { font-size: 12.5px; color: var(--sub); }
+
+@media (max-width: 720px) {
+  .seg { display: flex; width: 100%; }
+  .seg label { flex: 1 1 auto; }
+  .seg span { text-align: center; padding: 10px 10px; border-radius: 18px; }
+  .pick, .judge2 { grid-template-columns: 1fr; }
+  .tools { gap: 2px 14px; }
+}
+
+/* ===== 操作パネルの追従（デモのセクション内だけ。親の .sec を出たら追従終了） ===== */
+.tools.stick { position: sticky; top: 8px; z-index: 30; box-shadow: 0 10px 20px -14px rgba(27,31,42,.45); }
+.tools .tgt { font-size: 12.5px; font-weight: 700; color: var(--sub); }
+@media (max-width: 720px) {
+  /* スマホ幅: 追従パネルは小さくまとめる（ラベル・補足は省く。操作対象は直下のデモ） */
+  .tools.stick { top: 6px; padding: 4px 10px; gap: 0 12px; }
+  .tools.stick .lab, .tools.stick .tgt { display: none; }
+  .tools.stick .tgl, .tools.stick .rng { min-height: 40px; }
+  .tools.stick .seg span { padding: 7px 8px; min-height: 36px; line-height: 22px; }
+  .tools.stick .rng input[type=range] { height: 24px; }
+  .tools.stick .rng { flex-wrap: nowrap; gap: 0 8px; font-size: 12.5px; min-height: 36px; flex: 1 1 100%; }
+  .tools.stick .rng input[type=range] { flex: 1 1 60px; width: auto; min-width: 60px; }
+  .tools.stick .rng output { min-width: 3em; }
+  .tools.stick .tgl { min-height: 36px; font-size: 12.5px; }
+  .tools.stick .seg { flex: 1 1 100%; }
+  /* 効果対象の隣に置く操作パネル（2列に詰めて縦を短く） */
+  .build .tools { grid-template-columns: 1fr 1fr; column-gap: 10px; }
+  .build .tools > .lab, .build .tools > .btnrow, .build .tools > .accn, .build .tools > .readout, .build .tools > .lever { grid-column: 1 / -1; }
+  .build .lever small { display: none; }
+}
+
+/* スマホ幅だけ追従する操作パネル（デモが縦に長くなる幅で、操作と結果を同時に見られるように。親の .sec を出たら追従終了） */
+@media (max-width: 720px) {
+  .tools.stick-sm { position: sticky; top: 6px; z-index: 30; box-shadow: 0 10px 20px -14px rgba(27,31,42,.45); padding: 4px 10px; gap: 0 12px; }
+  .tools.stick-sm .lab, .tools.stick-sm .tgt { display: none; }
+  .tools.stick-sm .tgl { min-height: 36px; font-size: 12.5px; }
+  .tools.stick-sm .seg { flex: 1 1 100%; }
+  .tools.stick-sm .seg span { padding: 7px 8px; min-height: 36px; line-height: 22px; }
+  .tools.stick-sm .rng { flex: 1 1 100%; flex-wrap: nowrap; gap: 0 8px; font-size: 12.5px; min-height: 36px; }
+  .tools.stick-sm .rng input[type=range] { flex: 1 1 60px; width: auto; min-width: 60px; height: 24px; }
+  .tools.stick-sm .btn { min-height: 36px; min-width: 0; padding: 4px 10px; font-size: 12px; }
+  .tools.stick-sm .scrub { flex: 1 1 100%; }
+}
+
+/* ===== 動画Tips（video シリーズ）共通部品。meta の "css":["parts.css","vparts.css"] と "js":["vparts.js"] で読み込む ===== */
+.flow { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin-top: 14px; counter-reset: f; }
+.flow li { counter-increment: f; font-size: 12px; font-weight: 700; padding: 2px 11px 2px 9px; border-radius: 999px; background: rgba(255,255,255,.75); border: 1px solid var(--ac-line); color: var(--sub); }
+.flow li::before { content: counter(f) " "; font-weight: 800; color: var(--ac); }
+.flow li.now { background: var(--grad); color: #fff; border-color: transparent; }
+.flow li.now::before { color: #fff; }
+
+.rm-note:not([hidden]) { margin: 0 0 12px; padding: 8px 14px; font-size: 13px; line-height: 1.6; color: #8a5300; background: #fff7e8; border: 1px solid #efd7a6; border-radius: 10px; }
+
+/* 映像の枠（ファインダー風） */
+.vframe { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 14px; background: #1b1b22; border: 3px solid #1b1b22; box-shadow: 0 16px 30px -18px rgba(27,31,42,.6); isolation: isolate; container-type: inline-size; }
+.vframe > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hud { position: absolute; z-index: 5; inset: 0; pointer-events: none; color: #fff; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-shadow: 0 1px 3px rgba(0,0,0,.65); }
+.hud span { position: absolute; }
+.hud .tl { left: 12px; top: 10px; } .hud .tr { right: 12px; top: 10px; } .hud .bl { left: 12px; bottom: 10px; } .hud .br { right: 12px; bottom: 10px; }
+.hud .rec::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ff3b3b; margin-right: 6px; vertical-align: 0; }
+
+/* 再生・スクラブ操作 */
+.vctl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 12px; }
+.vctl .btn.solid { min-height: 40px; min-width: 96px; }
+.scrub { display: flex; align-items: center; gap: 10px; flex: 1 1 220px; min-width: 0; font-size: 12.5px; font-weight: 700; }
+.scrub input[type=range] { flex: 1; min-width: 0; accent-color: var(--ac); height: 28px; }
+.scrub output { font-family: var(--mono); min-width: 4.4em; text-align: right; color: var(--ac); }
+
+.vcap { font-size: 13px; color: var(--sub); margin-top: 8px; }
+.vbig { font-size: 16px; font-weight: 800; line-height: 1.5; margin-top: 12px; }
+.vbig small { display: block; font-size: 13px; font-weight: 600; color: var(--sub); }
+
+/* 状態チップ（画面に残るもの、カメラ位置など） */
+.chips2 { display: grid; gap: 6px; margin-top: 10px; list-style: none; }
+.chips2 li { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; font-size: 13px; padding: 5px 10px; border-radius: 10px; background: #fff; border: 1px solid var(--line); }
+.chips2 .st { font-size: 11.5px; font-weight: 800; border-radius: 999px; padding: 0 10px; white-space: nowrap; }
+.chips2 .st.on { color: var(--ok); background: var(--ok-soft); }
+.chips2 .st.mid { color: #8a5300; background: #fff1d6; }
+.chips2 .st.off { color: #6b7080; background: #eceef3; }
+
+.vgrid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.vgrid > * { min-width: 0; }
+@media (max-width: 720px) { .vgrid { grid-template-columns: 1fr; } }
+
+/* ===== 教材デモ共通（.teach = 学習用の動き。装飾の動きとは別扱いで、reduced-motion でも止めない） ===== */
+.demo-tag { position: absolute; z-index: 6; left: 10px; bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .04em; color: #fff; background: rgba(27,27,34,.72); border-radius: 999px; padding: 0 10px; pointer-events: none; }
+.demo-note { font-size: 12.5px; color: var(--sub); margin-top: 10px; padding: 8px 12px; border: 1px dashed var(--ac-line); border-radius: 10px; background: #fff; }
+.demo-note b { color: var(--ac); }
+.vctl .btn:not(.solid), .tools .btn:not(.solid) { min-height: 40px; padding: 4px 14px; }
+.se2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.se2 figure { margin: 0; }
+.se2 svg { width: 100%; height: auto; display: block; border-radius: 8px; border: 1px solid var(--ac-line); }
+.se2 figcaption { font-size: 11.5px; font-weight: 700; color: var(--sub); margin-top: 2px; }
+.se-text { font-size: 12.5px; color: #38415a; margin-top: 8px; line-height: 1.6; }
+.se-text b { color: var(--ac); }
+
+/* ===== このページ専用 ===== */
+
+  .hero-art { width: 210px; }
+  .nest { position: relative; aspect-ratio: 16 / 10; border-radius: 16px; background: linear-gradient(135deg, #ffd9b8, #ffb199); box-shadow: 0 20px 40px -20px rgba(239,59,75,.55); overflow: hidden; }
+  .nest i { position: absolute; border: 3px solid #fff; border-radius: 8px; }
+  .nest i:nth-child(1) { inset: 8%; } .nest i:nth-child(2) { inset: 26% 24%; } .nest i:nth-child(3) { inset: 42% 38%; background: rgba(255,255,255,.35); }
+
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .three .card svg { width: 100%; height: auto; display: block; border-radius: 10px; margin-bottom: 8px; border: 1px solid var(--ac-line); }
+  .three .card .en { font-size: 11.5px; font-weight: 800; letter-spacing: .08em; color: var(--ac); }
+  .three .card h3 { font-size: 20px; margin: 0 0 4px; }
+
+  .sub { margin-bottom: 12px; }
+  .viewpair { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .over { position: relative; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; border: 1px solid var(--ac-line); background: #fff; }
+  .over svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .over .lab { position: absolute; left: 8px; top: 6px; z-index: 2; font-size: 11px; font-weight: 800; color: #fff; background: rgba(27,27,34,.7); border-radius: 999px; padding: 0 9px; }
+  .stat { display: grid; gap: 4px; margin-top: 4px; }
+  .stat h3 { font-size: 13.5px; }
+  .pick3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .pick3 .card .q { font-size: 14.5px; font-weight: 800; line-height: 1.5; margin: 2px 0 6px; }
+  .pick3 .card p { font-size: 13.5px; }
+  .pick3 .card .go { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 800; color: #fff; background: var(--ac); border-radius: 999px; padding: 1px 11px; }
+  .ex { font-family: var(--mono); font-size: 13px; line-height: 1.8; color: #23304a; background: #fff; border: 1px solid var(--ac-line); border-left: 4px solid var(--c2); border-radius: 10px; padding: 10px 14px; margin-top: 12px; overflow-wrap: anywhere; }
+  .ex b { color: var(--ac); }
+  @media (max-width: 720px) {
+    .three, .pick3 { grid-template-columns: 1fr; } .hero-art { display: none; }
+    /* スマホ幅: 操作・映像・全景・「画面に残るもの」が1画面に収まるよう、縦を詰める（追従パネルは使わない） */
+    .vbig { font-size: 14.5px; margin-top: 8px; } .vbig small { font-size: 12px; }
+    .over { width: 48%; margin: 0 auto; }
+    #demo .tools .lab { display: none; } #demo .tools { padding: 4px 10px; gap: 0 12px; }
+    .stat h3 { font-size: 12.5px; } .chips2 { gap: 3px; margin-top: 6px; } .chips2 li { padding: 1px 8px; font-size: 12px; } .chips2 .st { font-size: 11px; }
+  }
+
+</style>
+</head>
+<body>
+<script>
+// 動画Tips共通ヘルパー（自動再生はしない。動きは「▶」やスライダーの操作でだけ動く）
+(() => {
+  const mq = matchMedia('(prefers-reduced-motion: reduce)');
+  const note = () => document.querySelectorAll('.rm-note').forEach((n) => { n.hidden = !mq.matches; });
+  // 共通スクリプトは本文より前に読み込まれるため、本文の生成後にも実行する
+  document.addEventListener('DOMContentLoaded', note); note(); if (mq.addEventListener) mq.addEventListener('change', note);
+  window.V = {
+    // 「動きを減らす」設定のとき true。教材の動きは操作したときだけ動かす（止めない）。補間の滑らかさだけ省く場面で使う
+    reduced: () => mq.matches,
+    lerp: (a, b, t) => a + (b - a) * t,
+    clamp: (v, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v)),
+    ease: (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2),
+    // duration(ms) かけて 0→1 を cb(t) に渡す。戻り値は中断関数
+    run(duration, cb, done) {
+      let id = 0, t0 = 0, dead = false;
+      const step = (now) => {
+        if (dead) return; if (!t0) t0 = now;
+        const t = Math.min(1, (now - t0) / duration); cb(t);
+        if (t < 1) id = requestAnimationFrame(step); else if (done) done();
+      };
+      id = requestAnimationFrame(step);
+      return () => { dead = true; cancelAnimationFrame(id); };
+    },
+  };
+})();
+// 「動きを減らす」設定のときは、なめらかな補間ではなく「コマ送り」（10段階）で進める。
+// 動き自体は消さず、操作したときだけ・少ない動きで確認できるようにする。
+(() => {
+  const run = window.V.run;
+  window.V.run = (duration, cb, done) => {
+    if (!window.V.reduced()) return run(duration, cb, done);
+    let last = -1;
+    return run(duration, (t) => { const k = Math.round(t * 10); if (k !== last) { last = k; cb(k / 10); } }, done);
+  };
+})();
+
+</script>
+<!-- 共通のシーン（同じ人物・同じ商品。画角だけを変えて切り取る） -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd9b8"/><stop offset="1" stop-color="#fff3e4"/></linearGradient>
+    <pattern id="awn" width="120" height="60" patternUnits="userSpaceOnUse"><rect width="60" height="60" fill="#ef3b4b"/><rect x="60" width="60" height="60" fill="#fff"/></pattern>
+    <g id="scene">
+      <rect width="1600" height="900" fill="url(#sky)"/>
+      <g fill="#f2c6a6"><rect x="0" y="360" width="190" height="320"/><rect x="210" y="300" width="140" height="380"/><rect x="1250" y="330" width="170" height="350"/><rect x="1440" y="270" width="160" height="410"/></g>
+      <g fill="#e7b08c"><rect x="30" y="410" width="50" height="46"/><rect x="110" y="410" width="50" height="46"/><rect x="30" y="500" width="50" height="46"/><rect x="236" y="350" width="40" height="40"/><rect x="1290" y="380" width="44" height="44"/><rect x="1480" y="320" width="44" height="44"/></g>
+      <rect y="660" width="1600" height="240" fill="#e4cdb5"/>
+      <rect y="660" width="1600" height="26" fill="#d1b799"/>
+      <g><rect x="250" y="520" width="26" height="160" fill="#8a5a3c"/><circle cx="263" cy="470" r="92" fill="#7fb06a"/></g>
+      <g><rect x="1330" y="530" width="26" height="150" fill="#8a5a3c"/><circle cx="1343" cy="480" r="86" fill="#7fb06a"/></g>
+      <!-- お店 -->
+      <rect x="380" y="150" width="840" height="520" fill="#fff6ec" stroke="#e0a67e" stroke-width="6"/>
+      <rect x="440" y="180" width="720" height="100" rx="14" fill="#b4321f"/>
+      <text x="800" y="250" text-anchor="middle" font-size="64" font-weight="800" fill="#fff" font-family="sans-serif" letter-spacing="6">SUNNY CAFE</text>
+      <rect x="400" y="300" width="800" height="60" fill="url(#awn)"/>
+      <rect x="430" y="400" width="230" height="230" rx="10" fill="#cfe9f2" stroke="#e0a67e" stroke-width="6"/>
+      <rect x="940" y="400" width="230" height="230" rx="10" fill="#cfe9f2" stroke="#e0a67e" stroke-width="6"/>
+      <rect x="715" y="380" width="170" height="290" rx="8" fill="#c9774f"/>
+      <!-- 人物 -->
+      <rect x="768" y="700" width="28" height="120" rx="12" fill="#2f3b5c"/><rect x="806" y="700" width="28" height="120" rx="12" fill="#2f3b5c"/>
+      <path d="M738 505 Q800 480 862 505 L874 712 L726 712Z" fill="#f2f0ea"/>
+      <path d="M766 520 L834 520 L846 712 L754 712Z" fill="#8a5a3c"/>
+      <path d="M742 515 L714 650" stroke="#f2f0ea" stroke-width="30" stroke-linecap="round" fill="none"/><circle cx="712" cy="662" r="16" fill="#f5cfae"/>
+      <path d="M858 515 L903 592" stroke="#f2f0ea" stroke-width="30" stroke-linecap="round" fill="none"/>
+      <circle cx="800" cy="420" r="55" fill="#f5cfae"/>
+      <path d="M744 412 Q748 354 800 352 Q852 354 856 412 Q830 384 800 388 Q770 384 744 412Z" fill="#4a2f24"/>
+      <circle cx="781" cy="424" r="6" fill="#2b2b33"/><circle cx="819" cy="424" r="6" fill="#2b2b33"/>
+      <path d="M768 408 Q781 400 794 408 M806 408 Q819 400 832 408" stroke="#4a2f24" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M778 446 Q800 466 822 446" stroke="#b4321f" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <circle cx="766" cy="442" r="8" fill="#ffb199" opacity=".7"/><circle cx="834" cy="442" r="8" fill="#ffb199" opacity=".7"/>
+      <!-- 商品（カップ） -->
+      <g transform="translate(872 500)">
+        <rect x="30" y="-28" width="8" height="42" fill="#ff9f43"/>
+        <path d="M0 18 L70 18 L58 90 L12 90Z" fill="#fff" stroke="#b4321f" stroke-width="4"/>
+        <rect x="-4" y="6" width="78" height="14" rx="5" fill="#b4321f"/>
+        <circle cx="35" cy="50" r="16" fill="#ff9f43"/><text x="35" y="57" text-anchor="middle" font-size="20" font-weight="800" fill="#fff" font-family="sans-serif">S</text>
+        <text x="35" y="80" text-anchor="middle" font-size="9" font-weight="800" fill="#b4321f" font-family="sans-serif" letter-spacing="1">ICED</text>
+      </g>
+      <circle cx="905" cy="596" r="16" fill="#f5cfae"/>
+    </g>
+  </defs>
+</svg>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <div class="pill-row rise"><span class="series">動画制作でよく聞くこれ何？</span><span class="tipno">TIPS V-09 / 画角</span></div>
+      <h1 class="rise" style="--i:1">ワイド・ミディアム・<br>クローズアップ、何が違う？</h1>
+      <p class="lead rise" style="--i:2">同じ被写体でも、どこまで画面に入れるかで<b>「場所を見せる」「人を見せる」「細部を見せる」</b>の役割が変わる。</p>
+      <div class="meta rise" style="--i:3"><span>難易度：初級</span><span>商品紹介・店舗紹介・ショート動画・AI動画生成に</span><span>切り替えて試せるデモつき</span></div>
+      <ol class="flow rise" style="--i:4" aria-label="シリーズの流れ">
+        <li class="now">画角（ワイド／ミディアム／クローズアップ）</li><li>パン／ティルト</li><li>ドリー／トラッキング／ズーム</li><li>Bロール</li><li>カット／フェード</li><li>フレームレート</li>
+      </ol>
+    </div>
+    <div class="hero-art rise" style="--i:2" aria-hidden="true"><div class="nest"><i></i><i></i><i></i></div></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">1</span><h2>まず、3つの画角と役割</h2></div>
+    <p class="sec-sub">動画では、被写体をどこまで画面に入れるかによって、見せられる情報が変わります。同じ場面から、3つの範囲を切り取ってみました。</p>
+    <div class="three">
+      <div class="card"><svg viewBox="0 0 1600 900" role="img" aria-label="ワイドショットの例"><use href="#scene"/></svg><div class="en">WIDE SHOT</div><h3>ワイド</h3><p><b>場所・状況・スケール感</b>を見せやすい。お店の外観や看板、人物の全身まで入る。</p></div>
+      <div class="card"><svg viewBox="560 340 480 270" role="img" aria-label="ミディアムショットの例"><use href="#scene"/></svg><div class="en">MEDIUM SHOT</div><h3>ミディアム</h3><p><b>人物と周囲のバランス</b>を見せやすい。説明や会話の場面でよく使われる。</p></div>
+      <div class="card"><svg viewBox="675 345 250 141" role="img" aria-label="クローズアップの例"><use href="#scene"/></svg><div class="en">CLOSE-UP</div><h3>クローズアップ</h3><p><b>表情や細部</b>など、注目してほしい部分を見せやすい。</p></div>
+    </div>
+    <p class="cap">出典：Adobe「Different types of shots and camera angles in film」ほか（下部の参考欄）</p>
+  </section>
+
+  <section class="sec rise" id="demo">
+    <div class="sec-h"><span class="sec-n">2</span><h2>切り替えて、画面に何が残るかを見る</h2></div>
+    <p class="sec-sub">単なる拡大ではありません。画角を変えると、<b>写るものと写らないもの</b>が変わります。右の全景の黄色い枠が、カメラが切り取っている範囲です。</p>
+    <div class="tools" role="group" aria-label="画角の切り替え">
+      <span class="lab">画角</span>
+      <span class="seg" role="radiogroup" aria-label="画角">
+        <label><input type="radio" name="shot" value="wide" checked><span>ワイド</span></label>
+        <label><input type="radio" name="shot" value="medium"><span>ミディアム</span></label>
+        <label><input type="radio" name="shot" value="close"><span>クローズアップ</span></label>
+      </span>
+      <button type="button" class="btn" id="replay">もう一度見る</button>
+      <span class="seg" id="closeSeg" role="radiogroup" aria-label="クローズアップで寄る対象" hidden>
+        <label><input type="radio" name="tgt" value="face" checked><span>表情に寄る</span></label>
+        <label><input type="radio" name="tgt" value="item"><span>商品に寄る</span></label>
+      </span>
+    </div>
+    <div class="vgrid teach">
+      <div>
+        <div class="vframe"><svg id="cam" viewBox="0 0 1600 900" role="img" aria-label="カメラが撮影している映像"><use href="#scene"/></svg><div class="hud"><span class="tl rec" id="hudName">WIDE</span><span class="br" id="hudSize">—</span></div><span class="demo-tag">説明用イラスト（実際の映像ではありません）</span></div>
+        <p class="vbig" id="role" aria-live="polite">ワイド：場所・状況・スケール感を見せる<small>お店の外観や看板まで入り、どこで何をしているかが分かる。</small></p>
+      </div>
+      <div>
+        <div class="over"><span class="lab">全景（撮れる範囲）</span>
+          <svg id="ov" viewBox="0 0 1600 900" aria-hidden="true"><use href="#scene"/><path id="dim" fill="rgba(27,27,34,.55)" fill-rule="evenodd"/><rect id="fr" fill="none" stroke="#ffd84a" stroke-width="10"/></svg>
+        </div>
+        <div class="stat">
+          <h3>画面に残るもの</h3>
+          <ul class="chips2" id="chips" aria-live="polite"></ul>
+        </div>
+      </div>
+    </div>
+    <p class="demo-note"><b>説明用のデモです。</b>実際の撮影映像ではなく、画角の違いと「画面に何が残るか」を理解するためのイラストです。</p>
+    <p class="rm-note" role="note" hidden>お使いの端末は「動きを減らす」設定です。画角はアニメーションなしで切り替わります。「もう一度見る」を押すと、切り替わりをコマ送りで確認できます。</p>
+    <noscript><p class="demo-note">JavaScriptが無効のため、切り替えは動きません。上の「3つの画角」の図が、ワイド・ミディアム・クローズアップを静止状態で比べたものです。</p></noscript>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">3</span><h2>「どれが正解」ではなく、何を見せたいかで選ぶ</h2></div>
+    <p class="sec-sub">同じ人物・同じ商品でも、見せたいものが変わると、選ぶ画角が変わります。</p>
+    <div class="pick3">
+      <div class="card"><div class="kicker">見せたいもの</div><div class="q">場所・お店の雰囲気・スケール感</div><p>どこで撮っているか、どれくらいの大きさかを伝えたいとき。動画の最初で状況を示す「はじめの一枚」にもよく使われます。</p><span class="go">→ ワイド</span></div>
+      <div class="card"><div class="kicker">見せたいもの</div><div class="q">人物と周りの関係</div><p>人が何をしているか、周りの物とどう関わっているかを見せたいとき。説明や会話、インタビューで使いやすい画角です。</p><span class="go">→ ミディアム</span></div>
+      <div class="card"><div class="kicker">見せたいもの</div><div class="q">表情・商品の細部</div><p>気持ちや、ロゴ・質感のような細かい部分を見てほしいとき。ここは寄らないと伝わりません。</p><span class="go">→ クローズアップ</span></div>
+    </div>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">4</span><h2>実務での使いどころ</h2></div>
+    <p class="sec-sub">画角の名前で、撮影や制作の指示を共有できます。</p>
+    <div class="grid3">
+      <div class="card"><div class="kicker">商品紹介</div><p>全体の雰囲気はワイド、使っている様子はミディアム、質感やロゴはクローズアップ、と役割を分けて撮る。</p></div>
+      <div class="card"><div class="kicker">店舗・施設紹介</div><p>外観・店内の広さはワイド、スタッフはミディアム、メニューや設備の細部はクローズアップ。</p></div>
+      <div class="card"><div class="kicker">インタビュー・ショート動画</div><p>基本はミディアム、強調したい一言で寄る。ショートでは画面が小さいため、細部は寄ると伝わりやすい。</p></div>
+    </div>
+    <div class="ex" aria-label="AI動画生成での指示文の例（英語）"><b>AI動画生成の画角指定の例</b><br>wide shot of a cafe storefront with a staff member<br>medium shot of the staff member holding an iced drink<br>close-up of the iced drink cup logo</div>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">5</span><h2>判断するときのポイント</h2></div>
+    <ol class="steps">
+      <li><h3>そのカットで「何を見せたいか」を先に決める</h3><p>場所か、人か、細部か。見せたいものが決まると、画角が決まります。</p></li>
+      <li><h3>写らなくなるものを確認する</h3><p>寄ると、場所の情報は減ります。引くと、表情や細部は小さくなります。必要な情報が画面に残っているかを見ます。</p></li>
+      <li><h3>動画全体では、画角を組み合わせる</h3><p>ワイドだけ、クローズアップだけでは単調になったり、情報が足りなくなったりします。役割ごとに使い分けます。</p></li>
+    </ol>
+    <ul class="chk" style="margin-top:18px">
+      <li>このカットで見せたいものは、場所・人・細部のどれか</li>
+      <li>見せたいものが、画面に十分な大きさで写っているか</li>
+      <li>必要な情報が、切り取りで落ちていないか</li>
+    </ul>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">6</span><h2>注意点</h2></div>
+    <div class="notes">
+      <div class="note warn"><h3>範囲や呼び方は資料で少し違う</h3>ミディアムやクローズアップの範囲は、資料や現場によって基準や呼び方が少しずつ異なります（腰から上、胸から上など）。ここでは初心者向けの目安として、「何を見せたいか」を基準に考えます。</div>
+      <div class="note warn"><h3>「この画角が正解」ではない</h3>寄りすぎると場所の情報が、引きすぎると表情や細部が伝わりにくくなります。見せたいものに合わせて選びます。</div>
+    </div>
+  </section>
+
+  <section class="refs">
+    <h2>参考・出典</h2>
+    <ul>
+      <li><a href="https://www.adobe.com/creativecloud/video/discover/types-of-shots-in-films.html" target="_blank" rel="noopener">Adobe「Different types of shots and camera angles in film」</a>（スプレッドシート記載の参考URL）</li>
+      <li><a href="https://www.adobe.com/creativecloud/video/production/cinematography/camera-shots-and-angles/wide-shot" target="_blank" rel="noopener">Adobe「What is a wide shot in film?」</a>（補足）</li>
+      <li><a href="https://www.adobe.com/creativecloud/video/production/cinematography/camera-shots-and-angles/close-up-shot" target="_blank" rel="noopener">Adobe「What is a close-up shot: Definition &amp; uses in film」</a>（補足）</li>
+    </ul>
+    <p class="by">デモの人物・お店・商品はすべて説明用のイラストです。</p>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const FULL = [0, 0, 1600, 900];
+  const SHOT = { wide: FULL, medium: [560, 340, 480, 270], face: [675, 345, 250, 140.6], item: [835, 505, 140, 78.75] };
+  const NAME = { wide: 'WIDE', medium: 'MEDIUM', face: 'CLOSE-UP', item: 'CLOSE-UP' };
+  const ROLE = {
+    wide: ['ワイド：場所・状況・スケール感を見せる', 'お店の外観や看板まで入り、どこで何をしているかが分かる。'],
+    medium: ['ミディアム：人物と周囲のバランスを見せる', '人物の様子と、背景のお店の雰囲気がちょうどよく入る。'],
+    face: ['クローズアップ：表情を見せる', '表情はよく分かるが、お店や商品など場所の情報は写らない。'],
+    item: ['クローズアップ：商品の細部を見せる', 'ロゴなどの細部が読めるが、人物やお店の様子は分からない。'],
+  };
+  // 画面に残るかを調べる対象（全景の座標）。legible = 画面の高さに対する比率がこれ以上なら「はっきり見える」
+  const ITEMS = [
+    { n: 'お店の看板（場所）', b: [440, 180, 720, 100], dim: 'h', legible: 0.06 },
+    { n: 'お店の外観', b: [380, 150, 840, 520] },
+    { n: '人物の全身', b: [712, 352, 230, 468] },
+    { n: '人物の表情', b: [745, 352, 110, 123], dim: 'h', legible: 0.3 },
+    { n: '商品のロゴ（細部）', b: [891, 534, 32, 32], dim: 'h', legible: 0.25 },
+  ];
+  let cur = FULL.slice(), stop = null, prev = FULL.slice();
+  const cam = $('#cam'), dim = $('#dim'), fr = $('#fr');
+  const vb = (v) => v.map((x) => +x.toFixed(2)).join(' ');
+  function draw(v) {
+    cam.setAttribute('viewBox', vb(v));
+    fr.setAttribute('x', v[0]); fr.setAttribute('y', v[1]); fr.setAttribute('width', v[2]); fr.setAttribute('height', v[3]);
+    dim.setAttribute('d', 'M0 0H1600V900H0Z M' + v[0] + ' ' + v[1] + 'h' + v[2] + 'v' + v[3] + 'h-' + v[2] + 'Z');
+  }
+  function inter(a, b) {
+    const x = Math.max(0, Math.min(a[0] + a[2], b[0] + b[2]) - Math.max(a[0], b[0]));
+    const y = Math.max(0, Math.min(a[1] + a[3], b[1] + b[3]) - Math.max(a[1], b[1]));
+    return (x * y) / (b[2] * b[3]);
+  }
+  function chips(v) {
+    $('#chips').innerHTML = ITEMS.map((it) => {
+      const f = inter(v, it.b);
+      let st, cls;
+      if (f <= 0.02) { st = '写らない'; cls = 'off'; }
+      else if (f < 0.9) { st = '一部だけ写る'; cls = 'mid'; }
+      else if (it.legible) { const ratio = it.b[3] / v[3]; if (ratio >= it.legible) { st = 'はっきり見える'; cls = 'on'; } else { st = '写るが小さい'; cls = 'mid'; } }
+      else { st = '写っている'; cls = 'on'; }
+      return '<li><span>' + it.n + '</span><span class="st ' + cls + '">' + st + '</span></li>';
+    }).join('');
+    $('#hudSize').textContent = inter(v, ITEMS[3].b) <= 0.02 ? '人物の顔 写らない' : '人物の顔 画面高さの ' + Math.min(100, Math.round(123 / v[3] * 100)) + '%';
+  }
+  function current() {
+    const s = document.querySelector('input[name=shot]:checked').value;
+    $('#closeSeg').hidden = s !== 'close';
+    return s === 'close' ? document.querySelector('input[name=tgt]:checked').value : s;
+  }
+  function go() {
+    const k = current(), to = SHOT[k], from = cur.slice(); prev = from.slice();
+    $('#hudName').textContent = NAME[k];
+    $('#role').innerHTML = ROLE[k][0] + '<small>' + ROLE[k][1] + '</small>';
+    if (stop) stop();
+    chips(to);
+    if (V.reduced()) { cur = to.slice(); draw(cur); return; }
+    stop = V.run(450, (t) => { const e = V.ease(t); cur = from.map((x, i) => V.lerp(x, to[i], e)); draw(cur); });
+  }
+  document.querySelectorAll('input[name=shot], input[name=tgt]').forEach((r) => r.addEventListener('change', go));
+  // もう一度見る: 直前の切り替えを最初から再生（「動きを減らす」設定ではコマ送り）
+  $('#replay').addEventListener('click', () => {
+    const to = SHOT[current()]; if (stop) stop();
+    stop = V.run(900, (t) => { const e = V.ease(t); cur = prev.map((x, i) => V.lerp(x, to[i], e)); draw(cur); });
+  });
+  draw(FULL); chips(FULL);
+})();
+</script>
+</body>
+</html>

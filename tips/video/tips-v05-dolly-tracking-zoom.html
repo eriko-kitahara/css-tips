@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ja" data-series="video">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>カメラが動く？画角だけ変わる？ ドリー・トラッキング・ズームの違い｜動画制作でよく聞くこれ何？</title>
+<style>
+/* ===== シリーズTips 共通ベース（既存CSS Tipsの作法を踏襲：トークン / .rise / reduced-motion / 640px以下は1カラム） ===== */
+:root {
+  --ink: #1b1f2a;
+  --sub: #566074;
+  --line: #e5e8ee;
+  --bg: #f4f6f9;
+  --ease: cubic-bezier(.22, .7, .25, 1);
+  --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", "Meiryo", sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Roboto Mono", Menlo, monospace;
+  --ok: #17683a; --ok-soft: #e8f5ec;
+  --ng: #b42318; --ng-soft: #fdecea;
+  color-scheme: light;
+}
+/* ----- シリーズ別カラー（c1→c2 のグラデーション。--ac は白地の文字に使える濃い色） ----- */
+[data-series="css"]    { --c1:#3b9cf6; --c2:#19c3d6; --ac:#1a5fa6; --ac-soft:#e8f3fd; --ac-line:#bcdaf3; --page:#f1f7fc; --hero:linear-gradient(135deg,#dff0ff,#d9f7fa); }
+[data-series="design"] { --c1:#ff5fa2; --c2:#8b5cf6; --ac:#9d2a72; --ac-soft:#fbeef6; --ac-line:#efc9e2; --page:#fbf6fa; --hero:linear-gradient(135deg,#ffe4f0,#ece5ff); }
+[data-series="ai"]     { --c1:#b6e04a; --c2:#22a861; --ac:#17683a; --ac-soft:#eef8e4; --ac-line:#cde7b2; --page:#f5f9ef; --hero:linear-gradient(135deg,#eefad0,#d8f3e2); }
+[data-series="video"]  { --c1:#ff9f43; --c2:#ef3b4b; --ac:#b4321f; --ac-soft:#fff1ea; --ac-line:#f6cdb8; --page:#fcf7f3; --hero:linear-gradient(135deg,#ffeedb,#ffe1e3); }
+:root { --grad: linear-gradient(90deg, var(--c1), var(--c2)); }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--page); color: var(--ink); font-family: var(--font); line-height: 1.75; -webkit-font-smoothing: antialiased; }
+a { color: var(--ac); text-underline-offset: 3px; }
+code, pre, kbd { font-family: var(--mono); }
+img, svg { max-width: 100%; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+/* ===== Motion（opacity:0 は keyframes 側のみ＝動きを切っても内容は必ず見える） ===== */
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+@keyframes pop  { from { opacity: 0; transform: scale(.94); } }
+.rise { animation: rise .5s var(--ease) calc(var(--i, 0) * 80ms) backwards; }
+/* 「動きを減らす」設定: 装飾の動きだけを止める。
+   教材として見せる動き（.teach の中身）は止めない＝動きそのものが学習内容のため。
+   教材側は、自動再生しない・ボタンで再生・コマ送りできる、という代替手段を別に用意する。 */
+@media (prefers-reduced-motion: reduce) {
+  *:not(.teach):not(.teach *), *:not(.teach):not(.teach *)::before, *:not(.teach):not(.teach *)::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* ===== Hero ===== */
+.hero { position: relative; overflow: hidden; background: var(--hero); border-bottom: 1px solid var(--ac-line); padding: 0 0 44px; }
+.hero::before { content: ""; display: block; height: 6px; background: var(--grad); }
+.hero::after { content: ""; position: absolute; right: -90px; top: -70px; width: 340px; height: 340px; border-radius: 50%; background: var(--grad); opacity: .16; pointer-events: none; }
+.hero .wrap { position: relative; z-index: 1; padding-top: 28px; display: grid; grid-template-columns: 1fr auto; gap: 24px 40px; align-items: center; }
+.pill-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.series { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; letter-spacing: .04em; color: var(--ac); background: #fff; border: 1px solid var(--ac-line); border-radius: 999px; padding: 4px 14px 4px 10px; }
+.series::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--grad); }
+.tipno { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--sub); }
+h1 { font-size: clamp(25px, 4.4vw, 38px); line-height: 1.4; letter-spacing: .01em; margin: 16px 0 14px; font-weight: 800; }
+.lead { font-size: clamp(15px, 2vw, 17px); color: #38415a; max-width: 38em; }
+.lead b { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--c1) 35%, transparent) 62%); font-weight: 700; }
+.hero-art { width: 200px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.meta span { font-size: 12px; color: var(--sub); background: rgba(255,255,255,.75); border: 1px solid var(--ac-line); border-radius: 999px; padding: 1px 12px; }
+
+/* ===== Section ===== */
+main { padding: 36px 0 24px; }
+.sec { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 30px 32px 32px; margin-bottom: 22px; box-shadow: 0 1px 2px rgba(27,31,42,.04), 0 18px 40px -26px rgba(27,31,42,.22); }
+.sec-h { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.sec-n { flex: none; width: 30px; height: 30px; border-radius: 10px; background: var(--grad); color: #1b1f2a; display: grid; place-items: center; font-size: 14px; font-weight: 800; }
+[data-series="design"] .sec-n, [data-series="video"] .sec-n { color: #fff; }
+h2 { font-size: clamp(19px, 2.8vw, 23px); line-height: 1.45; font-weight: 800; }
+.sec-sub { color: var(--sub); font-size: 14.5px; margin: 0 0 20px 42px; }
+h3 { font-size: 16px; line-height: 1.5; }
+p + p { margin-top: .8em; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.card { background: var(--ac-soft); border: 1px solid var(--ac-line); border-radius: 16px; padding: 18px 20px; transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
+.card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -16px rgba(27,31,42,.35); }
+.card .kicker { font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--ac); }
+.card .big { font-size: 28px; font-weight: 800; line-height: 1.3; margin: 4px 0 4px; }
+.card p { font-size: 14px; color: #38415a; }
+
+/* ===== Before / After ===== */
+.ba { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; position: relative; }
+.pane { min-width: 0; border: 1px solid var(--line); border-radius: 16px; padding: 18px; background: #fff; }
+.pane.after { border-color: var(--ac-line); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c2) 10%, transparent); }
+.pane-h { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.badge { flex: none; font-size: 11px; font-weight: 800; letter-spacing: .08em; border-radius: 999px; padding: 1px 11px; color: var(--sub); background: var(--bg); border: 1px solid var(--line); }
+.after .badge { color: #fff; background: var(--ac); border-color: var(--ac); }
+.pane-h h3 { font-size: 15px; }
+.cap { font-size: 13px; color: var(--sub); margin-top: 10px; }
+
+/* ===== Callout ===== */
+.note { border-radius: 14px; padding: 14px 18px 15px; font-size: 14.5px; background: var(--ac-soft); border: 1px solid var(--ac-line); }
+.note h3 { display: flex; align-items: center; gap: 8px; font-size: 13px; letter-spacing: .05em; color: var(--ac); margin-bottom: 3px; }
+.note h3::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.note.warn { background: #fff7e8; border-color: #efd7a6; }
+.note.warn h3 { color: #8a5300; }
+.notes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+/* ===== Code ===== */
+.code { margin: 14px 0 0; border-radius: 14px; overflow: hidden; border: 1px solid var(--ac-line); background: #f8faf8; }
+.code figcaption { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; font-weight: 800; letter-spacing: .06em; color: var(--ac); padding: 8px 14px; background: var(--ac-soft); border-bottom: 1px solid var(--ac-line); }
+.code pre { font-size: 13.5px; line-height: 1.75; padding: 14px 16px; overflow-x: auto; color: #23304a; tab-size: 2; }
+.code.dark { background: #14201a; border-color: #243a2d; }
+.code.dark figcaption { background: #1b2c22; color: #b9e78a; border-color: #243a2d; }
+.code.dark pre { color: #e4f1e0; }
+.btn { appearance: none; border: 1px solid var(--ac-line); background: #fff; color: var(--ac); font: inherit; font-size: 12px; font-weight: 800; letter-spacing: .04em; border-radius: 999px; padding: 3px 14px; cursor: pointer; transition: background .2s var(--ease), transform .2s var(--ease); }
+.btn:hover { background: var(--ac-soft); }
+.btn:active { transform: scale(.97); }
+.btn:focus-visible, input:focus-visible, summary:focus-visible, button:focus-visible { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 2px; }
+.btn.solid { background: var(--ac); border-color: var(--ac); color: #fff; padding: 6px 18px; font-size: 13.5px; }
+.btn.solid:hover { background: color-mix(in srgb, var(--ac) 88%, #000); }
+.tk-add { color: #0e6b32; background: #e3f6e8; } .tk-del { color: #a4281c; background: #fdeceb; }
+
+/* ===== Steps ===== */
+.steps { list-style: none; counter-reset: s; display: grid; gap: 12px; }
+.steps > li { counter-increment: s; position: relative; padding: 14px 16px 14px 58px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.steps > li::before { content: counter(s); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--grad); color: #1b1f2a; font-weight: 800; font-size: 14px; }
+[data-series="design"] .steps > li::before, [data-series="video"] .steps > li::before { color: #fff; }
+.steps h3 { font-size: 15.5px; }
+.steps p { font-size: 14px; color: #38415a; margin-top: 2px; }
+
+/* ===== Check list / refs ===== */
+.chk { list-style: none; display: grid; gap: 8px; }
+.chk li { position: relative; padding-left: 30px; font-size: 14.5px; }
+.chk li::before { content: "✓"; position: absolute; left: 0; top: 2px; width: 20px; height: 20px; border-radius: 6px; background: var(--ac); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 800; line-height: 1; }
+.refs { font-size: 13px; color: var(--sub); padding: 6px 4px 54px; }
+.refs h2 { font-size: 13px; letter-spacing: .08em; color: var(--sub); margin-bottom: 6px; }
+.refs li { margin-left: 1.2em; word-break: break-all; }
+.refs .by { margin-top: 10px; }
+.tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; padding: 0 9px; border-radius: 999px; }
+.tag.ok { color: var(--ok); background: var(--ok-soft); }
+.tag.ng { color: var(--ng); background: var(--ng-soft); }
+.rows .tag, .judge .tag { font-size: 0; }
+.rows .tag::before, .judge .tag::before { font-size: 11px; }
+.rows .tag.ok::before, .judge .tag.ok::before { content: "✓ OK"; }
+.rows .tag.ng::before, .judge .tag.ng::before { content: "✕ 不足"; }
+
+@media (max-width: 720px) {
+  .wrap { padding: 0 14px; }
+  .hero .wrap { grid-template-columns: 1fr; }
+  .hero-art { display: none; }
+  .sec { padding: 22px 16px 24px; border-radius: 16px; }
+  .sec-sub { margin-left: 0; }
+  .grid2, .grid3, .ba, .notes { grid-template-columns: 1fr; }
+}
+
+/* ===== 操作部品（design シリーズの追加ページ用。meta の "css":["parts.css"] で読み込む） ===== */
+.tools { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; margin: 0 0 16px; padding: 8px 14px; background: var(--ac-soft); border: 1px solid var(--ac-line); border-radius: 14px; }
+.tools .lab { font-size: 12.5px; font-weight: 800; color: var(--ac); letter-spacing: .04em; }
+.tools > * { min-width: 0; }
+
+/* トグルスイッチ（実体は checkbox。キーボードはスペースで切り替え） */
+.tgl { position: relative; display: inline-flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 700; cursor: pointer; min-height: 44px; }
+.tgl input { position: absolute; opacity: 0; width: 100%; height: 100%; left: 0; top: 0; margin: 0; cursor: pointer; }
+.tgl .sw { flex: none; width: 42px; height: 24px; border-radius: 999px; background: #b4bccb; position: relative; transition: background .2s var(--ease); }
+.tgl .sw::after { content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.35); transition: transform .2s var(--ease); }
+.tgl input:checked + .sw { background: var(--ac); }
+.tgl input:checked + .sw::after { transform: translateX(18px); }
+.tgl input:focus-visible + .sw { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 2px; }
+
+/* 切り替えボタン（実体は radio） */
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; border: 1px solid var(--ac-line); border-radius: 24px; background: #fff; padding: 3px; }
+.seg label { position: relative; cursor: pointer; }
+.seg input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.seg span { display: block; padding: 10px 15px; min-height: 42px; border-radius: 999px; font-size: 13px; font-weight: 800; line-height: 22px; color: var(--ac); }
+.seg input:checked + span { background: var(--ac); color: #fff; }
+.seg input:focus-visible + span { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 1px; }
+
+/* スライダー */
+.rng { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; font-size: 13.5px; font-weight: 700; min-height: 44px; }
+.rng input[type=range] { width: min(240px, 100%); accent-color: var(--ac); height: 28px; }
+.rng output { font-family: var(--mono); font-weight: 800; color: var(--ac); min-width: 4.2em; }
+
+/* 結果の読み上げ・まとめ欄 */
+.verdict { margin-top: 12px; padding: 12px 16px; border-radius: 12px; font-size: 14px; background: #fff; border: 1px solid var(--ac-line); border-left: 5px solid var(--c2); }
+.verdict b { color: var(--ac); }
+
+/* 選び方の表（カード型） */
+.pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pick .card .q { font-size: 14.5px; font-weight: 800; line-height: 1.5; margin: 2px 0 6px; }
+.pick .card p { font-size: 13.5px; }
+.pick .card .go { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 800; color: #fff; background: var(--ac); border-radius: 999px; padding: 1px 11px; }
+.fig { margin: 0; }
+.fig figcaption { font-size: 12.5px; color: var(--sub); margin-top: 8px; }
+.judge2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ctr-note { font-size: 12.5px; color: var(--sub); }
+
+@media (max-width: 720px) {
+  .seg { display: flex; width: 100%; }
+  .seg label { flex: 1 1 auto; }
+  .seg span { text-align: center; padding: 10px 10px; border-radius: 18px; }
+  .pick, .judge2 { grid-template-columns: 1fr; }
+  .tools { gap: 2px 14px; }
+}
+
+/* ===== 操作パネルの追従（デモのセクション内だけ。親の .sec を出たら追従終了） ===== */
+.tools.stick { position: sticky; top: 8px; z-index: 30; box-shadow: 0 10px 20px -14px rgba(27,31,42,.45); }
+.tools .tgt { font-size: 12.5px; font-weight: 700; color: var(--sub); }
+@media (max-width: 720px) {
+  /* スマホ幅: 追従パネルは小さくまとめる（ラベル・補足は省く。操作対象は直下のデモ） */
+  .tools.stick { top: 6px; padding: 4px 10px; gap: 0 12px; }
+  .tools.stick .lab, .tools.stick .tgt { display: none; }
+  .tools.stick .tgl, .tools.stick .rng { min-height: 40px; }
+  .tools.stick .seg span { padding: 7px 8px; min-height: 36px; line-height: 22px; }
+  .tools.stick .rng input[type=range] { height: 24px; }
+  .tools.stick .rng { flex-wrap: nowrap; gap: 0 8px; font-size: 12.5px; min-height: 36px; flex: 1 1 100%; }
+  .tools.stick .rng input[type=range] { flex: 1 1 60px; width: auto; min-width: 60px; }
+  .tools.stick .rng output { min-width: 3em; }
+  .tools.stick .tgl { min-height: 36px; font-size: 12.5px; }
+  .tools.stick .seg { flex: 1 1 100%; }
+  /* 効果対象の隣に置く操作パネル（2列に詰めて縦を短く） */
+  .build .tools { grid-template-columns: 1fr 1fr; column-gap: 10px; }
+  .build .tools > .lab, .build .tools > .btnrow, .build .tools > .accn, .build .tools > .readout, .build .tools > .lever { grid-column: 1 / -1; }
+  .build .lever small { display: none; }
+}
+
+/* スマホ幅だけ追従する操作パネル（デモが縦に長くなる幅で、操作と結果を同時に見られるように。親の .sec を出たら追従終了） */
+@media (max-width: 720px) {
+  .tools.stick-sm { position: sticky; top: 6px; z-index: 30; box-shadow: 0 10px 20px -14px rgba(27,31,42,.45); padding: 4px 10px; gap: 0 12px; }
+  .tools.stick-sm .lab, .tools.stick-sm .tgt { display: none; }
+  .tools.stick-sm .tgl { min-height: 36px; font-size: 12.5px; }
+  .tools.stick-sm .seg { flex: 1 1 100%; }
+  .tools.stick-sm .seg span { padding: 7px 8px; min-height: 36px; line-height: 22px; }
+  .tools.stick-sm .rng { flex: 1 1 100%; flex-wrap: nowrap; gap: 0 8px; font-size: 12.5px; min-height: 36px; }
+  .tools.stick-sm .rng input[type=range] { flex: 1 1 60px; width: auto; min-width: 60px; height: 24px; }
+  .tools.stick-sm .btn { min-height: 36px; min-width: 0; padding: 4px 10px; font-size: 12px; }
+  .tools.stick-sm .scrub { flex: 1 1 100%; }
+}
+
+/* ===== 動画Tips（video シリーズ）共通部品。meta の "css":["parts.css","vparts.css"] と "js":["vparts.js"] で読み込む ===== */
+.flow { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin-top: 14px; counter-reset: f; }
+.flow li { counter-increment: f; font-size: 12px; font-weight: 700; padding: 2px 11px 2px 9px; border-radius: 999px; background: rgba(255,255,255,.75); border: 1px solid var(--ac-line); color: var(--sub); }
+.flow li::before { content: counter(f) " "; font-weight: 800; color: var(--ac); }
+.flow li.now { background: var(--grad); color: #fff; border-color: transparent; }
+.flow li.now::before { color: #fff; }
+
+.rm-note:not([hidden]) { margin: 0 0 12px; padding: 8px 14px; font-size: 13px; line-height: 1.6; color: #8a5300; background: #fff7e8; border: 1px solid #efd7a6; border-radius: 10px; }
+
+/* 映像の枠（ファインダー風） */
+.vframe { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 14px; background: #1b1b22; border: 3px solid #1b1b22; box-shadow: 0 16px 30px -18px rgba(27,31,42,.6); isolation: isolate; container-type: inline-size; }
+.vframe > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hud { position: absolute; z-index: 5; inset: 0; pointer-events: none; color: #fff; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-shadow: 0 1px 3px rgba(0,0,0,.65); }
+.hud span { position: absolute; }
+.hud .tl { left: 12px; top: 10px; } .hud .tr { right: 12px; top: 10px; } .hud .bl { left: 12px; bottom: 10px; } .hud .br { right: 12px; bottom: 10px; }
+.hud .rec::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ff3b3b; margin-right: 6px; vertical-align: 0; }
+
+/* 再生・スクラブ操作 */
+.vctl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 12px; }
+.vctl .btn.solid { min-height: 40px; min-width: 96px; }
+.scrub { display: flex; align-items: center; gap: 10px; flex: 1 1 220px; min-width: 0; font-size: 12.5px; font-weight: 700; }
+.scrub input[type=range] { flex: 1; min-width: 0; accent-color: var(--ac); height: 28px; }
+.scrub output { font-family: var(--mono); min-width: 4.4em; text-align: right; color: var(--ac); }
+
+.vcap { font-size: 13px; color: var(--sub); margin-top: 8px; }
+.vbig { font-size: 16px; font-weight: 800; line-height: 1.5; margin-top: 12px; }
+.vbig small { display: block; font-size: 13px; font-weight: 600; color: var(--sub); }
+
+/* 状態チップ（画面に残るもの、カメラ位置など） */
+.chips2 { display: grid; gap: 6px; margin-top: 10px; list-style: none; }
+.chips2 li { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; font-size: 13px; padding: 5px 10px; border-radius: 10px; background: #fff; border: 1px solid var(--line); }
+.chips2 .st { font-size: 11.5px; font-weight: 800; border-radius: 999px; padding: 0 10px; white-space: nowrap; }
+.chips2 .st.on { color: var(--ok); background: var(--ok-soft); }
+.chips2 .st.mid { color: #8a5300; background: #fff1d6; }
+.chips2 .st.off { color: #6b7080; background: #eceef3; }
+
+.vgrid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.vgrid > * { min-width: 0; }
+@media (max-width: 720px) { .vgrid { grid-template-columns: 1fr; } }
+
+/* ===== 教材デモ共通（.teach = 学習用の動き。装飾の動きとは別扱いで、reduced-motion でも止めない） ===== */
+.demo-tag { position: absolute; z-index: 6; left: 10px; bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .04em; color: #fff; background: rgba(27,27,34,.72); border-radius: 999px; padding: 0 10px; pointer-events: none; }
+.demo-note { font-size: 12.5px; color: var(--sub); margin-top: 10px; padding: 8px 12px; border: 1px dashed var(--ac-line); border-radius: 10px; background: #fff; }
+.demo-note b { color: var(--ac); }
+.vctl .btn:not(.solid), .tools .btn:not(.solid) { min-height: 40px; padding: 4px 14px; }
+.se2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.se2 figure { margin: 0; }
+.se2 svg { width: 100%; height: auto; display: block; border-radius: 8px; border: 1px solid var(--ac-line); }
+.se2 figcaption { font-size: 11.5px; font-weight: 700; color: var(--sub); margin-top: 2px; }
+.se-text { font-size: 12.5px; color: #38415a; margin-top: 8px; line-height: 1.6; }
+.se-text b { color: var(--ac); }
+
+/* ===== このページ専用 ===== */
+
+  .hero-art { width: 210px; }
+  .depth { position: relative; aspect-ratio: 16 / 10; border-radius: 16px; background: linear-gradient(#ffe0c4, #fff4e8 60%, #e8d3bd 60%); box-shadow: 0 20px 40px -20px rgba(239,59,75,.55); overflow: hidden; }
+  .depth i { position: absolute; bottom: 18%; border-radius: 3px 3px 0 0; }
+  .depth i:nth-child(1) { left: 10%; width: 14%; height: 26%; background: #e7b08c; }
+  .depth i:nth-child(2) { left: 56%; width: 12%; height: 34%; background: #e7b08c; }
+  .depth i:nth-child(3) { left: 34%; width: 7%; height: 42%; background: #ef3b4b; bottom: 6%; }
+  .depth i:nth-child(4) { left: 76%; width: 7%; height: 42%; background: #ef3b4b; bottom: 6%; }
+
+  .rel { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 14px; align-items: stretch; }
+  .rel .big { border: 2px solid var(--ac); border-radius: 18px; padding: 14px 16px 16px; background: var(--ac-soft); }
+  .rel .big h3 { font-size: 17px; margin-bottom: 2px; }
+  .rel .big p, .rel .zoom p { font-size: 13.5px; color: #38415a; }
+  .rel .in { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .rel .in span { font-size: 13px; font-weight: 700; background: #fff; border: 1px solid var(--ac-line); border-radius: 12px; padding: 6px 12px; }
+  .rel .in span.dolly { border: 2px solid var(--ac); color: var(--ac); }
+  .rel .zoom { border: 2px dashed var(--ac-line); border-radius: 18px; padding: 14px 16px 16px; background: #fff; }
+  .rel .zoom h3 { font-size: 17px; margin-bottom: 2px; }
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+  .three .card h3 { font-size: 18px; margin-bottom: 2px; }
+
+  .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .col { min-width: 0; border: 1px solid var(--line); border-radius: 16px; padding: 12px; background: #fff; }
+  .col h3 { font-size: 17px; line-height: 1.4; margin-bottom: 2px; }
+  .col h3 small { display: block; font-size: 12.5px; font-weight: 600; color: var(--sub); }
+  .col .vframe { margin-top: 8px; }
+  .top { width: 100%; height: auto; display: block; margin-top: 8px; background: #fff8f0; border: 1px solid var(--ac-line); border-radius: 10px; }
+  .topcap { font-size: 11.5px; color: var(--sub); margin-top: 4px; }
+  .col .chips2 li { font-size: 12.5px; }
+  .pt { margin-top: 14px; }
+  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } .three { grid-template-columns: 1fr; } .rel { grid-template-columns: 1fr; } .hero-art { display: none; } }
+
+</style>
+</head>
+<body>
+<script>
+// 動画Tips共通ヘルパー（自動再生はしない。動きは「▶」やスライダーの操作でだけ動く）
+(() => {
+  const mq = matchMedia('(prefers-reduced-motion: reduce)');
+  const note = () => document.querySelectorAll('.rm-note').forEach((n) => { n.hidden = !mq.matches; });
+  // 共通スクリプトは本文より前に読み込まれるため、本文の生成後にも実行する
+  document.addEventListener('DOMContentLoaded', note); note(); if (mq.addEventListener) mq.addEventListener('change', note);
+  window.V = {
+    // 「動きを減らす」設定のとき true。教材の動きは操作したときだけ動かす（止めない）。補間の滑らかさだけ省く場面で使う
+    reduced: () => mq.matches,
+    lerp: (a, b, t) => a + (b - a) * t,
+    clamp: (v, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v)),
+    ease: (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2),
+    // duration(ms) かけて 0→1 を cb(t) に渡す。戻り値は中断関数
+    run(duration, cb, done) {
+      let id = 0, t0 = 0, dead = false;
+      const step = (now) => {
+        if (dead) return; if (!t0) t0 = now;
+        const t = Math.min(1, (now - t0) / duration); cb(t);
+        if (t < 1) id = requestAnimationFrame(step); else if (done) done();
+      };
+      id = requestAnimationFrame(step);
+      return () => { dead = true; cancelAnimationFrame(id); };
+    },
+  };
+})();
+// 「動きを減らす」設定のときは、なめらかな補間ではなく「コマ送り」（10段階）で進める。
+// 動き自体は消さず、操作したときだけ・少ない動きで確認できるようにする。
+(() => {
+  const run = window.V.run;
+  window.V.run = (duration, cb, done) => {
+    if (!window.V.reduced()) return run(duration, cb, done);
+    let last = -1;
+    return run(duration, (t) => { const k = Math.round(t * 10); if (k !== last) { last = k; cb(k / 10); } }, done);
+  };
+})();
+
+</script>
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <div class="pill-row rise"><span class="series">動画制作でよく聞くこれ何？</span><span class="tipno">TIPS V-05 / カメラの動き</span></div>
+      <h1 class="rise" style="--i:1">カメラが動く？画角だけ変わる？<br>ドリー・トラッキング・ズームの違い</h1>
+      <p class="lead rise" style="--i:2">似て見える動きでも、<b>カメラ自体が動くのか、被写体を追うのか、画角だけ変えるのか</b>で意味が違う。</p>
+      <div class="meta rise" style="--i:3"><span>難易度：初級</span><span>商品紹介・店舗紹介・ショート動画・AI動画生成の指示に</span><span>3つを並べて動かせるデモつき</span></div>
+      <ol class="flow rise" style="--i:4" aria-label="シリーズの流れ">
+        <li>画角</li><li>パン／ティルト</li><li class="now">ドリー／トラッキング／ズーム</li><li>Bロール</li><li>カット／フェード</li><li>フレームレート</li>
+      </ol>
+    </div>
+    <div class="hero-art rise" style="--i:2" aria-hidden="true"><div class="depth"><i></i><i></i><i></i><i></i></div></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">1</span><h2>まず、3つの違いと関係</h2></div>
+    <p class="sec-sub">3つは「完全に別物」というより、<b>何が動いているか</b>の違いです。特にトラッキングは、ドリーを含む広い言い方です。</p>
+    <div class="rel">
+      <div class="big"><h3>トラッキング</h3><p>被写体の動きに合わせて、カメラが移動しながら追う撮り方（広い言い方）。</p>
+        <div class="in"><span class="dolly">ドリー：カメラ自体が移動する（台車やレールなど）</span><span>ドリー以外の方法で追う場合も</span></div></div>
+      <div class="zoom"><h3>ズーム</h3><p>カメラ位置は動かず、<b>レンズの画角が変わる</b>。カメラの移動とは別の操作です。</p></div>
+    </div>
+    <div class="three">
+      <div class="card"><div class="kicker">DOLLY</div><h3>ドリー</h3><p>カメラ自体が前後（や左右）に移動する。</p></div>
+      <div class="card"><div class="kicker">TRACKING</div><h3>トラッキング</h3><p>被写体の動きに合わせてカメラが移動する。ドリーを使って実現する場合もある。</p></div>
+      <div class="card"><div class="kicker">ZOOM</div><h3>ズーム</h3><p>カメラ位置は動かず、レンズの画角が変わる。</p></div>
+    </div>
+    <p class="cap">出典：Adobe「Tracking shot examples」（ドリーショットはすべてトラッキングショットだが、トラッキングは必ずしもドリーを使うわけではない、と説明されています）ほか</p>
+  </section>
+
+  <section class="sec rise" id="demo">
+    <div class="sec-h"><span class="sec-n">2</span><h2>同じ被写体で、3つを並べて動かす</h2></div>
+    <p class="sec-sub">▶を押すか、スライダーを動かすと、3つが同時に同じ進み方で動きます。<b>手前の柱と奥のビルの見え方</b>が変わるかどうかに注目してください。</p>
+    <div class="tools stick-sm" role="group" aria-label="再生の操作">
+      <span class="lab">再生</span>
+      <button type="button" class="btn solid" id="play">▶ 再生</button>
+      <button type="button" class="btn" id="back" aria-label="コマ戻し（10%戻る）">◀ コマ</button><button type="button" class="btn" id="fwd" aria-label="コマ送り（10%進む）">コマ ▶</button>
+      <label class="scrub" for="prog">進み具合<input type="range" id="prog" min="0" max="100" value="60"><output id="o-prog" for="prog">60%</output></label>
+    </div>
+    <div class="cols teach">
+      <div class="col" data-mode="dolly"><h3>ドリー<small>カメラ自体が前に進む</small></h3>
+        <div class="vframe"><svg class="cam" viewBox="0 0 800 450" role="img" aria-label="ドリーの映像"></svg><div class="hud"><span class="tl rec">DOLLY</span></div><span class="demo-tag">疑似デモ</span></div>
+        <svg class="top" viewBox="0 0 240 200" role="img" aria-label="ドリーを上から見た図"></svg><p class="topcap">上から見た図（オレンジ＝今のカメラと写る範囲／赤い破線＝終了時の位置と動いた向き）</p>
+        <ul class="chips2 st" aria-live="polite"></ul>
+        <div class="se2"><figure><svg class="s0" viewBox="0 0 800 450" aria-hidden="true"></svg><figcaption>開始（0%）</figcaption></figure><figure><svg class="s1" viewBox="0 0 800 450" aria-hidden="true"></svg><figcaption>終了（100%）</figcaption></figure></div><p class="se-text"><b>開始→終了：</b>カメラが約5m前へ進む。手前の柱は大きく動いて見え、奥のビルはあまり変わらない。</p></div>
+      <div class="col" data-mode="tracking"><h3>トラッキング<small>人物を追って、カメラが横に動く</small></h3>
+        <div class="vframe"><svg class="cam" viewBox="0 0 800 450" role="img" aria-label="トラッキングの映像"></svg><div class="hud"><span class="tl rec">TRACKING</span></div><span class="demo-tag">疑似デモ</span></div>
+        <svg class="top" viewBox="0 0 240 200" role="img" aria-label="トラッキングを上から見た図"></svg><p class="topcap">上から見た図（オレンジ＝今のカメラと写る範囲／赤い破線＝終了時の位置と動いた向き）</p>
+        <ul class="chips2 st" aria-live="polite"></ul>
+        <div class="se2"><figure><svg class="s0" viewBox="0 0 800 450" aria-hidden="true"></svg><figcaption>開始（0%）</figcaption></figure><figure><svg class="s1" viewBox="0 0 800 450" aria-hidden="true"></svg><figcaption>終了（100%）</figcaption></figure></div><p class="se-text"><b>開始→終了：</b>歩く人物を、カメラが横に動いて追う。人物は画面の中央のまま、背景が流れる（手前ほど速く）。</p></div>
+      <div class="col" data-mode="zoom"><h3>ズーム<small>カメラはそのまま、画角だけ変える</small></h3>
+        <div class="vframe"><svg class="cam" viewBox="0 0 800 450" role="img" aria-label="ズームの映像"></svg><div class="hud"><span class="tl rec">ZOOM</span></div><span class="demo-tag">疑似デモ</span></div>
+        <svg class="top" viewBox="0 0 240 200" role="img" aria-label="ズームを上から見た図"></svg><p class="topcap">上から見た図（オレンジ＝今のカメラと写る範囲／赤い破線＝終了時の位置と動いた向き）</p>
+        <ul class="chips2 st" aria-live="polite"></ul>
+        <div class="se2"><figure><svg class="s0" viewBox="0 0 800 450" aria-hidden="true"></svg><figcaption>開始（0%）</figcaption></figure><figure><svg class="s1" viewBox="0 0 800 450" aria-hidden="true"></svg><figcaption>終了（100%）</figcaption></figure></div><p class="se-text"><b>開始→終了：</b>カメラの位置は同じまま、画角だけが狭くなる。画面全体が同じ比率で大きくなる。</p></div>
+    </div>
+    <p class="verdict pt" id="point"><b>見分けるコツ：</b>手前の柱と奥のビルの<b>位置関係</b>が変わっていたら、カメラ自体が動いています。ズームでは、全体が同じ比率で大きくなるだけで、位置関係は変わりません。</p>
+    <p class="demo-note"><b>疑似デモです。</b>実際の撮影映像や、実際のカメラ・レンズの光学特性を再現するものではありません。遠近の計算で描いた簡易的な表現で、「何が動いていて、見え方がどう違うか」を理解するためのものです。</p>
+    <p class="rm-note" role="note" hidden>お使いの端末は「動きを減らす」設定です。自動では動きません。▶再生は、なめらかな動きではなく10段階のコマ送りで進みます。スライダーや「コマ送り」ボタンでも確認できます。</p>
+    <noscript><p class="demo-note">JavaScriptが無効のため、デモは動きません。各カラムの「開始→終了」の説明が、動きを文章で示したものです。</p></noscript>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">3</span><h2>実務での使いどころ</h2></div>
+    <p class="sec-sub">動きの名前で、撮影や制作の指示を分けて伝えられます。</p>
+    <div class="grid3">
+      <div class="card"><div class="kicker">商品紹介</div><p>商品に近づく「ドリーイン」で奥行きを見せる。同じ寄りでも、ズームは奥行きの変化が出ないぶん平面的に見えやすい。</p></div>
+      <div class="card"><div class="kicker">店舗・施設紹介</div><p>歩くスタッフを横から追うトラッキングで、お店の中の広がりを見せる。</p></div>
+      <div class="card"><div class="kicker">ショート動画・AI動画生成</div><p>「カメラが前に進む（dolly in）」「人物を追う（tracking shot）」「ズームイン（zoom in）」のように、動きを分けて指示する。</p></div>
+    </div>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">4</span><h2>判断するときのポイント</h2></div>
+    <ol class="steps">
+      <li><h3>「何が動いているか」を先に決める</h3><p>カメラ自体が動くのか、被写体を追うのか、レンズの画角だけを変えるのか。ここが決まれば、言葉は自然に決まります。</p></li>
+      <li><h3>奥行きを見せたいか、寄りたいだけかを考える</h3><p>手前と奥の見え方（遠近感）を変えたいなら、カメラを動かす（ドリー・トラッキング）。画面の大きさだけ変えたいなら、ズームです。</p></li>
+      <li><h3>言葉の使い分けは、現場で確認する</h3><p>ドリーとトラッキングは重なる言葉です。誤解を避けるため、「カメラが前に進む」「人物の横を一緒に動く」のように動きを言葉でも添えます。</p></li>
+    </ol>
+    <ul class="chk" style="margin-top:18px">
+      <li>動くのは、カメラ位置か、レンズの画角か</li>
+      <li>手前と奥の位置関係を変えたいか</li>
+      <li>指示に、動き（前に進む・追う）も言葉で添えたか</li>
+    </ul>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">5</span><h2>注意点</h2></div>
+    <div class="notes">
+      <div class="note warn"><h3>ドリーとトラッキングは重なる言葉</h3>資料や現場で、同じ意味で使われることもあります。ここでは初心者向けに、「ドリー＝カメラ自体が移動」「トラッキング＝被写体を追って移動」と整理しましたが、完全に別のものではありません。</div>
+      <div class="note warn"><h3>ズームとドリーは、見た目が似ても同じではない</h3>ズームは画面全体が同じ比率で大きく（小さく）なり、手前と奥の関係は変わりません。カメラが動くと、手前の物ほど大きく動いて見えます（デモの柱とビルの動きの違い）。</div>
+    </div>
+  </section>
+
+  <section class="refs">
+    <h2>参考・出典</h2>
+    <ul>
+      <li><a href="https://www.adobe.com/eg_en/creativecloud/video/production/cinematography/camera-shots-and-angles/tracking-shot.html" target="_blank" rel="noopener">Adobe「Tracking shot examples」</a>（スプレッドシート記載の参考URL）</li>
+      <li><a href="https://www.adobe.com/creativecloud/video/production/cinematography/camera-shots-and-angles/dolly-zoom-shot.html" target="_blank" rel="noopener">Adobe「What is a dolly zoom: How to film the Vertigo effect」</a>（補足：ズームは焦点距離を変える操作、ドリーはカメラ移動）</li>
+    </ul>
+    <p class="by">デモは遠近の計算で描いた簡易的な疑似映像で、実際の撮影映像ではありません。</p>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const W = 800, H = 450, HZ = 250, CAMH = 1.5, F0 = 420, SZ = 10; // 画面・地平線・カメラの高さ・基準の画角・人物までの奥行き
+  // 遠近投影: 画面x = 400 + (x - cx) * f / (z - cz)
+  const P = (x, yUp, z, c) => { const s = c.f / (z - c.cz); return [W / 2 + (x - c.cx) * s, HZ - (yUp - CAMH) * s]; };
+  const poly = (pts, fill, extra = '') => '<polygon points="' + pts.map((p) => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ') + '" fill="' + fill + '" ' + extra + '/>';
+  function camOf(mode, e) {
+    const c = { cx: 0, cz: 0, f: F0, sx: 0 };
+    if (mode === 'dolly') c.cz = 5 * e;
+    if (mode === 'tracking') { c.sx = -6 + 12 * e; c.cx = c.sx; }
+    if (mode === 'zoom') c.f = F0 + F0 * e;
+    return c;
+  }
+  const BUILD = [[-16, -10, 7, '#e7b08c'], [-8, -3, 5, '#f0c6a6'], [5, 12, 9, '#e0a27c'], [14, 20, 6, '#ecbd9c']];
+  const MOUNT = [[-90, 0], [-60, 11], [-40, 5], [-15, 15], [10, 7], [30, 16], [60, 6], [90, 0]];
+  function scene(c, e) {
+    let g = '<rect width="800" height="450" fill="#fff0e0"/>' + '<rect y="0" width="800" height="250" fill="#ffe3c8"/>';
+    g += poly(MOUNT.map(([x, h]) => P(x, h, 80, c)).concat([P(90, -3, 80, c), P(-90, -3, 80, c)]), '#e9b9a0');
+    g += '<rect y="250" width="800" height="200" fill="#e4cdb5"/>';
+    // 建物（z=24）
+    for (const [x0, x1, h, col] of BUILD) { if (24 - c.cz < 0.5) continue; const a = P(x0, h, 24, c), b = P(x1, 0, 24, c); g += '<rect x="' + a[0].toFixed(1) + '" y="' + a[1].toFixed(1) + '" width="' + (b[0] - a[0]).toFixed(1) + '" height="' + (b[1] - a[1]).toFixed(1) + '" fill="' + col + '"/>'; }
+    // 道路の白線（x=0）
+    for (let z = 1; z < 60; z += 3) { if (z - c.cz < 0.4) continue; const z2 = z + 1.4; const q = [P(-0.12, 0, z, c), P(0.12, 0, z, c), P(0.12, 0, z2, c), P(-0.12, 0, z2, c)]; g += poly(q, '#fff6ea'); }
+    // 街灯（z=15）
+    for (const x of [-5.5, 5.5]) { if (15 - c.cz < 0.5) continue; const a = P(x - 0.08, 4.5, 15, c), b = P(x + 0.08, 0, 15, c); g += '<rect x="' + a[0].toFixed(1) + '" y="' + a[1].toFixed(1) + '" width="' + Math.max(1, b[0] - a[0]).toFixed(1) + '" height="' + (b[1] - a[1]).toFixed(1) + '" fill="#8a7d73"/>'; }
+    // 人物（z=10）
+    if (SZ - c.cz > 0.5) {
+      const s = c.f / (SZ - c.cz), sx = c.sx, ph = Math.sin(e * 60) * 0.18;
+      const feet = P(sx, 0, SZ, c), head = P(sx, 1.62, SZ, c), top = P(sx, 1.5, SZ, c), mid = P(sx, 0.85, SZ, c);
+      g += '<line x1="' + feet[0] + '" y1="' + feet[1] + '" x2="' + (mid[0] + ph * s) + '" y2="' + mid[1] + '" stroke="#2f3b5c" stroke-width="' + (0.16 * s).toFixed(1) + '" stroke-linecap="round"/>';
+      g += '<line x1="' + (feet[0] + 0.25 * s * (c.sx !== 0 ? 0.6 : 0)) + '" y1="' + feet[1] + '" x2="' + (mid[0] - ph * s) + '" y2="' + mid[1] + '" stroke="#2f3b5c" stroke-width="' + (0.16 * s).toFixed(1) + '" stroke-linecap="round"/>';
+      g += '<rect x="' + (mid[0] - 0.28 * s).toFixed(1) + '" y="' + top[1].toFixed(1) + '" width="' + (0.56 * s).toFixed(1) + '" height="' + (mid[1] - top[1]).toFixed(1) + '" rx="' + (0.1 * s).toFixed(1) + '" fill="#ef3b4b"/>';
+      g += '<circle cx="' + head[0].toFixed(1) + '" cy="' + head[1].toFixed(1) + '" r="' + (0.2 * s).toFixed(1) + '" fill="#f5cfae"/>';
+    }
+    // 手前の柱（z=6）
+    for (const x of [-4, 4]) { if (6 - c.cz < 0.5) continue; const a = P(x - 0.15, 1.3, 6, c), b = P(x + 0.15, 0, 6, c); g += '<rect x="' + a[0].toFixed(1) + '" y="' + a[1].toFixed(1) + '" width="' + (b[0] - a[0]).toFixed(1) + '" height="' + (b[1] - a[1]).toFixed(1) + '" fill="#ff7a45" stroke="#b4321f" stroke-width="2"/>'; }
+    return g;
+  }
+  // 上から見た図: x∈[-14,14] z∈[-1,28]
+  const TX = (x) => 120 + x * 7.8, TZ = (z) => 188 - (z + 1) * 6.2;
+  function top(c, endC, st) {
+    let g = '<rect x="0" y="0" width="240" height="200" fill="#fff8f0"/><line x1="120" y1="190" x2="120" y2="14" stroke="#e5cdb5" stroke-width="2" stroke-dasharray="4 4"/>';
+    g += '<rect x="6" y="6" width="228" height="12" rx="3" fill="#e9b9a0"/><text x="120" y="15.5" text-anchor="middle" font-size="9" fill="#7a4a36" font-family="sans-serif">遠景（山）</text>';
+    for (const [x0, x1] of BUILD) g += '<rect x="' + TX(x0) + '" y="' + (TZ(24) - 4) + '" width="' + (TX(x1) - TX(x0)) + '" height="8" fill="#e0a27c"/>';
+    g += '<text x="120" y="' + (TZ(24) - 8) + '" text-anchor="middle" font-size="9" fill="#7a4a36" font-family="sans-serif">ビル</text>';
+    for (const x of [-5.5, 5.5]) g += '<circle cx="' + TX(x) + '" cy="' + TZ(15) + '" r="3" fill="#8a7d73"/>';
+    for (const x of [-4, 4]) g += '<rect x="' + (TX(x) - 3.5) + '" y="' + (TZ(6) - 3.5) + '" width="7" height="7" fill="#ff7a45" stroke="#b4321f"/>';
+    g += '<text x="' + (TX(4) + 8) + '" y="' + (TZ(6) + 3) + '" font-size="9" fill="#b4321f" font-family="sans-serif">柱</text>';
+    // 写る範囲（くさび）
+    const half = Math.atan((W / 2) / c.f), L = 14, wx = Math.tan(half) * L;
+    g += '<polygon points="' + TX(c.cx) + ',' + TZ(c.cz) + ' ' + TX(c.cx - wx) + ',' + TZ(c.cz + L) + ' ' + TX(c.cx + wx) + ',' + TZ(c.cz + L) + '" fill="rgba(255,122,69,.22)" stroke="#ff7a45" stroke-width="1"/>';
+    g += '<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#b4321f"/></marker></defs>';
+    if (endC) {
+      const h2 = Math.atan((W / 2) / endC.f), w2 = Math.tan(h2) * L;
+      g += '<polygon points="' + TX(endC.cx) + ',' + TZ(endC.cz) + ' ' + TX(endC.cx - w2) + ',' + TZ(endC.cz + L) + ' ' + TX(endC.cx + w2) + ',' + TZ(endC.cz + L) + '" fill="none" stroke="#b4321f" stroke-width="1.2" stroke-dasharray="4 3"/>';
+      if (Math.hypot(endC.cx - st.cx, endC.cz - st.cz) > 0.05) g += '<line x1="' + TX(st.cx) + '" y1="' + TZ(st.cz) + '" x2="' + TX(endC.cx) + '" y2="' + TZ(endC.cz) + '" stroke="#b4321f" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#ar)"/>';
+      if (endC.sx !== 0) g += '<line x1="' + TX(-6) + '" y1="' + TZ(SZ) + '" x2="' + TX(6) + '" y2="' + TZ(SZ) + '" stroke="#ef3b4b" stroke-width="2" stroke-dasharray="2 3" marker-end="url(#ar)"/>';
+    }
+    g += '<circle cx="' + TX(st.cx) + '" cy="' + TZ(st.cz) + '" r="5" fill="none" stroke="#b4321f" stroke-dasharray="3 2"/>';
+    g += '<circle cx="' + TX(c.sx) + '" cy="' + TZ(SZ) + '" r="5" fill="#ef3b4b" stroke="#fff" stroke-width="1.5"/>';
+    g += '<g transform="translate(' + TX(c.cx) + ' ' + TZ(c.cz) + ')"><rect x="-8" y="-5" width="16" height="10" rx="2" fill="#b4321f"/><path d="M8 -3 L14 -6 L14 6 L8 3Z" fill="#b4321f"/></g>';
+    return g;
+  }
+  const norm0 = (-4) * F0 / 6 - 5 * F0 / 24; // 手前の柱と奥のビルの位置関係（開始時）
+  function chips(mode, c, st) {
+    const m = c.f / st.f, move = Math.hypot(c.cx - st.cx, c.cz - st.cz) > 0.05, lens = Math.abs(c.f - st.f) > 0.5;
+    const rel = (k) => ((-4 - k.cx) * k.f / (6 - k.cz) - (5 - k.cx) * k.f / (24 - k.cz)) / (k.f / st.f), par = Math.abs(rel(c) - rel(st)) > 1.5;
+    const row = (n, v, ok) => '<li><span>' + n + '</span><span class="st ' + (ok ? 'on' : 'off') + '">' + v + '</span></li>';
+    return row('カメラの位置', move ? '動いている' : '動かない', move) + row('レンズの画角', lens ? '変わっている' : '変わらない', lens) + row('手前と奥の見え方', par ? '変わっている' : '変わらない', par);
+  }
+  const cols = [...document.querySelectorAll('.col')];
+  cols.forEach((col) => { const m = col.dataset.mode; $('.s0', col).innerHTML = scene(camOf(m, 0), 0); $('.s1', col).innerHTML = scene(camOf(m, 1), 1); });
+  const prog = $('#prog'), out = $('#o-prog'), play = $('#play');
+  function render() {
+    const e = prog.value / 100; out.textContent = prog.value + '%';
+    for (const col of cols) {
+      const mode = col.dataset.mode, c = camOf(mode, e);
+      $('.cam', col).innerHTML = scene(c, e); $('.top', col).innerHTML = top(c, camOf(mode, 1), camOf(mode, 0)); $('.st', col).innerHTML = chips(mode, c, camOf(mode, 0));
+    }
+  }
+  let stop = null;
+  function halt() { if (stop) stop(); stop = null; play.textContent = '▶ 再生'; }
+  play.addEventListener('click', () => {
+    if (stop) { halt(); return; }
+    let p0 = +prog.value; if (p0 >= 99) p0 = 0;
+    play.textContent = '⏸ 一時停止';
+    stop = V.run(4200 * (1 - p0 / 100), (t) => { prog.value = Math.round(p0 + (100 - p0) * t); render(); }, () => { stop = null; play.textContent = '▶ もう一度'; });
+  });
+  prog.addEventListener('input', () => { halt(); render(); });
+  const stepBy = (d) => { halt(); prog.value = Math.max(0, Math.min(100, Math.round(+prog.value / 10) * 10 + d)); render(); };
+  $('#back').addEventListener('click', () => stepBy(-10));
+  $('#fwd').addEventListener('click', () => stepBy(10));
+  render();
+})();
+</script>
+</body>
+</html>

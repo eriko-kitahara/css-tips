@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ja" data-series="video">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>映像より先に声が聞こえる？ Jカット・Lカットって何？｜動画制作でよく聞くこれ何？</title>
+<style>
+/* ===== シリーズTips 共通ベース（既存CSS Tipsの作法を踏襲：トークン / .rise / reduced-motion / 640px以下は1カラム） ===== */
+:root {
+  --ink: #1b1f2a;
+  --sub: #566074;
+  --line: #e5e8ee;
+  --bg: #f4f6f9;
+  --ease: cubic-bezier(.22, .7, .25, 1);
+  --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", "Meiryo", sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Roboto Mono", Menlo, monospace;
+  --ok: #17683a; --ok-soft: #e8f5ec;
+  --ng: #b42318; --ng-soft: #fdecea;
+  color-scheme: light;
+}
+/* ----- シリーズ別カラー（c1→c2 のグラデーション。--ac は白地の文字に使える濃い色） ----- */
+[data-series="css"]    { --c1:#3b9cf6; --c2:#19c3d6; --ac:#1a5fa6; --ac-soft:#e8f3fd; --ac-line:#bcdaf3; --page:#f1f7fc; --hero:linear-gradient(135deg,#dff0ff,#d9f7fa); }
+[data-series="design"] { --c1:#ff5fa2; --c2:#8b5cf6; --ac:#9d2a72; --ac-soft:#fbeef6; --ac-line:#efc9e2; --page:#fbf6fa; --hero:linear-gradient(135deg,#ffe4f0,#ece5ff); }
+[data-series="ai"]     { --c1:#b6e04a; --c2:#22a861; --ac:#17683a; --ac-soft:#eef8e4; --ac-line:#cde7b2; --page:#f5f9ef; --hero:linear-gradient(135deg,#eefad0,#d8f3e2); }
+[data-series="video"]  { --c1:#ff9f43; --c2:#ef3b4b; --ac:#b4321f; --ac-soft:#fff1ea; --ac-line:#f6cdb8; --page:#fcf7f3; --hero:linear-gradient(135deg,#ffeedb,#ffe1e3); }
+:root { --grad: linear-gradient(90deg, var(--c1), var(--c2)); }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--page); color: var(--ink); font-family: var(--font); line-height: 1.75; -webkit-font-smoothing: antialiased; }
+a { color: var(--ac); text-underline-offset: 3px; }
+code, pre, kbd { font-family: var(--mono); }
+img, svg { max-width: 100%; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+/* ===== Motion（opacity:0 は keyframes 側のみ＝動きを切っても内容は必ず見える） ===== */
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+@keyframes pop  { from { opacity: 0; transform: scale(.94); } }
+.rise { animation: rise .5s var(--ease) calc(var(--i, 0) * 80ms) backwards; }
+/* 「動きを減らす」設定: 装飾の動きだけを止める。
+   教材として見せる動き（.teach の中身）は止めない＝動きそのものが学習内容のため。
+   教材側は、自動再生しない・ボタンで再生・コマ送りできる、という代替手段を別に用意する。 */
+@media (prefers-reduced-motion: reduce) {
+  *:not(.teach):not(.teach *), *:not(.teach):not(.teach *)::before, *:not(.teach):not(.teach *)::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* ===== Hero ===== */
+.hero { position: relative; overflow: hidden; background: var(--hero); border-bottom: 1px solid var(--ac-line); padding: 0 0 44px; }
+.hero::before { content: ""; display: block; height: 6px; background: var(--grad); }
+.hero::after { content: ""; position: absolute; right: -90px; top: -70px; width: 340px; height: 340px; border-radius: 50%; background: var(--grad); opacity: .16; pointer-events: none; }
+.hero .wrap { position: relative; z-index: 1; padding-top: 28px; display: grid; grid-template-columns: 1fr auto; gap: 24px 40px; align-items: center; }
+.pill-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.series { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; letter-spacing: .04em; color: var(--ac); background: #fff; border: 1px solid var(--ac-line); border-radius: 999px; padding: 4px 14px 4px 10px; }
+.series::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--grad); }
+.tipno { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--sub); }
+h1 { font-size: clamp(25px, 4.4vw, 38px); line-height: 1.4; letter-spacing: .01em; margin: 16px 0 14px; font-weight: 800; }
+.lead { font-size: clamp(15px, 2vw, 17px); color: #38415a; max-width: 38em; }
+.lead b { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--c1) 35%, transparent) 62%); font-weight: 700; }
+.hero-art { width: 200px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.meta span { font-size: 12px; color: var(--sub); background: rgba(255,255,255,.75); border: 1px solid var(--ac-line); border-radius: 999px; padding: 1px 12px; }
+
+/* ===== Section ===== */
+main { padding: 36px 0 24px; }
+.sec { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 30px 32px 32px; margin-bottom: 22px; box-shadow: 0 1px 2px rgba(27,31,42,.04), 0 18px 40px -26px rgba(27,31,42,.22); }
+.sec-h { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.sec-n { flex: none; width: 30px; height: 30px; border-radius: 10px; background: var(--grad); color: #1b1f2a; display: grid; place-items: center; font-size: 14px; font-weight: 800; }
+[data-series="design"] .sec-n, [data-series="video"] .sec-n { color: #fff; }
+h2 { font-size: clamp(19px, 2.8vw, 23px); line-height: 1.45; font-weight: 800; }
+.sec-sub { color: var(--sub); font-size: 14.5px; margin: 0 0 20px 42px; }
+h3 { font-size: 16px; line-height: 1.5; }
+p + p { margin-top: .8em; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.card { background: var(--ac-soft); border: 1px solid var(--ac-line); border-radius: 16px; padding: 18px 20px; transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
+.card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -16px rgba(27,31,42,.35); }
+.card .kicker { font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--ac); }
+.card .big { font-size: 28px; font-weight: 800; line-height: 1.3; margin: 4px 0 4px; }
+.card p { font-size: 14px; color: #38415a; }
+
+/* ===== Before / After ===== */
+.ba { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; position: relative; }
+.pane { min-width: 0; border: 1px solid var(--line); border-radius: 16px; padding: 18px; background: #fff; }
+.pane.after { border-color: var(--ac-line); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c2) 10%, transparent); }
+.pane-h { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.badge { flex: none; font-size: 11px; font-weight: 800; letter-spacing: .08em; border-radius: 999px; padding: 1px 11px; color: var(--sub); background: var(--bg); border: 1px solid var(--line); }
+.after .badge { color: #fff; background: var(--ac); border-color: var(--ac); }
+.pane-h h3 { font-size: 15px; }
+.cap { font-size: 13px; color: var(--sub); margin-top: 10px; }
+
+/* ===== Callout ===== */
+.note { border-radius: 14px; padding: 14px 18px 15px; font-size: 14.5px; background: var(--ac-soft); border: 1px solid var(--ac-line); }
+.note h3 { display: flex; align-items: center; gap: 8px; font-size: 13px; letter-spacing: .05em; color: var(--ac); margin-bottom: 3px; }
+.note h3::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.note.warn { background: #fff7e8; border-color: #efd7a6; }
+.note.warn h3 { color: #8a5300; }
+.notes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+/* ===== Code ===== */
+.code { margin: 14px 0 0; border-radius: 14px; overflow: hidden; border: 1px solid var(--ac-line); background: #f8faf8; }
+.code figcaption { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; font-weight: 800; letter-spacing: .06em; color: var(--ac); padding: 8px 14px; background: var(--ac-soft); border-bottom: 1px solid var(--ac-line); }
+.code pre { font-size: 13.5px; line-height: 1.75; padding: 14px 16px; overflow-x: auto; color: #23304a; tab-size: 2; }
+.code.dark { background: #14201a; border-color: #243a2d; }
+.code.dark figcaption { background: #1b2c22; color: #b9e78a; border-color: #243a2d; }
+.code.dark pre { color: #e4f1e0; }
+.btn { appearance: none; border: 1px solid var(--ac-line); background: #fff; color: var(--ac); font: inherit; font-size: 12px; font-weight: 800; letter-spacing: .04em; border-radius: 999px; padding: 3px 14px; cursor: pointer; transition: background .2s var(--ease), transform .2s var(--ease); }
+.btn:hover { background: var(--ac-soft); }
+.btn:active { transform: scale(.97); }
+.btn:focus-visible, input:focus-visible, summary:focus-visible, button:focus-visible { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 2px; }
+.btn.solid { background: var(--ac); border-color: var(--ac); color: #fff; padding: 6px 18px; font-size: 13.5px; }
+.btn.solid:hover { background: color-mix(in srgb, var(--ac) 88%, #000); }
+.tk-add { color: #0e6b32; background: #e3f6e8; } .tk-del { color: #a4281c; background: #fdeceb; }
+
+/* ===== Steps ===== */
+.steps { list-style: none; counter-reset: s; display: grid; gap: 12px; }
+.steps > li { counter-increment: s; position: relative; padding: 14px 16px 14px 58px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.steps > li::before { content: counter(s); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--grad); color: #1b1f2a; font-weight: 800; font-size: 14px; }
+[data-series="design"] .steps > li::before, [data-series="video"] .steps > li::before { color: #fff; }
+.steps h3 { font-size: 15.5px; }
+.steps p { font-size: 14px; color: #38415a; margin-top: 2px; }
+
+/* ===== Check list / refs ===== */
+.chk { list-style: none; display: grid; gap: 8px; }
+.chk li { position: relative; padding-left: 30px; font-size: 14.5px; }
+.chk li::before { content: "✓"; position: absolute; left: 0; top: 2px; width: 20px; height: 20px; border-radius: 6px; background: var(--ac); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 800; line-height: 1; }
+.refs { font-size: 13px; color: var(--sub); padding: 6px 4px 54px; }
+.refs h2 { font-size: 13px; letter-spacing: .08em; color: var(--sub); margin-bottom: 6px; }
+.refs li { margin-left: 1.2em; word-break: break-all; }
+.refs .by { margin-top: 10px; }
+.tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; padding: 0 9px; border-radius: 999px; }
+.tag.ok { color: var(--ok); background: var(--ok-soft); }
+.tag.ng { color: var(--ng); background: var(--ng-soft); }
+.rows .tag, .judge .tag { font-size: 0; }
+.rows .tag::before, .judge .tag::before { font-size: 11px; }
+.rows .tag.ok::before, .judge .tag.ok::before { content: "✓ OK"; }
+.rows .tag.ng::before, .judge .tag.ng::before { content: "✕ 不足"; }
+
+@media (max-width: 720px) {
+  .wrap { padding: 0 14px; }
+  .hero .wrap { grid-template-columns: 1fr; }
+  .hero-art { display: none; }
+  .sec { padding: 22px 16px 24px; border-radius: 16px; }
+  .sec-sub { margin-left: 0; }
+  .grid2, .grid3, .ba, .notes { grid-template-columns: 1fr; }
+}
+
+/* ===== 操作部品（design シリーズの追加ページ用。meta の "css":["parts.css"] で読み込む） ===== */
+.tools { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; margin: 0 0 16px; padding: 8px 14px; background: var(--ac-soft); border: 1px solid var(--ac-line); border-radius: 14px; }
+.tools .lab { font-size: 12.5px; font-weight: 800; color: var(--ac); letter-spacing: .04em; }
+.tools > * { min-width: 0; }
+
+/* トグルスイッチ（実体は checkbox。キーボードはスペースで切り替え） */
+.tgl { position: relative; display: inline-flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 700; cursor: pointer; min-height: 44px; }
+.tgl input { position: absolute; opacity: 0; width: 100%; height: 100%; left: 0; top: 0; margin: 0; cursor: pointer; }
+.tgl .sw { flex: none; width: 42px; height: 24px; border-radius: 999px; background: #b4bccb; position: relative; transition: background .2s var(--ease); }
+.tgl .sw::after { content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.35); transition: transform .2s var(--ease); }
+.tgl input:checked + .sw { background: var(--ac); }
+.tgl input:checked + .sw::after { transform: translateX(18px); }
+.tgl input:focus-visible + .sw { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 2px; }
+
+/* 切り替えボタン（実体は radio） */
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; border: 1px solid var(--ac-line); border-radius: 24px; background: #fff; padding: 3px; }
+.seg label { position: relative; cursor: pointer; }
+.seg input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.seg span { display: block; padding: 10px 15px; min-height: 42px; border-radius: 999px; font-size: 13px; font-weight: 800; line-height: 22px; color: var(--ac); }
+.seg input:checked + span { background: var(--ac); color: #fff; }
+.seg input:focus-visible + span { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 1px; }
+
+/* スライダー */
+.rng { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; font-size: 13.5px; font-weight: 700; min-height: 44px; }
+.rng input[type=range] { width: min(240px, 100%); accent-color: var(--ac); height: 28px; }
+.rng output { font-family: var(--mono); font-weight: 800; color: var(--ac); min-width: 4.2em; }
+
+/* 結果の読み上げ・まとめ欄 */
+.verdict { margin-top: 12px; padding: 12px 16px; border-radius: 12px; font-size: 14px; background: #fff; border: 1px solid var(--ac-line); border-left: 5px solid var(--c2); }
+.verdict b { color: var(--ac); }
+
+/* 選び方の表（カード型） */
+.pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pick .card .q { font-size: 14.5px; font-weight: 800; line-height: 1.5; margin: 2px 0 6px; }
+.pick .card p { font-size: 13.5px; }
+.pick .card .go { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 800; color: #fff; background: var(--ac); border-radius: 999px; padding: 1px 11px; }
+.fig { margin: 0; }
+.fig figcaption { font-size: 12.5px; color: var(--sub); margin-top: 8px; }
+.judge2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ctr-note { font-size: 12.5px; color: var(--sub); }
+
+@media (max-width: 720px) {
+  .seg { display: flex; width: 100%; }
+  .seg label { flex: 1 1 auto; }
+  .seg span { text-align: center; padding: 10px 10px; border-radius: 18px; }
+  .pick, .judge2 { grid-template-columns: 1fr; }
+  .tools { gap: 2px 14px; }
+}
+
+/* ===== 操作パネルの追従（デモのセクション内だけ。親の .sec を出たら追従終了） ===== */
+.tools.stick { position: sticky; top: 8px; z-index: 30; box-shadow: 0 10px 20px -14px rgba(27,31,42,.45); }
+.tools .tgt { font-size: 12.5px; font-weight: 700; color: var(--sub); }
+@media (max-width: 720px) {
+  /* スマホ幅: 追従パネルは小さくまとめる（ラベル・補足は省く。操作対象は直下のデモ） */
+  .tools.stick { top: 6px; padding: 4px 10px; gap: 0 12px; }
+  .tools.stick .lab, .tools.stick .tgt { display: none; }
+  .tools.stick .tgl, .tools.stick .rng { min-height: 40px; }
+  .tools.stick .seg span { padding: 7px 8px; min-height: 36px; line-height: 22px; }
+  .tools.stick .rng input[type=range] { height: 24px; }
+  .tools.stick .rng { flex-wrap: nowrap; gap: 0 8px; font-size: 12.5px; min-height: 36px; flex: 1 1 100%; }
+  .tools.stick .rng input[type=range] { flex: 1 1 60px; width: auto; min-width: 60px; }
+  .tools.stick .rng output { min-width: 3em; }
+  .tools.stick .tgl { min-height: 36px; font-size: 12.5px; }
+  .tools.stick .seg { flex: 1 1 100%; }
+  /* 効果対象の隣に置く操作パネル（2列に詰めて縦を短く） */
+  .build .tools { grid-template-columns: 1fr 1fr; column-gap: 10px; }
+  .build .tools > .lab, .build .tools > .btnrow, .build .tools > .accn, .build .tools > .readout, .build .tools > .lever { grid-column: 1 / -1; }
+  .build .lever small { display: none; }
+}
+
+/* スマホ幅だけ追従する操作パネル（デモが縦に長くなる幅で、操作と結果を同時に見られるように。親の .sec を出たら追従終了） */
+@media (max-width: 720px) {
+  .tools.stick-sm { position: sticky; top: 6px; z-index: 30; box-shadow: 0 10px 20px -14px rgba(27,31,42,.45); padding: 4px 10px; gap: 0 12px; }
+  .tools.stick-sm .lab, .tools.stick-sm .tgt { display: none; }
+  .tools.stick-sm .tgl { min-height: 36px; font-size: 12.5px; }
+  .tools.stick-sm .seg { flex: 1 1 100%; }
+  .tools.stick-sm .seg span { padding: 7px 8px; min-height: 36px; line-height: 22px; }
+  .tools.stick-sm .rng { flex: 1 1 100%; flex-wrap: nowrap; gap: 0 8px; font-size: 12.5px; min-height: 36px; }
+  .tools.stick-sm .rng input[type=range] { flex: 1 1 60px; width: auto; min-width: 60px; height: 24px; }
+  .tools.stick-sm .btn, .tools.stick-sm .btn:not(.solid) { min-height: 36px; min-width: 0; padding: 4px 10px; font-size: 12px; }
+  .tools.stick-sm .scrub { flex: 1 1 100%; }
+}
+
+/* ===== 動画Tips（video シリーズ）共通部品。meta の "css":["parts.css","vparts.css"] と "js":["vparts.js"] で読み込む ===== */
+.flow { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin-top: 14px; counter-reset: f; }
+.flow li { counter-increment: f; font-size: 12px; font-weight: 700; padding: 2px 11px 2px 9px; border-radius: 999px; background: rgba(255,255,255,.75); border: 1px solid var(--ac-line); color: var(--sub); }
+.flow li::before { content: counter(f) " "; font-weight: 800; color: var(--ac); }
+.flow li.now { background: var(--grad); color: #fff; border-color: transparent; }
+.flow li.now::before { color: #fff; }
+
+.rm-note:not([hidden]) { margin: 0 0 12px; padding: 8px 14px; font-size: 13px; line-height: 1.6; color: #8a5300; background: #fff7e8; border: 1px solid #efd7a6; border-radius: 10px; }
+
+/* 映像の枠（ファインダー風） */
+.vframe { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 14px; background: #1b1b22; border: 3px solid #1b1b22; box-shadow: 0 16px 30px -18px rgba(27,31,42,.6); isolation: isolate; container-type: inline-size; }
+.vframe > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hud { position: absolute; z-index: 5; inset: 0; pointer-events: none; color: #fff; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-shadow: 0 1px 3px rgba(0,0,0,.65); }
+.hud span { position: absolute; }
+.hud .tl { left: 12px; top: 10px; } .hud .tr { right: 12px; top: 10px; } .hud .bl { left: 12px; bottom: 10px; } .hud .br { right: 12px; bottom: 10px; }
+.hud .rec::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ff3b3b; margin-right: 6px; vertical-align: 0; }
+
+/* 再生・スクラブ操作 */
+.vctl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 12px; }
+.vctl .btn.solid { min-height: 40px; min-width: 96px; }
+.scrub { display: flex; align-items: center; gap: 10px; flex: 1 1 220px; min-width: 0; font-size: 12.5px; font-weight: 700; }
+.scrub input[type=range] { flex: 1; min-width: 0; accent-color: var(--ac); height: 28px; }
+.scrub output { font-family: var(--mono); min-width: 4.4em; text-align: right; color: var(--ac); }
+
+.vcap { font-size: 13px; color: var(--sub); margin-top: 8px; }
+.vbig { font-size: 16px; font-weight: 800; line-height: 1.5; margin-top: 12px; }
+.vbig small { display: block; font-size: 13px; font-weight: 600; color: var(--sub); }
+
+/* 状態チップ（画面に残るもの、カメラ位置など） */
+.chips2 { display: grid; gap: 6px; margin-top: 10px; list-style: none; }
+.chips2 li { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; font-size: 13px; padding: 5px 10px; border-radius: 10px; background: #fff; border: 1px solid var(--line); }
+.chips2 .st { font-size: 11.5px; font-weight: 800; border-radius: 999px; padding: 0 10px; white-space: nowrap; }
+.chips2 .st.on { color: var(--ok); background: var(--ok-soft); }
+.chips2 .st.mid { color: #8a5300; background: #fff1d6; }
+.chips2 .st.off { color: #6b7080; background: #eceef3; }
+
+.vgrid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.vgrid > * { min-width: 0; }
+@media (max-width: 720px) { .vgrid { grid-template-columns: 1fr; } }
+
+/* ===== 教材デモ共通（.teach = 学習用の動き。装飾の動きとは別扱いで、reduced-motion でも止めない） ===== */
+.demo-tag { white-space: nowrap; max-width: calc(100% - 20px); overflow: hidden; text-overflow: ellipsis; position: absolute; z-index: 6; left: 10px; bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .04em; color: #fff; background: rgba(27,27,34,.72); border-radius: 999px; padding: 0 10px; pointer-events: none; }
+.demo-note { font-size: 12.5px; color: var(--sub); margin-top: 10px; padding: 8px 12px; border: 1px dashed var(--ac-line); border-radius: 10px; background: #fff; }
+.demo-note b { color: var(--ac); }
+.vctl .btn:not(.solid), .tools .btn:not(.solid) { min-height: 40px; padding: 4px 14px; }
+.se2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.se2 figure { margin: 0; }
+.se2 svg { width: 100%; height: auto; display: block; border-radius: 8px; border: 1px solid var(--ac-line); }
+.se2 figcaption { font-size: 11.5px; font-weight: 700; color: var(--sub); margin-top: 2px; }
+.se-text { font-size: 12.5px; color: #38415a; margin-top: 8px; line-height: 1.6; }
+.se-text b { color: var(--ac); }
+
+#stopBtn { min-width: 0; padding: 4px 12px; }
+
+/* ===== このページ専用 ===== */
+
+  .hero-art { width: 210px; }
+  .jl { display: grid; gap: 8px; }
+  .jl div { display: grid; grid-template-columns: 1fr 1fr; height: 26px; border-radius: 8px; overflow: hidden; box-shadow: 0 8px 18px -12px rgba(239,59,75,.6); }
+  .jl div i:nth-child(1) { background: #7c86a8; } .jl div i:nth-child(2) { background: #e8791f; }
+  .jl div.j { grid-template-columns: .7fr 1.3fr; } .jl div.l { grid-template-columns: 1.3fr .7fr; }
+
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .three .card h3 { font-size: 20px; margin-bottom: 2px; }
+  .three .card .en { font-size: 11.5px; font-weight: 800; letter-spacing: .08em; color: var(--ac); }
+  .three .card p { font-size: 13.5px; }
+  .three .card svg { width: 100%; height: auto; display: block; margin: 8px 0; background: #fff; border: 1px solid var(--ac-line); border-radius: 10px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--sub); margin-top: 8px; }
+  .legend i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -2px; margin-right: 5px; }
+
+  .demo2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  .demo2 > * { min-width: 0; }
+  .tline { --lw: 56px; margin-top: 0; display: grid; gap: 6px; font-size: 12px; }
+  .tline .rowwrap { position: relative; display: grid; gap: 6px; }
+  .tline .row { display: grid; grid-template-columns: var(--lw) minmax(0, 1fr); gap: 8px; align-items: center; }
+  .tline .nm { font-weight: 800; color: var(--sub); line-height: 1.3; }
+  .tline .trk { position: relative; height: 30px; background: var(--bg); border-radius: 6px; overflow: hidden; }
+  .tline .blk { position: absolute; top: 3px; bottom: 3px; border-radius: 5px; color: #fff; font-size: 11px; font-weight: 800; padding: 0 7px; display: flex; align-items: center; white-space: nowrap; overflow: hidden; }
+  .tline .a { background: #7c86a8; } .tline .b { background: #e8791f; }
+  .tline .ph { position: absolute; top: -2px; bottom: -2px; width: 2px; background: #1b1b22; z-index: 3; }
+  .tline .zone { position: absolute; top: -4px; bottom: -4px; border-radius: 8px; background: rgba(255, 211, 77, .28); border: 2px dashed #d99a00; z-index: 1; display: none; }
+  .tline .zlab { font-size: 11.5px; font-weight: 800; color: #8a5300; margin: 6px 0 0 calc(var(--lw) + 8px); min-height: 1.4em; }
+  .live { margin-top: 10px; display: grid; gap: 6px; }
+  .live div { display: grid; grid-template-columns: 54px 1fr; gap: 8px; align-items: center; padding: 6px 10px; border-radius: 10px; background: #fff; border: 1px solid var(--line); font-size: 13px; }
+  .live b { font-size: 12px; color: var(--sub); }
+  .live .v { font-weight: 800; }
+  .modetxt { margin-top: 10px; font-size: 13.5px; }
+  .strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+  .strip figure { margin: 0; }
+  .strip svg { width: 100%; height: auto; display: block; border-radius: 8px; border: 1px solid var(--ac-line); background: #000; }
+  .strip figcaption { font-size: 11.5px; font-weight: 700; color: #38415a; margin-top: 2px; line-height: 1.4; }
+  @media (max-width: 720px) { .three { grid-template-columns: 1fr; } .demo2 { grid-template-columns: 1fr; } .strip { grid-template-columns: 1fr 1fr; } .hero-art { display: none; } }
+
+</style>
+</head>
+<body>
+<script>
+// 動画Tips共通ヘルパー（自動再生はしない。動きは「▶」やスライダーの操作でだけ動く）
+(() => {
+  const mq = matchMedia('(prefers-reduced-motion: reduce)');
+  const note = () => document.querySelectorAll('.rm-note').forEach((n) => { n.hidden = !mq.matches; });
+  // 共通スクリプトは本文より前に読み込まれるため、本文の生成後にも実行する
+  document.addEventListener('DOMContentLoaded', note); note(); if (mq.addEventListener) mq.addEventListener('change', note);
+  window.V = {
+    // 「動きを減らす」設定のとき true。教材の動きは操作したときだけ動かす（止めない）。補間の滑らかさだけ省く場面で使う
+    reduced: () => mq.matches,
+    lerp: (a, b, t) => a + (b - a) * t,
+    clamp: (v, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v)),
+    ease: (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2),
+    // duration(ms) かけて 0→1 を cb(t) に渡す。戻り値は中断関数
+    run(duration, cb, done) {
+      let id = 0, t0 = 0, dead = false;
+      const step = (now) => {
+        if (dead) return; if (!t0) t0 = now;
+        const t = Math.min(1, (now - t0) / duration); cb(t);
+        if (t < 1) id = requestAnimationFrame(step); else if (done) done();
+      };
+      id = requestAnimationFrame(step);
+      return () => { dead = true; cancelAnimationFrame(id); };
+    },
+  };
+})();
+// 「動きを減らす」設定のときは、なめらかな補間ではなく「コマ送り」（10段階）で進める。
+// 動き自体は消さず、操作したときだけ・少ない動きで確認できるようにする。
+(() => {
+  const run = window.V.run;
+  window.V.run = (duration, cb, done) => {
+    if (!window.V.reduced()) return run(duration, cb, done);
+    let last = -1;
+    return run(duration, (t) => { const k = Math.round(t * 10); if (k !== last) { last = k; cb(k / 10); } }, done);
+  };
+})();
+
+</script>
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <div class="pill-row rise"><span class="series">動画制作でよく聞くこれ何？</span><span class="tipno">TIPS V-13 / Jカット・Lカット</span></div>
+      <h1 class="rise" style="--i:1">映像より先に声が聞こえる？<br>Jカット・Lカットって何？</h1>
+      <p class="lead rise" style="--i:2">映像と音声の切り替えタイミングを<b>ずらす</b>と、場面転換を自然につないだり、次の場面を予告したりできる。</p>
+      <div class="meta rise" style="--i:3"><span>難易度：初級</span><span>インタビュー・店舗紹介・ショート動画・解説動画の編集に</span><span>タイムラインで比べる再生デモつき</span></div>
+      <ol class="flow rise" style="--i:4" aria-label="シリーズの流れ">
+        <li>画角</li><li>パン／ティルト</li><li>ドリー／トラッキング／ズーム</li><li>Bロール</li><li>カット／フェード</li><li>フレームレート</li><li>シャッタースピード</li><li>ホワイトバランス</li><li>絞り・被写界深度</li><li class="now">Jカット／Lカット</li>
+      </ol>
+    </div>
+    <div class="hero-art rise" style="--i:2" aria-hidden="true"><div class="jl"><div><i></i><i></i></div><div class="j"><i></i><i></i></div><div class="l"><i></i><i></i></div></div></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">1</span><h2>まず、「映像と音声の切れ目がズレている」</h2></div>
+    <p class="sec-sub">名前を暗記するより、<b>映像の切れ目と、音声の切れ目が、同じ位置かズレているか</b>を見てください。</p>
+    <div class="three">
+      <div class="card"><div class="en">CUT</div><h3>通常のカット</h3>
+        <svg viewBox="0 0 220 74" role="img" aria-label="通常のカットのタイムライン"><text x="2" y="12" font-size="10" fill="#566074" font-family="sans-serif">映像</text><rect x="0" y="16" width="110" height="18" rx="4" fill="#7c86a8"/><rect x="110" y="16" width="110" height="18" rx="4" fill="#e8791f"/><text x="2" y="52" font-size="10" fill="#566074" font-family="sans-serif">音声</text><rect x="0" y="56" width="110" height="18" rx="4" fill="#7c86a8"/><rect x="110" y="56" width="110" height="18" rx="4" fill="#e8791f"/><line x1="110" x2="110" y1="14" y2="74" stroke="#1b1b22" stroke-width="2" stroke-dasharray="3 2"/></svg>
+        <p>映像と音声が、<b>同じタイミング</b>で次の場面に切り替わる。</p></div>
+      <div class="card"><div class="en">J CUT</div><h3>Jカット</h3>
+        <svg viewBox="0 0 220 74" role="img" aria-label="Jカットのタイムライン"><text x="2" y="12" font-size="10" fill="#566074" font-family="sans-serif">映像</text><rect x="0" y="16" width="110" height="18" rx="4" fill="#7c86a8"/><rect x="110" y="16" width="110" height="18" rx="4" fill="#e8791f"/><text x="2" y="52" font-size="10" fill="#566074" font-family="sans-serif">音声</text><rect x="0" y="56" width="76" height="18" rx="4" fill="#7c86a8"/><rect x="76" y="56" width="144" height="18" rx="4" fill="#e8791f"/><rect x="76" y="12" width="34" height="66" rx="5" fill="rgba(255,211,77,.3)" stroke="#d99a00" stroke-dasharray="3 2"/></svg>
+        <p>次の場面の<b>音が先</b>に聞こえてから、映像が切り替わる。</p></div>
+      <div class="card"><div class="en">L CUT</div><h3>Lカット</h3>
+        <svg viewBox="0 0 220 74" role="img" aria-label="Lカットのタイムライン"><text x="2" y="12" font-size="10" fill="#566074" font-family="sans-serif">映像</text><rect x="0" y="16" width="110" height="18" rx="4" fill="#7c86a8"/><rect x="110" y="16" width="110" height="18" rx="4" fill="#e8791f"/><text x="2" y="52" font-size="10" fill="#566074" font-family="sans-serif">音声</text><rect x="0" y="56" width="144" height="18" rx="4" fill="#7c86a8"/><rect x="144" y="56" width="76" height="18" rx="4" fill="#e8791f"/><rect x="110" y="12" width="34" height="66" rx="5" fill="rgba(255,211,77,.3)" stroke="#d99a00" stroke-dasharray="3 2"/></svg>
+        <p>前の場面の<b>音が残った</b>まま、映像だけ次の場面へ切り替わる。</p></div>
+    </div>
+    <div class="legend"><span><i style="background:#7c86a8"></i>場面A（外）</span><span><i style="background:#e8791f"></i>場面B（店内）</span><span><i style="background:rgba(255,211,77,.5);border:1px dashed #d99a00"></i>映像と音声がズレている部分</span></div>
+    <p class="cap">出典：Adobe「L cut: What is an L cut and J cut in film?」ほか（下部の参考欄）</p>
+  </section>
+
+  <section class="sec rise" id="demo">
+    <div class="sec-h"><span class="sec-n">2</span><h2>タイムラインを見ながら、再生して聞こえ方を比べる</h2></div>
+    <p class="sec-sub">場面A（お店の外）から、場面B（店内）へ切り替わります。<b>映像</b>と<b>音声</b>の切れ目が、モードで変わります。</p>
+    <div class="tools" role="group" aria-label="切り替え方と再生">
+      <span class="lab">切り替え方と再生</span>
+      <span class="seg" role="radiogroup" aria-label="切り替え方">
+        <label><input type="radio" name="mode" value="n" checked><span>通常</span></label>
+        <label><input type="radio" name="mode" value="j"><span>Jカット</span></label>
+        <label><input type="radio" name="mode" value="l"><span>Lカット</span></label>
+      </span>
+      <div class="vctl" style="flex:1 1 100%;margin-top:2px">
+        <button type="button" class="btn solid" id="play">▶ 再生</button>
+        <button type="button" class="btn" id="stopBtn" aria-label="停止" title="停止">■</button>
+        <button type="button" class="btn" id="back" aria-label="コマ戻し（0.5秒戻る）">◀ コマ</button><button type="button" class="btn" id="fwd" aria-label="コマ送り（0.5秒進む）">コマ ▶</button>
+        <label class="scrub" for="seek">時間<input type="range" id="seek" min="0" max="80" value="35"><output id="o-seek" for="seek">3.5秒</output></label>
+      </div>
+    </div>
+    <div class="teach">
+      <div class="demo2"><div class="d2a">
+        <div class="vframe"><svg id="scr" viewBox="0 0 800 450" role="img" aria-label="再生中の映像と、聞こえている音のラベル"></svg><div class="hud"><span class="tl rec" id="hudV">映像：A</span><span class="tr" id="hudT">0.0 / 8.0s</span></div><span class="demo-tag">疑似デモ（音声は使わず、ラベルで再現）</span></div>
+      </div><div class="d2b">
+        <div class="tline" aria-hidden="true">
+          <div class="rowwrap">
+            <div class="zone" id="zone"></div>
+            <div class="row"><span class="nm">映像</span><div class="trk" id="trV"></div></div>
+            <div class="row"><span class="nm">音声</span><div class="trk" id="trA"></div></div>
+            <div class="ph" id="ph" style="left:0"></div>
+          </div>
+          <div class="zlab" id="zlab"></div>
+        </div>
+        <div class="live" aria-live="polite">
+          <div><b>映像</b><span class="v" id="lvV">—</span></div>
+          <div><b>聞こえる音</b><span class="v" id="lvA">—</span></div>
+        </div>
+        <p class="modetxt" id="modetxt"></p>
+      </div></div>
+      <div class="strip" id="strip"></div>
+    </div>
+    <p class="demo-note"><b>疑似デモです。</b>実際の音声は再生せず、画面下の「聞こえている音」ラベルと波形、タイムラインの音声ブロックで、どの場面の音が流れているかを表しています。実際の映像編集ソフトの動作や、実際の映像を再現するものではありません。</p>
+    <p class="rm-note" role="note" hidden>お使いの端末は「動きを減らす」設定です。自動では動きません。▶再生は段階（コマ送り）で進みます。スライダーや「コマ」ボタンでも確認できます。</p>
+    <noscript><p class="demo-note">JavaScriptが無効のため、デモは動きません。通常：映像も音声も4秒でA→B。Jカット：3秒でBの音が始まり、4秒に映像がBへ。Lカット：4秒に映像がBへ切り替わり、Aの音は5秒まで続く。</p></noscript>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">3</span><h2>実務での使いどころ</h2></div>
+    <p class="sec-sub">音声と映像のタイミングをずらして、場面のつなぎを自然にします。</p>
+    <div class="grid3">
+      <div class="card"><div class="kicker">Jカット</div><p>次の場面の音（店内のざわめき、人の声）を先に聞かせて、<b>次の場面を予告</b>する。場面転換が唐突に感じにくくなる。</p></div>
+      <div class="card"><div class="kicker">Lカット</div><p>話している人の声を残したまま、<b>聞いている人や、話題の映像</b>に切り替える。インタビューや会話の場面でよく使われる。</p></div>
+      <div class="card"><div class="kicker">ショート動画・解説動画</div><p>ナレーションを途切れさせずに、映像を切り替える。話のテンポを保ったまま、画面に変化をつけられる。</p></div>
+    </div>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">4</span><h2>判断するときのポイント</h2></div>
+    <ol class="steps">
+      <li><h3>つなぎ目で、何をしたいかを決める</h3><p>次の場面を予告したいのか、前の話をつなぎ続けたいのか。目的でJとLを選びます。</p></li>
+      <li><h3>映像と音声の「ズレ」を意図して作る</h3><p>通常のカットでは、映像と音声が同時に切り替わります。ずらすなら、どちらを先にするか（音が先＝J、音が残る＝L）を決めます。</p></li>
+      <li><h3>ズラす長さは、試して決める</h3><p>ズレが長すぎると、何の音か分からなくなります。実際に再生して、自然に感じる長さに調整します。</p></li>
+    </ol>
+    <ul class="chk" style="margin-top:18px">
+      <li>映像の切れ目と、音声の切れ目が、意図どおりにズレているか</li>
+      <li>先に聞こえる音（J）が、次の場面の予告になっているか</li>
+      <li>残る音（L）が、映像と食い違って混乱を生んでいないか</li>
+    </ul>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">5</span><h2>注意点</h2></div>
+    <div class="notes">
+      <div class="note warn"><h3>名前の暗記より、タイミングの考え方</h3>JとLは、タイムライン上で音声と映像のブロックが重なった形に由来する呼び名です。「音声と映像の切れ目をずらす」という考え方を押さえれば、名前は後からついてきます。</div>
+      <div class="note warn"><h3>ずらしすぎない</h3>ズレが長すぎたり、音と映像の関係が分かりにくかったりすると、かえって混乱します。話の内容と合っているか、実際に再生して確認します。</div>
+    </div>
+  </section>
+
+  <section class="refs">
+    <h2>参考・出典</h2>
+    <ul><li><a href="https://www.adobe.com/creativecloud/video/post-production/cuts-in-film/l-and-j-cut.html" target="_blank" rel="noopener">Adobe「L cut: What is an L cut and J cut in film?」</a>（スプレッドシート記載の参考URL。JカットとLカットの説明）</li><li><a href="https://www.adobe.com/creativecloud/video/post-production/cuts-in-film.html" target="_blank" rel="noopener">Adobe「Cuts in film: Learn about different types of cuts」</a>（補足：通常のカット（スタンダードカット）の説明）</li></ul>
+    <p class="by">デモの場面・人物は、すべて説明用のイラストです。実際の音声や映像編集ソフトの動作を再現するものではありません。</p>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const T = 8, VC = 4; // 全体の長さ・映像が切り替わる時刻
+  const MODES = {
+    n: { ac: 4, txt: '<b>通常のカット：</b>映像も音声も、4秒で同時に、A→Bへ切り替わります。', zl: '' },
+    j: { ac: 3, txt: '<b>Jカット：</b>3秒でBの音（店内の声）が先に始まり、1秒後の4秒に、映像がBへ切り替わります。音が先に聞こえます。', zl: '音だけ先に B（映像はまだ A）' },
+    l: { ac: 5, txt: '<b>Lカット：</b>映像は4秒でBへ切り替わりますが、Aの音（外の声）は5秒まで続きます。音があとまで残ります。', zl: '音だけ残る A（映像はもう B）' },
+  };
+  const SND = { A: ['外の街の音', '「ここが、気になっていたお店です」'], B: ['店内の音', '「いらっしゃいませ！」'] };
+  let mode = 'n', t = 3.5, stop = null;
+  const vid = (tt) => (tt < VC ? 'A' : 'B'), aud = (tt) => (tt < MODES[mode].ac ? 'A' : 'B');
+  function sceneA() { return '<rect width="800" height="450" fill="#dfe8f5"/><rect y="320" width="800" height="130" fill="#cdbfae"/><rect x="430" y="90" width="300" height="240" fill="#fff6ec" stroke="#cdae92" stroke-width="5"/><rect x="458" y="116" width="244" height="54" rx="8" fill="#6b7a99"/><text x="580" y="154" text-anchor="middle" font-size="30" font-weight="800" fill="#fff" font-family="sans-serif">SUNNY CAFE</text><rect x="540" y="210" width="90" height="120" rx="6" fill="#9a8a7a"/><rect x="70" y="150" width="14" height="180" fill="#8a7a6a"/><circle cx="77" cy="130" r="64" fill="#8fb4a0"/><rect x="262" y="236" width="38" height="104" rx="12" fill="#2f3b5c"/><rect x="304" y="236" width="38" height="104" rx="12" fill="#2f3b5c"/><rect x="244" y="150" width="116" height="104" rx="22" fill="#6b7a99"/><circle cx="302" cy="112" r="38" fill="#f5cfae"/><path d="M262 108 Q266 66 302 64 Q338 66 342 108 Q322 86 302 90 Q282 86 262 108Z" fill="#3f2e28"/><circle cx="289" cy="118" r="4" fill="#2b2b33"/><circle cx="315" cy="118" r="4" fill="#2b2b33"/>'; }
+  function sceneB() { return '<rect width="800" height="450" fill="#ffe7cf"/><rect y="300" width="800" height="150" fill="#c08e66"/><rect x="40" y="70" width="170" height="130" rx="8" fill="#fff6ec" stroke="#d9b896" stroke-width="5"/><rect x="590" y="70" width="170" height="130" rx="8" fill="#fff6ec" stroke="#d9b896" stroke-width="5"/><circle cx="125" cy="135" r="34" fill="#ff9f43"/><rect x="0" y="300" width="800" height="26" fill="#a97a54"/><rect x="300" y="210" width="200" height="100" rx="22" fill="#e8791f"/><circle cx="400" cy="160" r="46" fill="#f5cfae"/><path d="M354 156 Q358 106 400 104 Q442 106 446 156 Q422 128 400 132 Q378 128 354 156Z" fill="#3f2e28"/><circle cx="384" cy="166" r="5" fill="#2b2b33"/><circle cx="416" cy="166" r="5" fill="#2b2b33"/><path d="M386 184 Q400 196 414 184" stroke="#b05a4a" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M500 224 L560 150" stroke="#f5cfae" stroke-width="26" stroke-linecap="round"/>'; }
+  function wave(tt, who, x, y) {
+    const col = who === 'A' ? '#6b7a99' : '#e8791f';
+    return Array.from({ length: 16 }, (_, i) => { const h = 6 + 16 * Math.abs(Math.sin(tt * 9 + i * 1.3) * Math.cos(i * .7)); return '<rect x="' + (x + i * 9) + '" y="' + (y - h / 2).toFixed(1) + '" width="6" height="' + h.toFixed(1) + '" rx="3" fill="' + col + '"/>'; }).join('');
+  }
+  function frame(tt) {
+    const v = vid(tt), a = aud(tt);
+    return (v === 'A' ? sceneA() : sceneB()) +
+      '<rect x="40" y="356" width="720" height="70" rx="14" fill="rgba(20,20,28,.78)"/>' +
+      '<text x="62" y="384" font-size="17" font-weight="800" fill="' + (a === 'A' ? '#b8c2de' : '#ffb870') + '" font-family="sans-serif">♪ 聞こえている音：' + a + '（' + SND[a][0] + '）</text>' +
+      '<text x="62" y="412" font-size="21" font-weight="700" fill="#fff" font-family="sans-serif">' + SND[a][1] + '</text>' + wave(tt, a, 610, 392);
+  }
+  const trV = $('#trV'), trA = $('#trA'), pct = (x) => (x / T * 100).toFixed(2) + '%';
+  function build() {
+    const ac = MODES[mode].ac;
+    trV.innerHTML = '<div class="blk a" style="left:0;width:' + pct(VC) + '">場面A</div><div class="blk b" style="left:' + pct(VC) + ';right:0">場面B</div>';
+    trA.innerHTML = '<div class="blk a" style="left:0;width:' + pct(ac) + '">Aの音</div><div class="blk b" style="left:' + pct(ac) + ';right:0">Bの音</div>';
+    const z = $('#zone'), lo = Math.min(VC, ac), hi = Math.max(VC, ac);
+    if (lo === hi) { z.style.display = 'none'; } else { z.style.display = 'block'; z.style.left = 'calc(var(--lw) + 8px + (100% - var(--lw) - 8px) * ' + (lo / T) + ')'; z.style.width = 'calc((100% - var(--lw) - 8px) * ' + ((hi - lo) / T) + ')'; }
+    $('#zlab').textContent = MODES[mode].zl;
+    const pts = [2.5, 3.5, 4.5, 5.5];
+    $('#strip').innerHTML = pts.map((tt) => '<figure><svg viewBox="0 0 800 450" aria-hidden="true">' + frame(tt) + '</svg><figcaption>' + tt.toFixed(1) + '秒　映像 ' + vid(tt) + '／音 ' + aud(tt) + '</figcaption></figure>').join('');
+  }
+  const scr = $('#scr'), seek = $('#seek');
+  function render() {
+    scr.innerHTML = frame(t);
+    const v = vid(t), a = aud(t);
+    $('#hudV').textContent = '映像：' + v; $('#hudT').textContent = t.toFixed(1) + ' / ' + T.toFixed(1) + 's';
+    $('#lvV').textContent = '場面' + v + (v === 'A' ? '（お店の外）' : '（店内）');
+    $('#lvA').textContent = '場面' + a + 'の音（' + SND[a][0] + '）';
+    $('#ph').style.left = 'calc(var(--lw) + 8px + (100% - var(--lw) - 8px) * ' + (t / T) + ')';
+    seek.value = Math.round(t * 10); $('#o-seek').textContent = t.toFixed(1) + '秒';
+  }
+  function setMode(m) { mode = m; $('#modetxt').innerHTML = MODES[m].txt; build(); render(); }
+  function halt() { if (stop) stop(); stop = null; }
+  document.querySelectorAll('input[name=mode]').forEach((r) => r.addEventListener('change', () => { halt(); setMode(r.value); }));
+  // 再生は毎回、先頭（0秒）から。続きからの再開はしない
+  $('#play').addEventListener('click', () => {
+    halt(); t = 0; render();
+    stop = V.run(1000 * T, (k) => { t = T * k; render(); }, () => { stop = null; });
+  });
+  $('#stopBtn').addEventListener('click', halt);
+  seek.addEventListener('input', () => { halt(); t = +seek.value / 10; render(); });
+  const stepBy = (d) => { halt(); t = V.clamp(Math.round(t * 2) / 2 + d, 0, T); render(); };
+  $('#back').addEventListener('click', () => stepBy(-0.5));
+  $('#fwd').addEventListener('click', () => stepBy(0.5));
+  setMode('n');
+})();
+</script>
+</body>
+</html>

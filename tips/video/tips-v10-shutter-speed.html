@@ -298,6 +298,17 @@ p + p { margin-top: .8em; }
   .three .card h3 small { font-size: 12.5px; font-weight: 700; color: var(--ac); display: block; }
   .three .card p { font-size: 14px; }
   .three .card svg { width: 100%; height: auto; display: block; background: #fff8f0; border: 1px solid var(--ac-line); border-radius: 10px; margin: 8px 0; }
+  .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .two .card h3 { font-size: 20px; margin-bottom: 2px; line-height: 1.25; }
+  .two .card h3 small { font-size: 13px; font-weight: 800; color: var(--ac); display: block; margin-top: 2px; }
+  .two .card p { font-size: 13.5px; }
+  .two .card svg { width: 100%; height: auto; display: block; background: #fff8f0; border: 1px solid var(--ac-line); border-radius: 10px; margin: 8px 0; }
+  .ex2 { border: 2px solid var(--ac); border-radius: 16px; background: var(--ac-soft); padding: 12px 16px 14px; margin-bottom: 14px; }
+  .ex2 .ex-h { font-size: 13px; font-weight: 800; color: var(--ac); margin-bottom: 8px; }
+  .ex2 .ex-b { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .ex2 .ex-b > div { background: #fff; border-radius: 12px; padding: 8px 12px; display: grid; gap: 2px; font-size: 14px; }
+  .ex2 .ex-b b { font-family: inherit; font-weight: 800; font-size: 22px; color: var(--ac); line-height: 1.2; }
+  .ex2 em { font-style: normal; font-weight: 800; }
   .rule { margin-top: 14px; border: 2px solid var(--ac); border-radius: 16px; padding: 12px 16px 14px; background: var(--ac-soft); }
   .rule h3 { font-size: 15.5px; }
   .rule p { font-size: 13.5px; color: #38415a; }
@@ -316,7 +327,7 @@ p + p { margin-top: .8em; }
   .strip svg { width: 100%; height: auto; display: block; border-radius: 8px; border: 1px solid var(--ac-line); background: #fff8f0; }
   .strip figcaption { font-size: 11.5px; font-weight: 700; color: #38415a; margin-top: 2px; line-height: 1.4; }
   .strip .on { color: var(--ac); }
-  @media (max-width: 720px) { .three { grid-template-columns: 1fr; } .demo2 { grid-template-columns: 1fr; } .hero-art { display: none; } }
+  @media (max-width: 720px) { .two, .ex2 .ex-b { grid-template-columns: 1fr; } .three { grid-template-columns: 1fr; } .demo2 { grid-template-columns: 1fr; } .hero-art { display: none; } }
 
 </style>
 </head>
@@ -351,7 +362,8 @@ p + p { margin-top: .8em; }
 // 動き自体は消さず、操作したときだけ・少ない動きで確認できるようにする。
 (() => {
   const run = window.V.run;
-  window.V.run = (duration, cb, done) => {
+  window.V.runSmooth = run; // 補間を間引かない版（音と同時に進めたいときなど）
+  window.V.run =(duration, cb, done) => {
     if (!window.V.reduced()) return run(duration, cb, done);
     let last = -1;
     return run(duration, (t) => { const k = Math.round(t * 10); if (k !== last) { last = k; cb(k / 10); } }, done);
@@ -376,8 +388,42 @@ p + p { margin-top: .8em; }
 
 <main class="wrap">
 
+  <section class="sec rise" id="vs-fps">
+    <div class="sec-h"><span class="sec-n">1</span><h2>まず、fps とシャッタースピードは別のもの</h2></div>
+    <p class="sec-sub">どちらも「動画の撮影設定」に出てくる数字ですが、決めているものが違います。<b>fps＝何枚撮るか／シャッタースピード＝1枚をどれだけ長く写すか</b>です。</p>
+    <div class="ex2">
+      <div class="ex-h">例：30fps・1/60秒 で撮ると…</div>
+      <div class="ex-b">
+        <div><b>30fps</b><span>1秒間に<em>30コマ</em>撮る</span></div>
+        <div><b>1/60秒</b><span>1コマごとに<em>1/60秒</em>だけ露光する</span></div>
+      </div>
+    </div>
+    <div class="two">
+      <div class="card"><div class="kicker">fps（フレームレート）</div><h3>1秒間に何コマ撮るか<small>パラパラ漫画の「枚数」</small></h3>
+        <svg viewBox="0 0 260 146" role="img" aria-label="シャッタースピードは同じ1/60のまま、24fps・30fps・60fpsで1秒に並ぶコマ数が24枚・30枚・60枚と変わる図">
+          <g font-family="sans-serif" font-size="11" fill="#38415a" font-weight="700">
+            <text x="2" y="20">24fps</text><line x1="50" x2="250" y1="16" y2="16" stroke="#ef3b4b" stroke-width="14" stroke-dasharray="6.83 1.5"/><text x="50" y="38" font-weight="600" fill="#566074">1秒に 24枚 並ぶ</text>
+            <text x="2" y="66">30fps</text><line x1="50" x2="250" y1="62" y2="62" stroke="#ef3b4b" stroke-width="14" stroke-dasharray="5.17 1.5"/><text x="50" y="84" font-weight="600" fill="#566074">1秒に 30枚 並ぶ</text>
+            <text x="2" y="112">60fps</text><line x1="50" x2="250" y1="108" y2="108" stroke="#ef3b4b" stroke-width="14" stroke-dasharray="1.83 1.5"/><text x="50" y="130" font-weight="600" fill="#566074">1秒に 60枚 並ぶ</text>
+          </g>
+        </svg>
+        <p>シャッタースピードは、どれも <b>1/60</b> で同じ。<b>1秒に並ぶコマ数だけ</b>が変わります。<br>（枚数が多いほど、動きが細かくつながる）</p></div>
+      <div class="card"><div class="kicker">シャッタースピード</div><h3>1コマをどれくらい露光するか<small>1枚1枚の「ブレ具合」</small></h3>
+        <svg viewBox="0 0 260 146" role="img" aria-label="30fpsのまま、1/30は残像が多く、1/60は自然な残像、1/250は1コマがパキッとする図">
+          <g font-family="sans-serif" font-size="11" fill="#38415a" font-weight="700">
+            <text x="2" y="20">1/30</text><rect x="50" y="4" width="200" height="24" rx="6" fill="#fff" stroke="#e7c2a6"/><rect x="56" y="10" width="124" height="12" rx="6" fill="#ef3b4b" opacity=".5"/><circle cx="176" cy="16" r="8" fill="#ef3b4b"/><text x="50" y="42" font-weight="600" fill="#566074">残像が多い</text>
+            <text x="2" y="66">1/60</text><rect x="50" y="50" width="200" height="24" rx="6" fill="#fff" stroke="#e7c2a6"/><rect x="56" y="56" width="62" height="12" rx="6" fill="#ef3b4b" opacity=".5"/><circle cx="114" cy="62" r="8" fill="#ef3b4b"/><text x="50" y="88" font-weight="600" fill="#566074">自然な残像の目安</text>
+            <text x="2" y="112">1/250</text><rect x="50" y="96" width="200" height="24" rx="6" fill="#fff" stroke="#e7c2a6"/><rect x="56" y="102" width="12" height="12" rx="6" fill="#ef3b4b" opacity=".5"/><circle cx="62" cy="108" r="8" fill="#ef3b4b"/><text x="50" y="134" font-weight="600" fill="#566074">1コマはパキッ（動きはカクつきやすい）</text>
+          </g>
+        </svg>
+        <p>fpsは、どれも <b>30fps</b> で同じ（1秒に30コマ）。<b>1コマの写り方</b>だけが変わります。</p></div>
+    </div>
+    <div class="rule"><h3>2つは別々に決める</h3>
+      <p><b>fps</b>は「1秒に何枚撮るか」、<b>シャッタースピード</b>は「その1枚を何秒かけて写すか」。たとえば30fpsなら、1コマの長さは1/30秒なので、<b>1/30より遅いシャッタースピードは基本的に使えません</b>。その範囲で、1/60や1/250のように選びます。</p></div>
+  </section>
+
   <section class="sec rise">
-    <div class="sec-h"><span class="sec-n">1</span><h2>まず、シャッタースピードと動きの関係</h2></div>
+    <div class="sec-h"><span class="sec-n">2</span><h2>まず、シャッタースピードと動きの関係</h2></div>
     <p class="sec-sub">シャッタースピードは、<b>1コマを撮るために、光を取り込む時間</b>の長さです。長いほど、その間の動きがコマの中に残り、ブレとして写ります。</p>
     <div class="three">
       <div class="card"><div class="kicker">遅い（例：1/30）</div><h3>ブレが増えやすい<small>残像が長い</small></h3>
@@ -393,7 +439,7 @@ p + p { margin-top: .8em; }
   </section>
 
   <section class="sec rise" id="demo">
-    <div class="sec-h"><span class="sec-n">2</span><h2>同じ動きを、1/30・1/60・1/250 で比べる</h2></div>
+    <div class="sec-h"><span class="sec-n">3</span><h2>同じ動きを、1/30・1/60・1/250 で比べる</h2></div>
     <p class="sec-sub">30fps で撮った、横に動くボールです。シャッタースピードを切り替えて、<b>残像の長さ</b>と<b>コマとコマの間のつながり</b>を見てください。</p>
     <div class="bigdisc" style="font-size:14px;font-weight:800;line-height:1.6;padding:10px 14px;border:2px solid var(--ac);border-radius:12px;background:var(--ac-soft);margin-bottom:12px">このデモは、実際のカメラの露光を完全に再現するものではなく、見え方の違いを理解するための疑似デモです。</div>
     <div class="tools" role="group" aria-label="シャッタースピードと再生">
@@ -429,7 +475,7 @@ p + p { margin-top: .8em; }
   </section>
 
   <section class="sec rise">
-    <div class="sec-h"><span class="sec-n">3</span><h2>実務での使いどころ</h2></div>
+    <div class="sec-h"><span class="sec-n">4</span><h2>実務での使いどころ</h2></div>
     <p class="sec-sub">映像の目的に合わせて、ブレ方を選びます。</p>
     <div class="grid3">
       <div class="card"><div class="kicker">商品紹介・人物撮影</div><p>自然な動きにしたいなら、フレームレートの約2倍を目安にする。商品を回す動きや、人物のしぐさが自然につながる。</p></div>
@@ -439,7 +485,7 @@ p + p { margin-top: .8em; }
   </section>
 
   <section class="sec rise">
-    <div class="sec-h"><span class="sec-n">4</span><h2>判断するときのポイント</h2></div>
+    <div class="sec-h"><span class="sec-n">5</span><h2>判断するときのポイント</h2></div>
     <ol class="steps">
       <li><h3>まず、フレームレートを決める</h3><p>24・30・60fps のどれで撮るかが先です。シャッタースピードの目安は、それに合わせて決まります。</p></li>
       <li><h3>目安は「フレームレートの約2倍」</h3><p>30fps なら 1/60 程度。自然なブレ（モーションブラー）が残り、動きがなめらかにつながります。</p></li>
@@ -453,7 +499,7 @@ p + p { margin-top: .8em; }
   </section>
 
   <section class="sec rise">
-    <div class="sec-h"><span class="sec-n">5</span><h2>注意点</h2></div>
+    <div class="sec-h"><span class="sec-n">6</span><h2>注意点</h2></div>
     <div class="notes">
       <div class="note warn"><h3>180度シャッターは「目安」</h3>フレームレートの約2倍にする考え方は、自然な動きを作るための目安であり、絶対のルールではありません。表現の目的で、意図的に外す場合もあります。</div>
       <div class="note warn"><h3>速ければ良い・遅ければ良いではない</h3>速いと動きはパキッとしますが、速すぎるとカクカクした印象になることがあります。遅いと自然ですが、ブレが増えます。明るさ（絞り・ISO）にも影響するので、撮影環境とあわせて決めます。</div>

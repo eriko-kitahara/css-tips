@@ -317,6 +317,11 @@ p + p { margin-top: .8em; }
   .live b { font-size: 12px; color: var(--sub); }
   .live .v { font-weight: 800; }
   .modetxt { margin-top: 10px; font-size: 13.5px; }
+  .snd { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 2px; }
+  .snd .btn[aria-pressed="true"] { background: #fff1e0; border-color: #e8791f; color: #8a3f00; font-weight: 800; }
+  .snd .btn[aria-pressed="false"] { background: #eceef3; color: #566074; font-weight: 800; }
+  .snd .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .snd .sst { font-size: 12.5px; color: var(--sub); }
   .strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
   .strip figure { margin: 0; }
   .strip svg { width: 100%; height: auto; display: block; border-radius: 8px; border: 1px solid var(--ac-line); background: #000; }
@@ -356,7 +361,8 @@ p + p { margin-top: .8em; }
 // 動き自体は消さず、操作したときだけ・少ない動きで確認できるようにする。
 (() => {
   const run = window.V.run;
-  window.V.run = (duration, cb, done) => {
+  window.V.runSmooth = run; // 補間を間引かない版（音と同時に進めたいときなど）
+  window.V.run =(duration, cb, done) => {
     if (!window.V.reduced()) return run(duration, cb, done);
     let last = -1;
     return run(duration, (t) => { const k = Math.round(t * 10); if (k !== last) { last = k; cb(k / 10); } }, done);
@@ -401,7 +407,7 @@ p + p { margin-top: .8em; }
 
   <section class="sec rise" id="demo">
     <div class="sec-h"><span class="sec-n">2</span><h2>タイムラインを見ながら、再生して聞こえ方を比べる</h2></div>
-    <p class="sec-sub">場面A（お店の外）から、場面B（店内）へ切り替わります。<b>映像</b>と<b>音声</b>の切れ目が、モードで変わります。</p>
+    <p class="sec-sub">場面A（お店の外）から、場面B（店内）へ切り替わります。<b>映像</b>と<b>音声</b>の切れ目が、モードで変わります。<b>▶再生を押すと、場面Aは低い音、場面Bは高い音</b>が鳴ります（音あり設定のとき）。音が出なくても、画面の表示で確認できます。</p>
     <div class="tools" role="group" aria-label="切り替え方と再生">
       <span class="lab">切り替え方と再生</span>
       <span class="seg" role="radiogroup" aria-label="切り替え方">
@@ -415,10 +421,11 @@ p + p { margin-top: .8em; }
         <button type="button" class="btn" id="back" aria-label="コマ戻し（0.5秒戻る）">◀ コマ</button><button type="button" class="btn" id="fwd" aria-label="コマ送り（0.5秒進む）">コマ ▶</button>
         <label class="scrub" for="seek">時間<input type="range" id="seek" min="0" max="80" value="35"><output id="o-seek" for="seek">3.5秒</output></label>
       </div>
+      <div class="snd" id="sndbox" style="flex:1 1 100%"></div>
     </div>
     <div class="teach">
       <div class="demo2"><div class="d2a">
-        <div class="vframe"><svg id="scr" viewBox="0 0 800 450" role="img" aria-label="再生中の映像と、聞こえている音のラベル"></svg><div class="hud"><span class="tl rec" id="hudV">映像：A</span><span class="tr" id="hudT">0.0 / 8.0s</span></div><span class="demo-tag">疑似デモ（音声は使わず、ラベルで再現）</span></div>
+        <div class="vframe"><svg id="scr" viewBox="0 0 800 450" role="img" aria-label="再生中の映像と、聞こえている音のラベル"></svg><div class="hud"><span class="tl rec" id="hudV">映像：A</span><span class="tr" id="hudT">0.0 / 8.0s</span></div><span class="demo-tag">疑似デモ（生成音）</span></div>
       </div><div class="d2b">
         <div class="tline" aria-hidden="true">
           <div class="rowwrap">
@@ -432,14 +439,15 @@ p + p { margin-top: .8em; }
         <div class="live" aria-live="polite">
           <div><b>映像</b><span class="v" id="lvV">—</span></div>
           <div><b>聞こえる音</b><span class="v" id="lvA">—</span></div>
+          <div><b>音の状態</b><span class="v" id="lvS">—</span></div>
         </div>
         <p class="modetxt" id="modetxt"></p>
       </div></div>
       <div class="strip" id="strip"></div>
     </div>
-    <p class="demo-note"><b>疑似デモです。</b>実際の音声は再生せず、画面下の「聞こえている音」ラベルと波形、タイムラインの音声ブロックで、どの場面の音が流れているかを表しています。実際の映像編集ソフトの動作や、実際の映像を再現するものではありません。</p>
-    <p class="rm-note" role="note" hidden>お使いの端末は「動きを減らす」設定です。自動では動きません。▶再生は段階（コマ送り）で進みます。スライダーや「コマ」ボタンでも確認できます。</p>
-    <noscript><p class="demo-note">JavaScriptが無効のため、デモは動きません。通常：映像も音声も4秒でA→B。Jカット：3秒でBの音が始まり、4秒に映像がBへ。Lカット：4秒に映像がBへ切り替わり、Aの音は5秒まで続く。</p></noscript>
+    <p class="demo-note"><b>疑似デモです。</b>音は、説明用にブラウザで作った簡単な音（場面A＝低い音、場面B＝高い音）です。実際の会話や環境音ではありません。音は、▶再生を押したときだけ鳴ります（自動では鳴りません）。「ミュート」にしても、画面下の「聞こえている音」ラベルと波形、タイムラインの音声ブロックで、どの場面の音が流れているかが分かります。実際の映像編集ソフトの動作や、実際の映像を再現するものではありません。</p>
+    <p class="rm-note" role="note" hidden>お使いの端末は「動きを減らす」設定です。自動では動きません。▶再生すると、画面は0.5秒ごとの段階（コマ送り）で進みます。音は通常どおり切り替わるので、音あり設定なら、音の切り替わりも確認できます。スライダーや「コマ」ボタンでも確認できます。</p>
+    <noscript><p class="demo-note">JavaScriptが無効のため、デモは動かず、音も鳴りません。通常：映像も音声も4秒でA→B。Jカット：3秒でBの音が始まり、4秒に映像がBへ。Lカット：4秒に映像がBへ切り替わり、Aの音は5秒まで続く。</p></noscript>
   </section>
 
   <section class="sec rise">
@@ -490,7 +498,7 @@ p + p { margin-top: .8em; }
     j: { ac: 3, txt: '<b>Jカット：</b>3秒でBの音（店内の声）が先に始まり、1秒後の4秒に、映像がBへ切り替わります。音が先に聞こえます。', zl: '音だけ先に B（映像はまだ A）' },
     l: { ac: 5, txt: '<b>Lカット：</b>映像は4秒でBへ切り替わりますが、Aの音（外の声）は5秒まで続きます。音があとまで残ります。', zl: '音だけ残る A（映像はもう B）' },
   };
-  const SND = { A: ['外の街の音', '「ここが、気になっていたお店です」'], B: ['店内の音', '「いらっしゃいませ！」'] };
+  const SND = { A: ['外の街の音・低い音', '「ここが、気になっていたお店です」'], B: ['店内の音・高い音', '「いらっしゃいませ！」'] };
   let mode = 'n', t = 3.5, stop = null;
   const vid = (tt) => (tt < VC ? 'A' : 'B'), aud = (tt) => (tt < MODES[mode].ac ? 'A' : 'B');
   function sceneA() { return '<rect width="800" height="450" fill="#dfe8f5"/><rect y="320" width="800" height="130" fill="#cdbfae"/><rect x="430" y="90" width="300" height="240" fill="#fff6ec" stroke="#cdae92" stroke-width="5"/><rect x="458" y="116" width="244" height="54" rx="8" fill="#6b7a99"/><text x="580" y="154" text-anchor="middle" font-size="30" font-weight="800" fill="#fff" font-family="sans-serif">SUNNY CAFE</text><rect x="540" y="210" width="90" height="120" rx="6" fill="#9a8a7a"/><rect x="70" y="150" width="14" height="180" fill="#8a7a6a"/><circle cx="77" cy="130" r="64" fill="#8fb4a0"/><rect x="262" y="236" width="38" height="104" rx="12" fill="#2f3b5c"/><rect x="304" y="236" width="38" height="104" rx="12" fill="#2f3b5c"/><rect x="244" y="150" width="116" height="104" rx="22" fill="#6b7a99"/><circle cx="302" cy="112" r="38" fill="#f5cfae"/><path d="M262 108 Q266 66 302 64 Q338 66 342 108 Q322 86 302 90 Q282 86 262 108Z" fill="#3f2e28"/><circle cx="289" cy="118" r="4" fill="#2b2b33"/><circle cx="315" cy="118" r="4" fill="#2b2b33"/>'; }
@@ -524,16 +532,86 @@ p + p { margin-top: .8em; }
     $('#hudV').textContent = '映像：' + v; $('#hudT').textContent = t.toFixed(1) + ' / ' + T.toFixed(1) + 's';
     $('#lvV').textContent = '場面' + v + (v === 'A' ? '（お店の外）' : '（店内）');
     $('#lvA').textContent = '場面' + a + 'の音（' + SND[a][0] + '）';
+    sndStatus();
     $('#ph').style.left = 'calc(var(--lw) + 8px + (100% - var(--lw) - 8px) * ' + (t / T) + ')';
     seek.value = Math.round(t * 10); $('#o-seek').textContent = t.toFixed(1) + '秒';
   }
   function setMode(m) { mode = m; $('#modetxt').innerHTML = MODES[m].txt; build(); render(); }
-  function halt() { if (stop) stop(); stop = null; }
+  // ---- 生成音（Web Audio API。外部の音声ファイルは使わない）----
+  // 場面A＝低い音（196Hz・ゆっくり揺れる）／場面B＝高い音（784Hz・速く揺れる）。▶再生を押したときだけ鳴らす
+  const AU = { ctx: null, master: null, voices: [], on: true, playing: false, ok: !!(window.AudioContext || window.webkitAudioContext) };
+  const FREQ = { A: [196, 'triangle', 1.5, 1], B: [784, 'sine', 6, .6] };
+  function audioCtx() {
+    if (!AU.ok) return null;
+    if (!AU.ctx) {
+      const C = window.AudioContext || window.webkitAudioContext;
+      AU.ctx = new C(); AU.master = AU.ctx.createGain(); AU.master.gain.value = AU.on ? .18 : 0; AU.master.connect(AU.ctx.destination);
+    }
+    if (AU.ctx.state === 'suspended') AU.ctx.resume();
+    return AU.ctx;
+  }
+  // 1つの音を from〜to 秒（ctx時刻）だけ鳴らす
+  function voice(who, from, to) {
+    const c = AU.ctx, [f, type, lfoHz, peak] = FREQ[who];
+    const osc = c.createOscillator(); osc.type = type; osc.frequency.value = f;
+    const trem = c.createGain(); trem.gain.value = .6;
+    const lfo = c.createOscillator(); lfo.frequency.value = lfoHz; const lg = c.createGain(); lg.gain.value = .4; lfo.connect(lg); lg.connect(trem.gain);
+    const env = c.createGain(); env.gain.setValueAtTime(0, from);
+    env.gain.linearRampToValueAtTime(peak, from + .03); env.gain.setValueAtTime(peak, Math.max(from + .03, to - .04)); env.gain.linearRampToValueAtTime(0, to);
+    osc.connect(trem); trem.connect(env); env.connect(AU.master);
+    osc.start(from); lfo.start(from); osc.stop(to + .02); lfo.stop(to + .02);
+    AU.voices.push({ osc, lfo, env });
+  }
+  function startAudio(ac) {
+    stopAudio(); const c = audioCtx(); if (!c) return;
+    const t0 = c.currentTime + .06;
+    voice('A', t0, t0 + ac); voice('B', t0 + ac, t0 + T);
+    AU.playing = true;
+  }
+  function stopAudio() {
+    AU.playing = false;
+    if (AU.ctx) { const now = AU.ctx.currentTime; AU.voices.forEach((v) => { try { v.env.gain.cancelScheduledValues(now); v.env.gain.setValueAtTime(0, now); v.osc.stop(now + .01); v.lfo.stop(now + .01); } catch (e) {} }); }
+    AU.voices = [];
+  }
+  function sample(who) {
+    halt(); const c = audioCtx(); if (!c) return;
+    const t0 = c.currentTime + .05; voice(who, t0, t0 + 1.2); AU.playing = true; t = who === 'A' ? 2 : 6; render();
+    setTimeout(() => { if (!stop) { AU.playing = false; sndStatus(); } }, 1300);
+  }
+  function sndStatus() {
+    const el = $('#lvS'); if (!el) return;
+    if (!AU.ok) { el.textContent = 'このブラウザでは音を鳴らせません（画面表示だけで確認できます）'; return; }
+    el.textContent = !AU.on ? '🔇 ミュート中（音は出ません。画面表示で確認できます）' : (AU.playing ? '🔊 鳴っています：' + (aud(t) === 'A' ? '低い音（場面A）' : '高い音（場面B）') : '🔊 音あり（▶再生で鳴ります）');
+  }
+  (() => {
+    const box = $('#sndbox'); if (!box) return;
+    box.innerHTML = '<button type="button" class="btn" id="sndT" aria-pressed="true">🔊 音あり</button>' +
+      '<button type="button" class="btn" id="smpA" title="場面Aの音（低い音）を1秒ほど鳴らす">♪ A（低い音）を試聴</button><button type="button" class="btn" id="smpB" title="場面Bの音（高い音）を1秒ほど鳴らす">♪ B（高い音）を試聴</button>' +
+      '<span class="sst" id="sstxt"></span>';
+    const sync = () => {
+      const b = $('#sndT'); b.setAttribute('aria-pressed', String(AU.on)); b.textContent = AU.on ? '🔊 音あり' : '🔇 ミュート';
+      b.setAttribute('aria-label', AU.on ? '音あり（押すとミュート）' : 'ミュート中（押すと音あり）');
+      ['#smpA', '#smpB'].forEach((s) => { $(s).disabled = !AU.on || !AU.ok; });
+      $('#sstxt').textContent = AU.ok ? (AU.on ? '音は▶再生・試聴を押したときだけ鳴ります' : 'ミュート中：音は鳴りません') : '音を鳴らせないブラウザです';
+      if (AU.master) AU.master.gain.setTargetAtTime(AU.on ? .18 : 0, AU.ctx.currentTime, .02);
+      sndStatus();
+    };
+    $('#sndT').addEventListener('click', () => { AU.on = !AU.on; sync(); });
+    $('#smpA').addEventListener('click', () => sample('A'));
+    $('#smpB').addEventListener('click', () => sample('B'));
+    sync();
+  })();
+  function halt() { if (stop) stop(); stop = null; stopAudio(); sndStatus(); }
   document.querySelectorAll('input[name=mode]').forEach((r) => r.addEventListener('change', () => { halt(); setMode(r.value); }));
-  // 再生は毎回、先頭（0秒）から。続きからの再開はしない
+  // 再生は毎回、先頭（0秒）から。続きからの再開はしない。音は実時間で進め、
+  // 「動きを減らす」設定のときは画面だけ0.5秒ごとの段階にする（切り替え時刻は0.5秒の倍数なので、音と画面の切り替え位置は変わらない）
   $('#play').addEventListener('click', () => {
-    halt(); t = 0; render();
-    stop = V.run(1000 * T, (k) => { t = T * k; render(); }, () => { stop = null; });
+    halt(); t = 0; render(); startAudio(MODES[mode].ac);
+    let shown = -1;
+    stop = V.runSmooth(1000 * T, (k) => {
+      let tt = T * k; if (V.reduced()) tt = Math.floor(tt * 2 + 1e-9) / 2;
+      if (tt !== shown) { shown = tt; t = tt; render(); }
+    }, () => { stop = null; stopAudio(); sndStatus(); });
   });
   $('#stopBtn').addEventListener('click', halt);
   seek.addEventListener('input', () => { halt(); t = +seek.value / 10; render(); });

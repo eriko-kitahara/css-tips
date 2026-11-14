@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ja" data-series="video">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>パン？ティルト？動画でよく使うカメラの動きを3つ覚える｜動画制作でよく聞くこれ何？</title>
+<style>
+/* ===== シリーズTips 共通ベース（既存CSS Tipsの作法を踏襲：トークン / .rise / reduced-motion / 640px以下は1カラム） ===== */
+:root {
+  --ink: #1b1f2a;
+  --sub: #566074;
+  --line: #e5e8ee;
+  --bg: #f4f6f9;
+  --ease: cubic-bezier(.22, .7, .25, 1);
+  --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", "Meiryo", sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Roboto Mono", Menlo, monospace;
+  --ok: #17683a; --ok-soft: #e8f5ec;
+  --ng: #b42318; --ng-soft: #fdecea;
+  color-scheme: light;
+}
+/* ----- シリーズ別カラー（c1→c2 のグラデーション。--ac は白地の文字に使える濃い色） ----- */
+[data-series="css"]    { --c1:#3b9cf6; --c2:#19c3d6; --ac:#1a5fa6; --ac-soft:#e8f3fd; --ac-line:#bcdaf3; --page:#f1f7fc; --hero:linear-gradient(135deg,#dff0ff,#d9f7fa); }
+[data-series="design"] { --c1:#ff5fa2; --c2:#8b5cf6; --ac:#9d2a72; --ac-soft:#fbeef6; --ac-line:#efc9e2; --page:#fbf6fa; --hero:linear-gradient(135deg,#ffe4f0,#ece5ff); }
+[data-series="ai"]     { --c1:#b6e04a; --c2:#22a861; --ac:#17683a; --ac-soft:#eef8e4; --ac-line:#cde7b2; --page:#f5f9ef; --hero:linear-gradient(135deg,#eefad0,#d8f3e2); }
+[data-series="video"]  { --c1:#ff9f43; --c2:#ef3b4b; --ac:#b4321f; --ac-soft:#fff1ea; --ac-line:#f6cdb8; --page:#fcf7f3; --hero:linear-gradient(135deg,#ffeedb,#ffe1e3); }
+:root { --grad: linear-gradient(90deg, var(--c1), var(--c2)); }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--page); color: var(--ink); font-family: var(--font); line-height: 1.75; -webkit-font-smoothing: antialiased; }
+a { color: var(--ac); text-underline-offset: 3px; }
+code, pre, kbd { font-family: var(--mono); }
+img, svg { max-width: 100%; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+/* ===== Motion（opacity:0 は keyframes 側のみ＝動きを切っても内容は必ず見える） ===== */
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+@keyframes pop  { from { opacity: 0; transform: scale(.94); } }
+.rise { animation: rise .5s var(--ease) calc(var(--i, 0) * 80ms) backwards; }
+/* 「動きを減らす」設定: 装飾の動きだけを止める。
+   教材として見せる動き（.teach の中身）は止めない＝動きそのものが学習内容のため。
+   教材側は、自動再生しない・ボタンで再生・コマ送りできる、という代替手段を別に用意する。 */
+@media (prefers-reduced-motion: reduce) {
+  *:not(.teach):not(.teach *), *:not(.teach):not(.teach *)::before, *:not(.teach):not(.teach *)::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* ===== Hero ===== */
+.hero { position: relative; overflow: hidden; background: var(--hero); border-bottom: 1px solid var(--ac-line); padding: 0 0 44px; }
+.hero::before { content: ""; display: block; height: 6px; background: var(--grad); }
+.hero::after { content: ""; position: absolute; right: -90px; top: -70px; width: 340px; height: 340px; border-radius: 50%; background: var(--grad); opacity: .16; pointer-events: none; }
+.hero .wrap { position: relative; z-index: 1; padding-top: 28px; display: grid; grid-template-columns: 1fr auto; gap: 24px 40px; align-items: center; }
+.pill-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.series { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; letter-spacing: .04em; color: var(--ac); background: #fff; border: 1px solid var(--ac-line); border-radius: 999px; padding: 4px 14px 4px 10px; }
+.series::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--grad); }
+.tipno { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--sub); }
+h1 { font-size: clamp(25px, 4.4vw, 38px); line-height: 1.4; letter-spacing: .01em; margin: 16px 0 14px; font-weight: 800; }
+.lead { font-size: clamp(15px, 2vw, 17px); color: #38415a; max-width: 38em; }
+.lead b { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--c1) 35%, transparent) 62%); font-weight: 700; }
+.hero-art { width: 200px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.meta span { font-size: 12px; color: var(--sub); background: rgba(255,255,255,.75); border: 1px solid var(--ac-line); border-radius: 999px; padding: 1px 12px; }
+
+/* ===== Section ===== */
+main { padding: 36px 0 24px; }
+.sec { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 30px 32px 32px; margin-bottom: 22px; box-shadow: 0 1px 2px rgba(27,31,42,.04), 0 18px 40px -26px rgba(27,31,42,.22); }
+.sec-h { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.sec-n { flex: none; width: 30px; height: 30px; border-radius: 10px; background: var(--grad); color: #1b1f2a; display: grid; place-items: center; font-size: 14px; font-weight: 800; }
+[data-series="design"] .sec-n, [data-series="video"] .sec-n { color: #fff; }
+h2 { font-size: clamp(19px, 2.8vw, 23px); line-height: 1.45; font-weight: 800; }
+.sec-sub { color: var(--sub); font-size: 14.5px; margin: 0 0 20px 42px; }
+h3 { font-size: 16px; line-height: 1.5; }
+p + p { margin-top: .8em; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.card { background: var(--ac-soft); border: 1px solid var(--ac-line); border-radius: 16px; padding: 18px 20px; transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
+.card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -16px rgba(27,31,42,.35); }
+.card .kicker { font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--ac); }
+.card .big { font-size: 28px; font-weight: 800; line-height: 1.3; margin: 4px 0 4px; }
+.card p { font-size: 14px; color: #38415a; }
+
+/* ===== Before / After ===== */
+.ba { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; position: relative; }
+.pane { min-width: 0; border: 1px solid var(--line); border-radius: 16px; padding: 18px; background: #fff; }
+.pane.after { border-color: var(--ac-line); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c2) 10%, transparent); }
+.pane-h { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.badge { flex: none; font-size: 11px; font-weight: 800; letter-spacing: .08em; border-radius: 999px; padding: 1px 11px; color: var(--sub); background: var(--bg); border: 1px solid var(--line); }
+.after .badge { color: #fff; background: var(--ac); border-color: var(--ac); }
+.pane-h h3 { font-size: 15px; }
+.cap { font-size: 13px; color: var(--sub); margin-top: 10px; }
+
+/* ===== Callout ===== */
+.note { border-radius: 14px; padding: 14px 18px 15px; font-size: 14.5px; background: var(--ac-soft); border: 1px solid var(--ac-line); }
+.note h3 { display: flex; align-items: center; gap: 8px; font-size: 13px; letter-spacing: .05em; color: var(--ac); margin-bottom: 3px; }
+.note h3::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.note.warn { background: #fff7e8; border-color: #efd7a6; }
+.note.warn h3 { color: #8a5300; }
+.notes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+/* ===== Code ===== */
+.code { margin: 14px 0 0; border-radius: 14px; overflow: hidden; border: 1px solid var(--ac-line); background: #f8faf8; }
+.code figcaption { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; font-weight: 800; letter-spacing: .06em; color: var(--ac); padding: 8px 14px; background: var(--ac-soft); border-bottom: 1px solid var(--ac-line); }
+.code pre { font-size: 13.5px; line-height: 1.75; padding: 14px 16px; overflow-x: auto; color: #23304a; tab-size: 2; }
+.code.dark { background: #14201a; border-color: #243a2d; }
+.code.dark figcaption { background: #1b2c22; color: #b9e78a; border-color: #243a2d; }
+.code.dark pre { color: #e4f1e0; }
+.btn { appearance: none; border: 1px solid var(--ac-line); background: #fff; color: var(--ac); font: inherit; font-size: 12px; font-weight: 800; letter-spacing: .04em; border-radius: 999px; padding: 3px 14px; cursor: pointer; transition: background .2s var(--ease), transform .2s var(--ease); }
+.btn:hover { background: var(--ac-soft); }
+.btn:active { transform: scale(.97); }
+.btn:focus-visible, input:focus-visible, summary:focus-visible, button:focus-visible { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 2px; }
+.btn.solid { background: var(--ac); border-color: var(--ac); color: #fff; padding: 6px 18px; font-size: 13.5px; }
+.btn.solid:hover { background: color-mix(in srgb, var(--ac) 88%, #000); }
+.tk-add { color: #0e6b32; background: #e3f6e8; } .tk-del { color: #a4281c; background: #fdeceb; }
+
+/* ===== Steps ===== */
+.steps { list-style: none; counter-reset: s; display: grid; gap: 12px; }
+.steps > li { counter-increment: s; position: relative; padding: 14px 16px 14px 58px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.steps > li::before { content: counter(s); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--grad); color: #1b1f2a; font-weight: 800; font-size: 14px; }
+[data-series="design"] .steps > li::before, [data-series="video"] .steps > li::before { color: #fff; }
+.steps h3 { font-size: 15.5px; }
+.steps p { font-size: 14px; color: #38415a; margin-top: 2px; }
+
+/* ===== Check list / refs ===== */
+.chk { list-style: none; display: grid; gap: 8px; }
+.chk li { position: relative; padding-left: 30px; font-size: 14.5px; }
+.chk li::before { content: "✓"; position: absolute; left: 0; top: 2px; width: 20px; height: 20px; border-radius: 6px; background: var(--ac); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 800; line-height: 1; }
+.refs { font-size: 13px; color: var(--sub); padding: 6px 4px 54px; }
+.refs h2 { font-size: 13px; letter-spacing: .08em; color: var(--sub); margin-bottom: 6px; }
+.refs li { margin-left: 1.2em; word-break: break-all; }
+.refs .by { margin-top: 10px; }
+.tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; padding: 0 9px; border-radius: 999px; }
+.tag.ok { color: var(--ok); background: var(--ok-soft); }
+.tag.ng { color: var(--ng); background: var(--ng-soft); }
+.rows .tag, .judge .tag { font-size: 0; }
+.rows .tag::before, .judge .tag::before { font-size: 11px; }
+.rows .tag.ok::before, .judge .tag.ok::before { content: "✓ OK"; }
+.rows .tag.ng::before, .judge .tag.ng::before { content: "✕ 不足"; }
+
+@media (max-width: 720px) {
+  .wrap { padding: 0 14px; }
+  .hero .wrap { grid-template-columns: 1fr; }
+  .hero-art { display: none; }
+  .sec { padding: 22px 16px 24px; border-radius: 16px; }
+  .sec-sub { margin-left: 0; }
+  .grid2, .grid3, .ba, .notes { grid-template-columns: 1fr; }
+}
+
+/* ===== 操作部品（design シリーズの追加ページ用。meta の "css":["parts.css"] で読み込む） ===== */
+.tools { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; margin: 0 0 16px; padding: 8px 14px; background: var(--ac-soft); border: 1px solid var(--ac-line); border-radius: 14px; }
+.tools .lab { font-size: 12.5px; font-weight: 800; color: var(--ac); letter-spacing: .04em; }
+.tools > * { min-width: 0; }
+
+/* トグルスイッチ（実体は checkbox。キーボードはスペースで切り替え） */
+.tgl { position: relative; display: inline-flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 700; cursor: pointer; min-height: 44px; }
+.tgl input { position: absolute; opacity: 0; width: 100%; height: 100%; left: 0; top: 0; margin: 0; cursor: pointer; }
+.tgl .sw { flex: none; width: 42px; height: 24px; border-radius: 999px; background: #b4bccb; position: relative; transition: background .2s var(--ease); }
+.tgl .sw::after { content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.35); transition: transform .2s var(--ease); }
+.tgl input:checked + .sw { background: var(--ac); }
+.tgl input:checked + .sw::after { transform: translateX(18px); }
+.tgl input:focus-visible + .sw { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 2px; }
+
+/* 切り替えボタン（実体は radio） */
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; border: 1px solid var(--ac-line); border-radius: 24px; background: #fff; padding: 3px; }
+.seg label { position: relative; cursor: pointer; }
+.seg input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.seg span { display: block; padding: 10px 15px; min-height: 42px; border-radius: 999px; font-size: 13px; font-weight: 800; line-height: 22px; color: var(--ac); }
+.seg input:checked + span { background: var(--ac); color: #fff; }
+.seg input:focus-visible + span { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 1px; }
+
+/* スライダー */
+.rng { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; font-size: 13.5px; font-weight: 700; min-height: 44px; }
+.rng input[type=range] { width: min(240px, 100%); accent-color: var(--ac); height: 28px; }
+.rng output { font-family: var(--mono); font-weight: 800; color: var(--ac); min-width: 4.2em; }
+
+/* 結果の読み上げ・まとめ欄 */
+.verdict { margin-top: 12px; padding: 12px 16px; border-radius: 12px; font-size: 14px; background: #fff; border: 1px solid var(--ac-line); border-left: 5px solid var(--c2); }
+.verdict b { color: var(--ac); }
+
+/* 選び方の表（カード型） */
+.pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pick .card .q { font-size: 14.5px; font-weight: 800; line-height: 1.5; margin: 2px 0 6px; }
+.pick .card p { font-size: 13.5px; }
+.pick .card .go { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 800; color: #fff; background: var(--ac); border-radius: 999px; padding: 1px 11px; }
+.fig { margin: 0; }
+.fig figcaption { font-size: 12.5px; color: var(--sub); margin-top: 8px; }
+.judge2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ctr-note { font-size: 12.5px; color: var(--sub); }
+
+@media (max-width: 720px) {
+  .seg { display: flex; width: 100%; }
+  .seg label { flex: 1 1 auto; }
+  .seg span { text-align: center; padding: 10px 10px; border-radius: 18px; }
+  .pick, .judge2 { grid-template-columns: 1fr; }
+  .tools { gap: 2px 14px; }
+}
+
+/* ===== 操作パネルの追従（デモのセクション内だけ。親の .sec を出たら追従終了） ===== */
+.tools.stick { position: sticky; top: 8px; z-index: 30; box-shadow: 0 10px 20px -14px rgba(27,31,42,.45); }
+.tools .tgt { font-size: 12.5px; font-weight: 700; color: var(--sub); }
+@media (max-width: 720px) {
+  /* スマホ幅: 追従パネルは小さくまとめる（ラベル・補足は省く。操作対象は直下のデモ） */
+  .tools.stick { top: 6px; padding: 4px 10px; gap: 0 12px; }
+  .tools.stick .lab, .tools.stick .tgt { display: none; }
+  .tools.stick .tgl, .tools.stick .rng { min-height: 40px; }
+  .tools.stick .seg span { padding: 7px 8px; min-height: 36px; line-height: 22px; }
+  .tools.stick .rng input[type=range] { height: 24px; }
+  .tools.stick .rng { flex-wrap: nowrap; gap: 0 8px; font-size: 12.5px; min-height: 36px; flex: 1 1 100%; }
+  .tools.stick .rng input[type=range] { flex: 1 1 60px; width: auto; min-width: 60px; }
+  .tools.stick .rng output { min-width: 3em; }
+  .tools.stick .tgl { min-height: 36px; font-size: 12.5px; }
+  .tools.stick .seg { flex: 1 1 100%; }
+  /* 効果対象の隣に置く操作パネル（2列に詰めて縦を短く） */
+  .build .tools { grid-template-columns: 1fr 1fr; column-gap: 10px; }
+  .build .tools > .lab, .build .tools > .btnrow, .build .tools > .accn, .build .tools > .readout, .build .tools > .lever { grid-column: 1 / -1; }
+  .build .lever small { display: none; }
+}
+
+/* スマホ幅だけ追従する操作パネル（デモが縦に長くなる幅で、操作と結果を同時に見られるように。親の .sec を出たら追従終了） */
+@media (max-width: 720px) {
+  .tools.stick-sm { position: sticky; top: 6px; z-index: 30; box-shadow: 0 10px 20px -14px rgba(27,31,42,.45); padding: 4px 10px; gap: 0 12px; }
+  .tools.stick-sm .lab, .tools.stick-sm .tgt { display: none; }
+  .tools.stick-sm .tgl { min-height: 36px; font-size: 12.5px; }
+  .tools.stick-sm .seg { flex: 1 1 100%; }
+  .tools.stick-sm .seg span { padding: 7px 8px; min-height: 36px; line-height: 22px; }
+  .tools.stick-sm .rng { flex: 1 1 100%; flex-wrap: nowrap; gap: 0 8px; font-size: 12.5px; min-height: 36px; }
+  .tools.stick-sm .rng input[type=range] { flex: 1 1 60px; width: auto; min-width: 60px; height: 24px; }
+  .tools.stick-sm .btn, .tools.stick-sm .btn:not(.solid) { min-height: 36px; min-width: 0; padding: 4px 10px; font-size: 12px; }
+  .tools.stick-sm .scrub { flex: 1 1 100%; }
+}
+
+/* ===== 動画Tips（video シリーズ）共通部品。meta の "css":["parts.css","vparts.css"] と "js":["vparts.js"] で読み込む ===== */
+.flow { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin-top: 14px; counter-reset: f; }
+.flow li { counter-increment: f; font-size: 12px; font-weight: 700; padding: 2px 11px 2px 9px; border-radius: 999px; background: rgba(255,255,255,.75); border: 1px solid var(--ac-line); color: var(--sub); }
+.flow li::before { content: counter(f) " "; font-weight: 800; color: var(--ac); }
+.flow li.now { background: var(--grad); color: #fff; border-color: transparent; }
+.flow li.now::before { color: #fff; }
+
+.rm-note:not([hidden]) { margin: 0 0 12px; padding: 8px 14px; font-size: 13px; line-height: 1.6; color: #8a5300; background: #fff7e8; border: 1px solid #efd7a6; border-radius: 10px; }
+
+/* 映像の枠（ファインダー風） */
+.vframe { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 14px; background: #1b1b22; border: 3px solid #1b1b22; box-shadow: 0 16px 30px -18px rgba(27,31,42,.6); isolation: isolate; container-type: inline-size; }
+.vframe > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hud { position: absolute; z-index: 5; inset: 0; pointer-events: none; color: #fff; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-shadow: 0 1px 3px rgba(0,0,0,.65); }
+.hud span { position: absolute; }
+.hud .tl { left: 12px; top: 10px; } .hud .tr { right: 12px; top: 10px; } .hud .bl { left: 12px; bottom: 10px; } .hud .br { right: 12px; bottom: 10px; }
+.hud .rec::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ff3b3b; margin-right: 6px; vertical-align: 0; }
+
+/* 再生・スクラブ操作 */
+.vctl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 12px; }
+.vctl .btn.solid { min-height: 40px; min-width: 96px; }
+.scrub { display: flex; align-items: center; gap: 10px; flex: 1 1 220px; min-width: 0; font-size: 12.5px; font-weight: 700; }
+.scrub input[type=range] { flex: 1; min-width: 0; accent-color: var(--ac); height: 28px; }
+.scrub output { font-family: var(--mono); min-width: 4.4em; text-align: right; color: var(--ac); }
+
+.vcap { font-size: 13px; color: var(--sub); margin-top: 8px; }
+.vbig { font-size: 16px; font-weight: 800; line-height: 1.5; margin-top: 12px; }
+.vbig small { display: block; font-size: 13px; font-weight: 600; color: var(--sub); }
+
+/* 状態チップ（画面に残るもの、カメラ位置など） */
+.chips2 { display: grid; gap: 6px; margin-top: 10px; list-style: none; }
+.chips2 li { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; font-size: 13px; padding: 5px 10px; border-radius: 10px; background: #fff; border: 1px solid var(--line); }
+.chips2 .st { font-size: 11.5px; font-weight: 800; border-radius: 999px; padding: 0 10px; white-space: nowrap; }
+.chips2 .st.on { color: var(--ok); background: var(--ok-soft); }
+.chips2 .st.mid { color: #8a5300; background: #fff1d6; }
+.chips2 .st.off { color: #6b7080; background: #eceef3; }
+
+.vgrid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.vgrid > * { min-width: 0; }
+@media (max-width: 720px) { .vgrid { grid-template-columns: 1fr; } }
+
+/* ===== 教材デモ共通（.teach = 学習用の動き。装飾の動きとは別扱いで、reduced-motion でも止めない） ===== */
+.demo-tag { white-space: nowrap; max-width: calc(100% - 20px); overflow: hidden; text-overflow: ellipsis; position: absolute; z-index: 6; left: 10px; bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .04em; color: #fff; background: rgba(27,27,34,.72); border-radius: 999px; padding: 0 10px; pointer-events: none; }
+.demo-note { font-size: 12.5px; color: var(--sub); margin-top: 10px; padding: 8px 12px; border: 1px dashed var(--ac-line); border-radius: 10px; background: #fff; }
+.demo-note b { color: var(--ac); }
+.vctl .btn:not(.solid), .tools .btn:not(.solid) { min-height: 40px; padding: 4px 14px; }
+.se2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.se2 figure { margin: 0; }
+.se2 svg { width: 100%; height: auto; display: block; border-radius: 8px; border: 1px solid var(--ac-line); }
+.se2 figcaption { font-size: 11.5px; font-weight: 700; color: var(--sub); margin-top: 2px; }
+.se-text { font-size: 12.5px; color: #38415a; margin-top: 8px; line-height: 1.6; }
+.se-text b { color: var(--ac); }
+
+#stopBtn { min-width: 0; padding: 4px 12px; }
+
+/* ===== 「Premiere Proではどうする？」共通セクション（静的な簡略図。JS不要） ===== */
+.pp-judge { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 12px; }
+.pp-judge .j { font-size: 12.5px; font-weight: 800; padding: 5px 12px; border-radius: 999px; border: 1.5px solid var(--ac-line); background: #fff; color: #8c93a3; line-height: 1.4; }
+.pp-judge .j.on { background: var(--grad); color: #fff; border-color: transparent; }
+.pp-judge .j.on::before { content: "✔ "; }
+.pp-lead { font-size: 15px; line-height: 1.8; margin: 0 0 14px; }
+.pp-lead b { color: var(--ac); }
+.pp-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.pp-grid > * { min-width: 0; }
+.pp-fig { margin: 0; }
+.pp-fig figcaption { font-size: 11.5px; color: var(--sub); margin-top: 6px; line-height: 1.5; }
+.pp-txt h3 { font-size: 15px; margin: 0 0 6px; }
+.pp-txt ol { margin: 0 0 10px; padding-left: 1.4em; font-size: 13.5px; line-height: 1.65; }
+.pp-txt li { margin: 3px 0; }
+.pp-txt code { font-size: 12px; background: var(--ac-soft); border-radius: 5px; padding: 0 5px; }
+.pp-look { border: 2px solid var(--ac); background: var(--ac-soft); border-radius: 12px; padding: 8px 12px; font-size: 13.5px; margin-bottom: 8px; line-height: 1.65; }
+.pp-look b { color: var(--ac); }
+.pp-warn { font-size: 13px; color: #8a5300; background: #fff7e8; border: 1px solid #efd7a6; border-radius: 10px; padding: 7px 12px; margin: 0 0 8px; line-height: 1.6; }
+.pp-links { font-size: 12.5px; margin: 6px 0 0; }
+.pp-links a { display: inline-block; margin: 2px 12px 2px 0; }
+.pp-note { font-size: 11.5px; color: var(--sub); margin-top: 12px; }
+
+.ui { background: #2a2a33; border-radius: 10px; color: #dcdce4; font-size: 12px; overflow: hidden; border: 1px solid #1b1b22; line-height: 1.4; }
+.ui + .ui { margin-top: 8px; }
+.ui-t { background: #1f1f27; padding: 4px 10px; font-size: 11px; font-weight: 700; color: #aeb0bd; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.ui-b { padding: 8px 10px; display: grid; gap: 5px; }
+.ui-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
+.ui-2 .ui + .ui { margin-top: 0; }
+.ui-r { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: center; padding: 3px 7px; border-radius: 6px; border: 2px solid transparent; }
+.ui-r .v { font-family: var(--mono); color: #fff; text-align: right; }
+.ui-r .n { font-weight: 700; }
+.ui .hl { border-color: #ff9f43; background: rgba(255,159,67,.16); box-shadow: 0 0 0 3px rgba(255,159,67,.22); }
+.ui-tag { display: inline-block; font-size: 10.5px; font-weight: 800; color: #fff; background: var(--grad); border-radius: 999px; padding: 1px 8px; margin-left: 6px; white-space: nowrap; }
+.ui-mon { aspect-ratio: 16 / 9; background: #14141a; position: relative; border-radius: 6px; overflow: hidden; margin: 8px 10px; }
+.ui-mon i { position: absolute; display: block; box-sizing: border-box; }
+.ui-mon span { position: absolute; font-size: 10px; font-weight: 800; }
+.kfl { position: relative; height: 22px; background: #1d1d24; border-radius: 4px; margin: 2px 4px; }
+.kfl i { position: absolute; top: 4px; width: 12px; height: 12px; background: #ffd34d; transform: rotate(45deg); border-radius: 2px; box-shadow: 0 0 0 3px rgba(255,211,77,.25); }
+.kfl span { position: absolute; top: 24px; font-size: 10.5px; color: #aeb0bd; white-space: nowrap; }
+.kfl.pad { margin-bottom: 20px; }
+
+.tl2 { position: relative; padding: 4px 10px 8px; }
+.tl2 .t { font-size: 11px; font-weight: 800; color: #ffcf9a; margin: 6px 0 2px; }
+.tl2 .tr { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 6px; align-items: center; margin: 3px 0; }
+.tl2 .tr .n { font-size: 11px; font-weight: 800; color: #aeb0bd; }
+.tl2 .lane { position: relative; height: 26px; background: #1d1d24; border-radius: 4px; }
+.tl2 .lane b { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; font-size: 10.5px; font-weight: 800; color: #fff; display: flex; align-items: center; padding: 0 4px; white-space: nowrap; overflow: hidden; box-sizing: border-box; }
+.tl2 .a { background: #6b7a99; } .tl2 .a2 { background: #5a6888; } .tl2 .b { background: #e8791f; }
+.tl2 b.hl { outline: 2px solid #ffd34d; outline-offset: 1px; box-shadow: 0 0 0 4px rgba(255,211,77,.25); z-index: 2; }
+.tl2 .cut { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dashed rgba(255,255,255,.65); left: calc(36px + (100% - 36px) * .5); pointer-events: none; z-index: 3; }
+.tl2 .wrapc { position: relative; }
+
+.sl { position: relative; height: 6px; border-radius: 3px; margin: 8px 6px 3px; }
+.sl.t { background: linear-gradient(90deg, #5aa9ff, #d8d8e0, #ffb347); }
+.sl.g { background: linear-gradient(90deg, #3cb371, #d8d8e0, #e052b0); }
+.sl i { position: absolute; top: -5px; width: 12px; height: 16px; margin-left: -6px; border-radius: 3px; background: #fff; border: 2px solid #ff9f43; box-sizing: border-box; }
+.sl-l { display: flex; justify-content: space-between; font-size: 10.5px; color: #aeb0bd; margin: 0 4px; }
+.eye { display: inline-flex; width: 26px; height: 26px; border-radius: 6px; background: #3b3b47; align-items: center; justify-content: center; }
+.menu { background: #3a3a46; border: 1px solid #55555f; border-radius: 6px; padding: 4px 0; font-size: 11.5px; }
+.menu div { padding: 2px 10px; color: #cfcfd8; }
+.menu .on { background: rgba(255,159,67,.28); color: #fff; font-weight: 800; box-shadow: inset 2px 0 0 #ff9f43; }
+
+.pp-flow { display: grid; gap: 4px; }
+.pp-flow .fb { border-radius: 12px; padding: 8px 12px; font-size: 12.5px; line-height: 1.55; }
+.pp-flow .fb b { display: block; font-size: 12px; }
+.pp-flow .cam { background: var(--ac-soft); border: 2px solid var(--ac); color: #38415a; }
+.pp-flow .cam b { color: var(--ac); }
+.pp-flow .mid { background: #fff; border: 1.5px dashed var(--ac-line); color: #38415a; text-align: center; font-weight: 700; }
+.pp-flow .pr { background: #2a2a33; color: #dcdce4; border: 1px solid #1b1b22; }
+.pp-flow .pr b { color: #ffcf9a; }
+.pp-flow .pr .ng { color: #ff8f8f; font-weight: 800; }
+.pp-flow .pr .ok { color: #9fe3b0; }
+.pp-flow .ar { text-align: center; color: var(--ac); font-weight: 800; line-height: 1; }
+.pp-pics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+.pp-pics div { border-radius: 8px; border: 1px solid var(--ac-line); background: #fff; padding: 6px; font-size: 11.5px; text-align: center; font-weight: 700; color: #38415a; }
+.pp-pics .pic { position: relative; aspect-ratio: 16 / 9; border-radius: 6px; overflow: hidden; background: #cfd8e8; margin-bottom: 4px; }
+.pp-pics .pic .bgb { position: absolute; inset: -10%; background: repeating-linear-gradient(90deg, #8fb4a0 0 14px, #cfd8e8 14px 28px), #cfd8e8; }
+.pp-pics .pic .bgb.blur { filter: blur(6px); }
+.pp-pics .pic .sb { position: absolute; left: 40%; top: 22%; width: 20%; height: 62%; border-radius: 40% 40% 12% 12%; background: #e8791f; }
+@media (max-width: 720px) { .pp-grid { grid-template-columns: 1fr; } }
+
+/* ===== このページ専用 ===== */
+
+  /* 動画系: フィルム風の装飾 + 「ファインダー」で動きを実際に見せる */
+  .hero .film { position: absolute; left: 0; right: 0; bottom: 14px; height: 10px; background: repeating-linear-gradient(90deg, rgba(180,50,31,.28) 0 16px, transparent 16px 30px); border-radius: 3px; }
+  .hero-art { width: 220px; }
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .mv { background: var(--ac-soft); border: 1px solid var(--ac-line); border-radius: 16px; padding: 16px 18px 18px; transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
+  .mv:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -16px rgba(27,31,42,.35); }
+  .mv svg { width: 100%; height: 92px; display: block; margin-bottom: 8px; }
+  .mv .en { font-size: 11.5px; font-weight: 800; letter-spacing: .08em; color: var(--ac); }
+  .mv h3 { font-size: 22px; margin: 0 0 4px; }
+  .mv p { font-size: 14px; color: #38415a; }
+  .mv .use { margin-top: 8px; font-size: 13px; color: var(--ink); padding-top: 8px; border-top: 1px dashed var(--ac-line); }
+
+  /* ---- ファインダー ---- */
+  .cams { display: grid; gap: 22px; }
+  .cam { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 20px; align-items: center; }
+  .frame { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 14px; background: #1b1b22; border: 3px solid #1b1b22; box-shadow: 0 16px 30px -18px rgba(27,31,42,.6); }
+  .scene { position: absolute; left: 0; top: 0; will-change: transform, filter; }
+  .scene svg { display: block; width: 100%; height: 100%; }
+  .cam[data-mode="pan"] .scene  { width: 250%; height: 100%; transform: translateX(calc(var(--t, 0) * -60%)); }
+  .cam[data-mode="tilt"] .scene { width: 100%; height: 250%; transform: translateY(calc((var(--t, 0) - 1) * 60%)); }
+  .cam[data-mode="whip"] .scene { width: 200%; height: 100%; transform: translateX(calc(var(--e, 0) * -50%)); filter: blur(calc(var(--b, 0) * 1px)); }
+  .hud { position: absolute; inset: 0; pointer-events: none; color: #fff; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+  .hud::before { content: ""; position: absolute; inset: 10px; border: 2px solid rgba(255,255,255,.55); border-radius: 4px; -webkit-mask: linear-gradient(#000 0 0) top left/18px 2px no-repeat, linear-gradient(#000 0 0) top left/2px 18px no-repeat, linear-gradient(#000 0 0) top right/18px 2px no-repeat, linear-gradient(#000 0 0) top right/2px 18px no-repeat, linear-gradient(#000 0 0) bottom left/18px 2px no-repeat, linear-gradient(#000 0 0) bottom left/2px 18px no-repeat, linear-gradient(#000 0 0) bottom right/18px 2px no-repeat, linear-gradient(#000 0 0) bottom right/2px 18px no-repeat; mask: linear-gradient(#000 0 0) top left/18px 2px no-repeat, linear-gradient(#000 0 0) top left/2px 18px no-repeat, linear-gradient(#000 0 0) top right/18px 2px no-repeat, linear-gradient(#000 0 0) top right/2px 18px no-repeat, linear-gradient(#000 0 0) bottom left/18px 2px no-repeat, linear-gradient(#000 0 0) bottom left/2px 18px no-repeat, linear-gradient(#000 0 0) bottom right/18px 2px no-repeat, linear-gradient(#000 0 0) bottom right/2px 18px no-repeat; }
+  .hud .rec, .hud .mode, .hud .tc { background: rgba(20,16,24,.55); padding: 1px 8px; border-radius: 6px; }
+  .hud .rec { position: absolute; left: 20px; top: 18px; display: flex; align-items: center; gap: 6px; }
+  .hud .rec::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: #ff3b3b; }
+  .hud .mode { position: absolute; right: 20px; top: 18px; }
+  .hud .tc { position: absolute; left: 20px; bottom: 16px; }
+  .hud .cross { position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; transform: translate(-50%, -50%); opacity: .8; }
+  .hud .cross::before, .hud .cross::after { content: ""; position: absolute; background: #fff; }
+  .hud .cross::before { left: 8px; top: 0; width: 2px; height: 18px; } .hud .cross::after { left: 0; top: 8px; width: 18px; height: 2px; }
+  .ctrl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 10px; }
+  .cam > * { min-width: 0; }
+  .ctrl input[type=range] { flex: 1 1 140px; min-width: 0; accent-color: var(--ac); height: 28px; }
+  .ctrl .btn { flex: none; min-height: 40px; }
+  .ctrl .btn.solid { min-width: 96px; }
+  .ctrl .btn.stop { padding: 4px 12px; min-width: 0; }
+  .cam-info h3 { font-size: 18px; margin-bottom: 4px; }
+  .cam-info p { font-size: 14px; color: #38415a; }
+  .cam-info .kv { margin-top: 10px; display: grid; gap: 6px; font-size: 13px; }
+  .cam-info .kv div { display: grid; grid-template-columns: 5.8em 1fr; gap: 8px; }
+  .cam-info .kv b { color: var(--ac); font-size: 12px; letter-spacing: .05em; padding-top: 1px; }
+
+  /* ---- 動かし方の違い ---- */
+  .how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .how figure { border: 1px solid var(--line); border-radius: 16px; padding: 12px 12px 14px; background: #fff; }
+  .how figure.other { border-style: dashed; background: #fffaf6; }
+  .how svg { width: 100%; height: auto; display: block; }
+  .how figcaption { font-size: 13.5px; margin-top: 6px; }
+  .how figcaption b { display: block; font-size: 15px; }
+
+  /* ---- クイズ ---- */
+  .quiz { display: grid; gap: 10px; }
+  .quiz details { border: 1px solid var(--line); border-radius: 14px; background: #fff; overflow: hidden; }
+  .quiz summary { cursor: pointer; padding: 12px 16px; font-weight: 700; font-size: 15px; list-style: none; display: flex; gap: 10px; align-items: baseline; }
+  .quiz summary::before { content: "Q" counter(q); counter-increment: q; flex: none; font-weight: 800; font-size: 12px; color: #fff; background: var(--grad); border-radius: 6px; padding: 1px 8px; }
+  .quiz { counter-reset: q; }
+  .quiz summary::after { content: "答えを見る ▾"; margin-left: auto; flex: none; font-size: 12px; font-weight: 700; color: var(--ac); }
+  .quiz details[open] summary::after { content: "閉じる ▴"; }
+  .quiz .ans { padding: 0 16px 14px; font-size: 14px; color: #38415a; }
+  .quiz .ans b { color: var(--ac); font-size: 17px; }
+
+  /* ---- AIへの伝え方 ---- */
+  .say { display: inline-block; font-family: var(--mono); font-size: 14px; font-weight: 700; background: #fff; border: 1px solid var(--ac-line); border-radius: 8px; padding: 3px 10px; color: var(--ac); }
+  .say.bad { color: var(--ng); border-color: #f3c7c2; background: var(--ng-soft); font-family: var(--font); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+  @media (max-width: 720px) {
+    .three, .how { grid-template-columns: 1fr; }
+    .cam { grid-template-columns: minmax(0, 1fr); }
+    .hero .film { bottom: 10px; }
+  }
+
+</style>
+</head>
+<body>
+<script>
+// 動画Tips共通ヘルパー（自動再生はしない。動きは「▶」やスライダーの操作でだけ動く）
+(() => {
+  const mq = matchMedia('(prefers-reduced-motion: reduce)');
+  const note = () => document.querySelectorAll('.rm-note').forEach((n) => { n.hidden = !mq.matches; });
+  // 共通スクリプトは本文より前に読み込まれるため、本文の生成後にも実行する
+  document.addEventListener('DOMContentLoaded', note); note(); if (mq.addEventListener) mq.addEventListener('change', note);
+  window.V = {
+    // 「動きを減らす」設定のとき true。教材の動きは操作したときだけ動かす（止めない）。補間の滑らかさだけ省く場面で使う
+    reduced: () => mq.matches,
+    lerp: (a, b, t) => a + (b - a) * t,
+    clamp: (v, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v)),
+    ease: (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2),
+    // duration(ms) かけて 0→1 を cb(t) に渡す。戻り値は中断関数
+    run(duration, cb, done) {
+      let id = 0, t0 = 0, dead = false;
+      const step = (now) => {
+        if (dead) return; if (!t0) t0 = now;
+        const t = Math.min(1, (now - t0) / duration); cb(t);
+        if (t < 1) id = requestAnimationFrame(step); else if (done) done();
+      };
+      id = requestAnimationFrame(step);
+      return () => { dead = true; cancelAnimationFrame(id); };
+    },
+  };
+})();
+// 「動きを減らす」設定のときは、なめらかな補間ではなく「コマ送り」（10段階）で進める。
+// 動き自体は消さず、操作したときだけ・少ない動きで確認できるようにする。
+(() => {
+  const run = window.V.run;
+  window.V.runSmooth = run; // 補間を間引かない版（音と同時に進めたいときなど）
+  window.V.run =(duration, cb, done) => {
+    if (!window.V.reduced()) return run(duration, cb, done);
+    let last = -1;
+    return run(duration, (t) => { const k = Math.round(t * 10); if (k !== last) { last = k; cb(k / 10); } }, done);
+  };
+})();
+
+</script>
+<header class="hero">
+  <div class="film" aria-hidden="true"></div>
+  <div class="wrap">
+    <div>
+      <div class="pill-row rise"><span class="series">動画制作でよく聞くこれ何？</span><span class="tipno">TIPS V-04 / パン・ティルト・ウィップパン</span></div>
+      <h1 class="rise" style="--i:1">パン？ティルト？<br>動画でよく使う<br>カメラの動きを3つ覚える</h1>
+      <p class="lead rise" style="--i:2">横に見せる<b>「パン」</b>、上下に見せる<b>「ティルト」</b>、素早く振る<b>「ウィップパン」</b>。名前が分かると、動画の指示がしやすくなる。</p>
+      <div class="meta rise" style="--i:3"><span>難易度：初級</span><span>撮影の指示・AI動画生成の指示に</span><span>3つの動きを再生して比べられるデモつき</span></div>
+      <ol class="flow rise" style="--i:4" aria-label="シリーズの流れ">
+        <li>画角</li><li class="now">パン／ティルト</li><li>ドリー／トラッキング／ズーム</li><li>Bロール</li><li>カット／フェード</li><li>フレームレート</li><li>シャッタースピード</li><li>ホワイトバランス</li><li>絞り・被写界深度</li><li>Jカット／Lカット</li>
+      </ol>
+    </div>
+    <svg class="hero-art rise" style="--i:2" viewBox="0 0 220 170" aria-hidden="true">
+      <defs><linearGradient id="hg" x1="0" x2="1"><stop offset="0" stop-color="#ff9f43"/><stop offset="1" stop-color="#ef3b4b"/></linearGradient></defs>
+      <rect x="20" y="22" width="180" height="101" rx="10" fill="#1b1b22"/>
+      <rect x="28" y="30" width="164" height="85" rx="5" fill="url(#hg)" opacity=".92"/>
+      <circle cx="58" cy="58" r="10" fill="#fff" opacity=".9"/>
+      <path d="M28 115l46-34 34 22 28-20 56 32z" fill="#fff" opacity=".35"/>
+      <path d="M40 138h110" stroke="#b4321f" stroke-width="3" stroke-linecap="round"/><path d="M142 130l10 8-10 8" fill="none" stroke="#b4321f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="22" y="164" font-size="12" font-weight="700" fill="#b4321f">PAN / TILT / WHIP</text>
+    </svg>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">1</span><h2>まず3つの名前と意味</h2></div>
+    <p class="sec-sub">どれも<b>カメラの位置は変えず</b>、向きだけを変える動きです。</p>
+    <div class="three">
+      <div class="mv">
+        <svg viewBox="0 0 200 92" aria-hidden="true"><rect x="10" y="12" width="180" height="68" rx="8" fill="#fff" stroke="#f6cdb8"/><path d="M34 46h132" stroke="#b4321f" stroke-width="4" stroke-linecap="round"/><path d="M150 34l18 12-18 12" fill="none" stroke="#b4321f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="en">PAN</div><h3>パン</h3>
+        <p>カメラの位置を変えず、<b>横方向</b>に振る。</p>
+        <p class="use">場所の広がりを見せる／動く被写体を追う</p>
+      </div>
+      <div class="mv">
+        <svg viewBox="0 0 200 92" aria-hidden="true"><rect x="10" y="12" width="180" height="68" rx="8" fill="#fff" stroke="#f6cdb8"/><path d="M100 72V22" stroke="#b4321f" stroke-width="4" stroke-linecap="round"/><path d="M84 38l16-18 16 18" fill="none" stroke="#b4321f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="en">TILT</div><h3>ティルト</h3>
+        <p>カメラの位置を変えず、<b>上下</b>に振る。</p>
+        <p class="use">建物を下から上へ見せる／高さ・スケール感を出す</p>
+      </div>
+      <div class="mv">
+        <svg viewBox="0 0 200 92" aria-hidden="true"><rect x="10" y="12" width="180" height="68" rx="8" fill="#fff" stroke="#f6cdb8"/><path d="M30 46h140" stroke="#ef3b4b" stroke-width="4" stroke-linecap="round" stroke-dasharray="3 9"/><path d="M62 34h24M70 46h38M62 58h24M118 34h34M126 46h40M118 58h34" stroke="#b4321f" stroke-width="3" stroke-linecap="round" opacity=".55"/></svg>
+        <div class="en">WHIP PAN（SWISH PAN）</div><h3>ウィップパン</h3>
+        <p>素早く振って、画面を<b>大きく流す</b>。</p>
+        <p class="use">場面の切り替え／勢いやテンポを出す</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">2</span><h2>動かして確認：カメラのファインダーを覗いてみる</h2></div>
+    <p class="sec-sub">「▶ 再生」で動きを見られます（再生は毎回、最初から。■で止められます）。スライダーを動かすと、好きな位置で止めて確認できます。</p>
+    <div class="cams teach">
+
+      <div class="cam" data-mode="pan" data-dur="2600">
+        <div>
+          <div class="frame"><div class="scene"><svg viewBox="0 0 1600 360" preserveAspectRatio="none" role="img" aria-label="左から、カフェ、書店、花屋、パン屋が並ぶ街並み">
+<defs><linearGradient id="ps" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd9a8"/><stop offset="1" stop-color="#ffeedd"/></linearGradient></defs>
+<rect width="1600" height="360" fill="url(#ps)"/>
+<circle cx="1210" cy="78" r="44" fill="#ffb347"/>
+<rect y="296" width="1600" height="64" fill="#b9a99a"/><rect y="296" width="1600" height="6" fill="#a19182"/>
+<g><rect x="40" y="96" width="290" height="200" fill="#ffc89a"/><rect x="40" y="96" width="290" height="22" fill="#e8743b"/>
+<rect x="110" y="130" width="150" height="34" rx="6" fill="#2b2230"/><text x="185" y="154" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="800" letter-spacing="3" fill="#fff">CAFE</text>
+<rect x="76" y="186" width="90" height="80" rx="6" fill="#fff6e8"/><rect x="204" y="186" width="90" height="110" rx="6" fill="#7a4b2a"/><path d="M96 232q20-26 40 0" fill="none" stroke="#e8743b" stroke-width="5"/></g>
+<g><rect x="372" y="70" width="300" height="226" fill="#bcd7ff"/><rect x="372" y="70" width="300" height="22" fill="#3d6fc4"/>
+<rect x="444" y="108" width="156" height="34" rx="6" fill="#2b2230"/><text x="522" y="132" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="800" letter-spacing="3" fill="#fff">BOOKS</text>
+<rect x="400" y="168" width="110" height="128" fill="#fff"/><g stroke="#3d6fc4" stroke-width="4"><path d="M416 190h78M416 220h78M416 250h78"/></g><rect x="540" y="176" width="100" height="120" rx="6" fill="#274a8a"/></g>
+<g><rect x="720" y="110" width="320" height="186" fill="#ffc3d3"/><rect x="720" y="110" width="320" height="22" fill="#d9487a"/>
+<rect x="792" y="146" width="176" height="34" rx="6" fill="#2b2230"/><text x="880" y="170" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="800" letter-spacing="3" fill="#fff">FLOWERS</text>
+<g><circle cx="776" cy="246" r="18" fill="#ff6f9f"/><circle cx="822" cy="262" r="18" fill="#ffd34d"/><circle cx="868" cy="246" r="18" fill="#ff6f9f"/><circle cx="914" cy="262" r="18" fill="#b57bff"/><circle cx="960" cy="246" r="18" fill="#ffd34d"/></g><rect x="760" y="270" width="230" height="26" rx="5" fill="#8a5a3a"/></g>
+<g><rect x="1090" y="84" width="300" height="212" fill="#ffe7a0"/><rect x="1090" y="84" width="300" height="22" fill="#d99a1a"/>
+<rect x="1160" y="122" width="160" height="34" rx="6" fill="#2b2230"/><text x="1240" y="146" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="800" letter-spacing="3" fill="#fff">BAKERY</text>
+<rect x="1120" y="190" width="120" height="106" rx="6" fill="#fff6e0"/><ellipse cx="1180" cy="236" rx="40" ry="20" fill="#d99a1a"/><rect x="1270" y="190" width="90" height="106" rx="6" fill="#7a4b2a"/></g>
+<g fill="#4f9d5f"><circle cx="1450" cy="226" r="56"/><circle cx="1500" cy="250" r="44"/></g><rect x="1470" y="270" width="12" height="30" fill="#7a4b2a"/>
+</svg></div><div class="hud"><span class="rec">REC</span><span class="mode">PAN ▶</span><span class="cross"></span><span class="tc"></span></div><span class="demo-tag">疑似デモ</span></div>
+          <div class="ctrl"><button class="btn solid" type="button" data-play>▶ 再生</button><button class="btn stop" type="button" data-stop aria-label="停止" title="停止">■</button><input type="range" min="0" max="100" value="0" aria-label="パンの位置"></div>
+        </div>
+        <div class="cam-info"><h3>パン：左から右へ</h3><p>立っている位置はそのまま、首だけ横に振るイメージ。景色が横へ流れていきます。</p>
+          <div class="kv"><div><b>向き</b><span>横（左右）</span></div><div><b>使いどころ</b><span>店内や街並みの広がり／歩く人を追う</span></div></div></div>
+      </div>
+
+      <div class="cam" data-mode="tilt" data-dur="2600">
+        <div>
+          <div class="frame"><div class="scene"><svg viewBox="0 0 640 900" preserveAspectRatio="none" role="img" aria-label="地面から屋上のアンテナまで続く高い建物">
+<defs><linearGradient id="ts" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb08a"/><stop offset=".55" stop-color="#ffe0c4"/><stop offset="1" stop-color="#fff3e6"/></linearGradient></defs>
+<rect width="640" height="900" fill="url(#ts)"/>
+<circle cx="520" cy="110" r="46" fill="#ffd166"/>
+<g fill="#fff" opacity=".9"><ellipse cx="120" cy="150" rx="70" ry="22"/><ellipse cx="170" cy="134" rx="46" ry="20"/><ellipse cx="470" cy="300" rx="60" ry="18"/></g>
+<rect x="312" y="30" width="6" height="150" fill="#5a4a52"/><circle cx="315" cy="30" r="9" fill="#ef3b4b"/>
+<rect x="190" y="170" width="260" height="600" fill="#7b6a9a"/><rect x="190" y="170" width="260" height="26" fill="#5c4d7a"/>
+<g fill="#ffe9a8"><rect x="214" y="214" width="54" height="40" rx="5"/><rect x="292" y="214" width="54" height="40" rx="5"/><rect x="370" y="214" width="54" height="40" rx="5"/><rect x="214" y="280" width="54" height="40" rx="5"/><rect x="292" y="280" width="54" height="40" rx="5"/><rect x="370" y="280" width="54" height="40" rx="5"/><rect x="214" y="346" width="54" height="40" rx="5"/><rect x="292" y="346" width="54" height="40" rx="5"/><rect x="370" y="346" width="54" height="40" rx="5"/><rect x="214" y="412" width="54" height="40" rx="5"/><rect x="292" y="412" width="54" height="40" rx="5"/><rect x="370" y="412" width="54" height="40" rx="5"/><rect x="214" y="478" width="54" height="40" rx="5"/><rect x="292" y="478" width="54" height="40" rx="5"/><rect x="370" y="478" width="54" height="40" rx="5"/><rect x="214" y="544" width="54" height="40" rx="5"/><rect x="292" y="544" width="54" height="40" rx="5"/><rect x="370" y="544" width="54" height="40" rx="5"/><rect x="214" y="610" width="54" height="40" rx="5"/><rect x="292" y="610" width="54" height="40" rx="5"/><rect x="370" y="610" width="54" height="40" rx="5"/><rect x="214" y="676" width="54" height="40" rx="5"/><rect x="292" y="676" width="54" height="40" rx="5"/><rect x="370" y="676" width="54" height="40" rx="5"/></g>
+<g fill="#cdb8f5" opacity=".6"><rect x="214" y="544" width="54" height="40" rx="5"/><rect x="292" y="544" width="54" height="40" rx="5"/><rect x="370" y="544" width="54" height="40" rx="5"/></g>
+<text x="320" y="760" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="800" letter-spacing="6" fill="#fff">TOWER</text>
+<rect y="770" width="640" height="130" fill="#b9a99a"/><rect y="770" width="640" height="8" fill="#a19182"/>
+<rect x="276" y="690" width="88" height="80" rx="8" fill="#3c2f4f"/><rect x="284" y="698" width="34" height="72" fill="#cdb8f5" opacity=".8"/><rect x="322" y="698" width="34" height="72" fill="#cdb8f5" opacity=".8"/>
+<g><circle cx="500" cy="800" r="10" fill="#e8743b"/><rect x="491" y="810" width="18" height="40" rx="6" fill="#e8743b"/></g>
+<g fill="#4f9d5f"><circle cx="110" cy="780" r="46"/><circle cx="150" cy="800" r="34"/></g>
+</svg></div><div class="hud"><span class="rec">REC</span><span class="mode">TILT ▲</span><span class="cross"></span><span class="tc"></span></div><span class="demo-tag">疑似デモ</span></div>
+          <div class="ctrl"><button class="btn solid" type="button" data-play>▶ 再生</button><button class="btn stop" type="button" data-stop aria-label="停止" title="停止">■</button><input type="range" min="0" max="100" value="0" aria-label="ティルトの位置"></div>
+        </div>
+        <div class="cam-info"><h3>ティルト：下から上へ</h3><p>こちらも位置はそのまま、首だけ縦に振る。入口から屋上まで、高さを見せられます。</p>
+          <div class="kv"><div><b>向き</b><span>縦（上下）</span></div><div><b>使いどころ</b><span>建物の外観／高さ・スケール感</span></div></div></div>
+      </div>
+
+      <div class="cam" data-mode="whip" data-dur="900">
+        <div>
+          <div class="frame"><div class="scene"><svg viewBox="0 0 1280 360" preserveAspectRatio="none" role="img" aria-label="左は店内、右は店の外の景色">
+<defs><linearGradient id="ws" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc4ff"/><stop offset="1" stop-color="#d9f0ff"/></linearGradient></defs>
+<rect width="640" height="360" fill="#ffd9a8"/><rect y="250" width="640" height="110" fill="#b5835a"/>
+<g fill="#7a4b2a"><rect x="60" y="200" width="520" height="30" rx="6"/><rect x="80" y="230" width="480" height="130"/></g>
+<g stroke="#5a3a22" stroke-width="4"><path d="M150 40v70M320 40v50M490 40v70"/></g>
+<g fill="#ffb347"><path d="M120 110h60l-10-40h-40z"/><path d="M290 90h60l-10-40h-40z"/><path d="M460 110h60l-10-40h-40z"/></g>
+<g><rect x="150" y="172" width="50" height="28" rx="6" fill="#fff"/><rect x="330" y="172" width="50" height="28" rx="6" fill="#fff"/><rect x="470" y="172" width="50" height="28" rx="6" fill="#fff"/></g>
+<text x="320" y="300" text-anchor="middle" font-family="sans-serif" font-size="26" font-weight="800" letter-spacing="8" fill="#ffe7c2">INSIDE</text>
+<rect x="640" width="640" height="360" fill="url(#ws)"/>
+<circle cx="1130" cy="76" r="40" fill="#ffd166"/>
+<g fill="#6b8bb8"><rect x="680" y="120" width="90" height="180"/><rect x="780" y="80" width="110" height="220"/><rect x="900" y="140" width="80" height="160"/><rect x="990" y="100" width="100" height="200"/></g>
+<g fill="#eaf4ff"><rect x="694" y="140" width="22" height="22"/><rect x="730" y="140" width="22" height="22"/><rect x="800" y="104" width="22" height="22"/><rect x="842" y="104" width="22" height="22"/><rect x="1010" y="124" width="22" height="22"/><rect x="1048" y="124" width="22" height="22"/></g>
+<rect x="640" y="290" width="640" height="70" fill="#8e9aa8"/><path d="M660 326h60M760 326h60M860 326h60M960 326h60M1060 326h60M1160 326h60" stroke="#fff" stroke-width="6"/>
+<text x="960" y="272" text-anchor="middle" font-family="sans-serif" font-size="26" font-weight="800" letter-spacing="8" fill="#1f3f6e">OUTSIDE</text>
+</svg></div><div class="hud"><span class="rec">REC</span><span class="mode">WHIP PAN ▶▶</span><span class="cross"></span><span class="tc"></span></div><span class="demo-tag">疑似デモ</span></div>
+          <div class="ctrl"><button class="btn solid" type="button" data-play>▶ 再生</button><button class="btn stop" type="button" data-stop aria-label="停止" title="停止">■</button><input type="range" min="0" max="100" value="0" aria-label="ウィップパンの位置"></div>
+        </div>
+        <div class="cam-info"><h3>ウィップパン：一気に振る</h3><p>パンを<b>とても速く</b>。動いている間は映像がブレて流れ、振り終わると次のシーンが現れます。</p>
+          <div class="kv"><div><b>向き</b><span>主に横（スウィッシュパンとも）</span></div><div><b>使いどころ</b><span>場面の切り替え／ショート動画のテンポ</span></div></div></div>
+      </div>
+
+    </div>
+    <p class="demo-note"><b>疑似デモです。</b>実際の撮影映像やカメラの動きを再現するものではなく、動きの違いを理解するための簡易的な表現です。</p>
+    <p class="rm-note" role="note" hidden>お使いの端末は「動きを減らす」設定です。自動では動きません。▶再生は、なめらかな動きではなく10段階のコマ送りで進みます。ウィップパンのブレ表現も止めています。スライダーでも好きな位置を確認できます。</p>
+    <noscript><p class="demo-note">JavaScriptが無効のため、デモは動きません。上の「まず3つの名前と意味」と、各デモ横の説明が、動きを文章で示したものです。</p></noscript>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">3</span><h2>似ている動きとの違い：動くのは「向き」か「カメラ」か</h2></div>
+    <p class="sec-sub">パン・ティルトは<b>固定位置から向きを変える</b>動き。カメラ自体が移動する「ドリー／トラッキング」は別物です。</p>
+    <div class="how">
+      <figure><svg viewBox="0 0 220 158" role="img" aria-label="上から見た図：カメラの位置は動かず、向きが左右に回る">
+<g transform="translate(70 70) rotate(-22)"><path d="M0 0L96 -34V34z" fill="#ef3b4b" opacity=".16"/><path d="M0 0L96 -34M0 0L96 34" stroke="#ef3b4b" stroke-width="1.5" stroke-dasharray="4 4" opacity=".6"/></g><g transform="translate(70 70) rotate(22)"><path d="M0 0L96 -34V34z" fill="#b4321f" opacity=".16"/><path d="M0 0L96 -34M0 0L96 34" stroke="#b4321f" stroke-width="1.5" stroke-dasharray="4 4" opacity=".6"/></g><g transform="translate(70 70) rotate(0)"><rect x="-16" y="-11" width="32" height="22" rx="5" fill="#2b2230"/><path d="M16 -6l14 -8v28l-14 -8z" fill="#2b2230"/></g><path d="M105.7 24.3A58 58 0 0 1 105.7 115.7" fill="none" stroke="#b4321f" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M70 70l-0 0" /><circle cx="70" cy="70" r="4" fill="#fff"/>
+<rect x="168" y="22" width="30" height="96" rx="6" fill="#ffc89a" stroke="#f6cdb8"/><text x="110" y="152" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#566074">上から見た図：位置は同じ・向きが回る</text></svg><figcaption><b>パン</b>位置は固定。向きだけ<b style="display:inline">横</b>に回す。</figcaption></figure>
+      <figure><svg viewBox="0 0 220 158" role="img" aria-label="横から見た図：カメラの位置は動かず、向きが上下に振れる">
+<g transform="translate(70 78) rotate(-26)"><path d="M0 0L96 -34V34z" fill="#ef3b4b" opacity=".16"/><path d="M0 0L96 -34M0 0L96 34" stroke="#ef3b4b" stroke-width="1.5" stroke-dasharray="4 4" opacity=".6"/></g><g transform="translate(70 78) rotate(20)"><path d="M0 0L96 -34V34z" fill="#b4321f" opacity=".16"/><path d="M0 0L96 -34M0 0L96 34" stroke="#b4321f" stroke-width="1.5" stroke-dasharray="4 4" opacity=".6"/></g><g transform="translate(70 78) rotate(-3)"><rect x="-16" y="-11" width="32" height="22" rx="5" fill="#2b2230"/><path d="M16 -6l14 -8v28l-14 -8z" fill="#2b2230"/></g><path d="M105.7 32.3A58 58 0 0 1 105.7 123.7" fill="none" stroke="#b4321f" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M70 94v26M54 124h32" stroke="#2b2230" stroke-width="4" stroke-linecap="round"/>
+<rect x="168" y="14" width="30" height="108" rx="6" fill="#bcd7ff" stroke="#9cbbec"/><text x="110" y="152" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#566074">横から見た図：位置は同じ・向きが振れる</text></svg><figcaption><b>ティルト</b>位置は固定。向きだけ<b style="display:inline">縦</b>に振る。</figcaption></figure>
+      <figure class="other"><svg viewBox="0 0 220 158" role="img" aria-label="上から見た図：カメラ自体が被写体へ近づく（ドリー）">
+<path d="M30 112h110" stroke="#b9a99a" stroke-width="4" stroke-dasharray="2 7" stroke-linecap="round"/>
+<g transform="translate(60 70) rotate(0)"><path d="M0 0L96 -34V34z" fill="#ef3b4b" opacity=".16"/><path d="M0 0L96 -34M0 0L96 34" stroke="#ef3b4b" stroke-width="1.5" stroke-dasharray="4 4" opacity=".6"/></g><g transform="translate(60 70) rotate(0)"><rect x="-16" y="-11" width="32" height="22" rx="5" fill="#2b2230"/><path d="M16 -6l14 -8v28l-14 -8z" fill="#2b2230"/></g>
+<path d="M84 100h50" stroke="#b4321f" stroke-width="3.5" stroke-linecap="round"/><path d="M126 93l9 7-9 7" fill="none" stroke="#b4321f" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="168" y="42" width="30" height="56" rx="6" fill="#ffd1dc" stroke="#f0b3c4"/><text x="110" y="152" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#566074">上から見た図：カメラごと移動する</text></svg><figcaption><b>ドリー／トラッキング（参考）</b>カメラ自体が前後・横へ<b style="display:inline">移動</b>する。</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">4</span><h2>使い分けクイズ</h2></div>
+    <p class="sec-sub">この見せ方をしたいとき、どの動き？（押すと答えが開きます）</p>
+    <div class="quiz">
+      <details><summary>店の外観を、地面から屋根まで見せたい</summary><div class="ans"><b>ティルト</b>　縦に振って高さを見せる定番の使い方です。</div></details>
+      <details><summary>広い駐車場や商店街の「広がり」を見せたい</summary><div class="ans"><b>パン</b>　横にゆっくり振って、場所の広がりを伝えます。</div></details>
+      <details><summary>ショート動画で、店内のシーンから店外のシーンへ勢いよく切り替えたい</summary><div class="ans"><b>ウィップパン</b>　素早く振る動きで、場面転換とテンポを出せます。</div></details>
+    </div>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">5</span><h2>名前を知っていると、指示が伝わる</h2></div>
+    <p class="sec-sub">撮影や編集の相談、そしてAI動画生成への指示で「動きの名前」が使えます。</p>
+    <div class="ba">
+      <div class="pane"><div class="pane-h"><span class="badge">BEFORE</span><h3>ふわっとした指示</h3></div>
+        <span class="say bad">画面を右に動かして</span>
+        <p class="cap">「カメラが動くのか、映像が動くのか」「どのくらいの速さか」が人によって変わります。</p></div>
+      <div class="pane after"><div class="pane-h"><span class="badge">AFTER</span><h3>動きの名前で伝える</h3></div>
+        <div class="chips" style="margin-top:0"><span class="say">slow pan left</span><span class="say">tilt up</span><span class="say">whip pan</span></div>
+        <p class="cap">「ゆっくり左へパン」「上へティルト」のように、<b>動き＋速さ＋向き</b>を名前で共有できます。</p></div>
+    </div>
+    <div class="notes" style="margin-top:16px">
+      <div class="note warn"><h3>AI動画生成に使うとき</h3>ツールによって言葉の解釈は異なります。上の言葉は例です。実際に試して、思った動きになるか確認してください。クライアント案件など、AIの利用に制限がある場合は使わないでください。この例は、動きの名前を理解したうえで、個人の学習・検証として試すための参考です。</div>
+      <div class="note"><h3>社内で使うとき</h3>社内情報・顧客情報・画像をAIへ渡す範囲は、社内のAIガイドラインや案件ごとの取り扱いに従います。</div>
+    </div>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">6</span><h2>注意点・確認ポイント</h2></div>
+    <ul class="chk">
+      <li><b>ドリー／トラッキングとは別の動き</b>：カメラ自体が移動するのがドリー／トラッキング。固定位置から向きを変えるのがパン・ティルトです。</li>
+      <li><b>速すぎるパンは見づらい</b>：速度は、見せたい内容に合わせて調整します（ウィップパンは「あえて速い」特別な使い方）。</li>
+      <li><b>目的を先に決める</b>：「広がりを見せたい」→パン、「高さを見せたい」→ティルト、のように目的から選びます。</li>
+    </ul>
+  </section>
+
+  <!-- pp:start -->
+  <section class="sec rise pp" id="premiere">
+    <div class="sec-h"><span class="sec-n">7</span><h2>Premiere Proではどうする？</h2></div>
+    <div class="pp-judge" aria-label="分類"><span class="j">Premiereで直接調整できる</span><span class="j on">撮影時に決めるもの</span><span class="j on">Premiereで近い見た目は作れる（本来の撮影とは別）</span></div>
+    <p class="pp-lead">パン・ティルト・ウィップパンは<b>基本的に撮影時のカメラ操作</b>です。Premiere Proでは、撮影済み映像の<b>Position（位置）をキーフレームで動かして</b>、パン・ティルトに近い見え方は作れますが、本来の撮影時のカメラ操作とは<b>別物</b>です。</p>
+    <div class="pp-grid">
+      <figure class="pp-fig" role="group" aria-label="Premiere Proの操作箇所（簡略図）"><div class="ui-2"><div class="ui"><div class="ui-t"><span>プログラムモニター</span><span></span></div><div class="ui-mon"><i style="left:6%;top:22%;width:44%;height:56%;border:2px dashed #8a8fa3"></i><span style="left:8%;top:26%;color:#aeb0bd">開始位置</span><i class="hl" style="left:48%;top:22%;width:44%;height:56%;border:3px solid #ff9f43;background:rgba(255,159,67,.18)"></i><span style="left:51%;top:26%;color:#ffd9a8">終了位置</span></div></div><div class="ui"><div class="ui-t"><span>Effect Controls ▸ Motion</span><span></span></div><div class="ui-b"><div class="ui-r hl"><span class="n">Position</span><span class="v">480 → 1440</span></div><div class="kfl pad"><i style="left:8%"></i><i style="left:88%"></i><span style="left:3%">開始 ◆</span><span style="right:2%">終了 ◆</span></div></div></div></div><figcaption>開始と終了に◆（キーフレーム）を打って Position の値を変えると、画面の位置がその間を動きます。</figcaption></figure>
+      <div class="pp-txt">
+        <h3>やってみるなら</h3>
+        <ol><li><b>Position</b> の <b>Toggle Animation</b>（ストップウォッチ）をオンにして、キーフレームを設定する</li><li><b>開始位置</b>と<b>終了位置</b>で、Position の値を変える</li><li>再生して、<b>移動の速さ</b>を確認する</li></ol>
+        <div class="pp-look"><b>ここを見る：</b>動く速さは、<b>◆と◆の間隔</b>で決まります（間隔が短いほど速く動きます）。</div>
+        <p class="pp-warn"><b>注意：</b>撮影時のパン・ティルトと、編集で画面位置を動かす処理は同じではありません。ウィップパンは特に、撮影時の速いカメラ移動が基本です。</p>
+        <p class="pp-links">Adobe公式で確認：<a href="https://helpx.adobe.com/premiere/desktop/add-video-effects/commonly-used-effects/apply-motion-effect.html" target="_blank" rel="noopener">Adobe「Apply Motion effect」</a><a href="https://helpx.adobe.com/premiere/desktop/add-video-effects/control-effects-and-transitions-using-keyframes/add-keyframes.html" target="_blank" rel="noopener">Adobe「Add keyframes」</a></p>
+      </div>
+    </div>
+    <p class="pp-note">図は説明用の簡略図で、実際のPremiere Proの画面とは異なります。メニュー名・機能名はAdobe公式ヘルプ（2026年11月14日確認）に基づきますが、バージョンによって表示が変わることがあります。</p>
+  </section>
+  <!-- pp:end -->
+
+  <section class="refs">
+    <h2>参考・出典</h2>
+    <ul><li><a href="https://www.adobe.com/creativecloud/video/production/cinematography/camera-shots-and-angles/pan-shot.html" target="_blank" rel="noopener">Adobe Creative Cloud：Pan shot: Definition &amp; examples of the camera pan</a></li></ul>
+    <p class="by">※ ファインダー内のイラストは、動きの説明用に作成した図です。</p>
+  </section>
+</main>
+
+<script>
+(() => {
+  // 再生は毎回、先頭（0%）から。続きからの再開はしない。「動きを減らす」設定のときは V.run が10段階のコマ送りにする
+  const ease = (x) => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+  const whipEase = (x) => (x < .5 ? 16 * Math.pow(x, 5) : 1 - Math.pow(-2 * x + 2, 5) / 2);
+  document.querySelectorAll('.cam').forEach((cam) => {
+    const mode = cam.dataset.mode, dur = +cam.dataset.dur, range = cam.querySelector('input'), btn = cam.querySelector('[data-play]'), stopB = cam.querySelector('[data-stop]');
+    const tc = cam.querySelector('.tc'); let stop = null;
+    const apply = (t) => {   // t: 0〜1
+      cam.style.setProperty('--t', t);
+      if (mode === 'whip') {
+        const e = whipEase(t); cam.style.setProperty('--e', e);
+        cam.style.setProperty('--b', V.reduced() ? 0 : (Math.pow(Math.sin(Math.PI * t), 2) * 9).toFixed(2));   // 動きを減らす設定ではブレ表現も切る
+      }
+      range.value = Math.round(t * 100);
+      tc.textContent = '00:0' + Math.floor(t * dur / 1000) + ':' + String(Math.floor((t * dur % 1000) / 1000 * 24)).padStart(2, '0');
+    };
+    const halt = () => { if (stop) stop(); stop = null; };
+    btn.addEventListener('click', () => {
+      halt(); apply(0);
+      stop = V.run(dur, (k) => apply(mode === 'whip' ? k : ease(k)), () => { stop = null; });
+    });
+    stopB.addEventListener('click', halt);
+    range.addEventListener('input', () => { halt(); apply(range.value / 100); });
+    apply(0);
+  });
+})();
+</script>
+</body>
+</html>

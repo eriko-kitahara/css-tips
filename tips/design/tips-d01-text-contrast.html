@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ja" data-series="design">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>文字色、薄すぎない？「4.5:1」で確認するコントラストの基本｜なんとなくで決めないデザイン</title>
+<style>
+/* ===== シリーズTips 共通ベース（既存CSS Tipsの作法を踏襲：トークン / .rise / reduced-motion / 640px以下は1カラム） ===== */
+:root {
+  --ink: #1b1f2a;
+  --sub: #566074;
+  --line: #e5e8ee;
+  --bg: #f4f6f9;
+  --ease: cubic-bezier(.22, .7, .25, 1);
+  --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", "Meiryo", sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Roboto Mono", Menlo, monospace;
+  --ok: #17683a; --ok-soft: #e8f5ec;
+  --ng: #b42318; --ng-soft: #fdecea;
+  color-scheme: light;
+}
+/* ----- シリーズ別カラー（c1→c2 のグラデーション。--ac は白地の文字に使える濃い色） ----- */
+[data-series="css"]    { --c1:#3b9cf6; --c2:#19c3d6; --ac:#1a5fa6; --ac-soft:#e8f3fd; --ac-line:#bcdaf3; --page:#f1f7fc; --hero:linear-gradient(135deg,#dff0ff,#d9f7fa); }
+[data-series="design"] { --c1:#ff5fa2; --c2:#8b5cf6; --ac:#9d2a72; --ac-soft:#fbeef6; --ac-line:#efc9e2; --page:#fbf6fa; --hero:linear-gradient(135deg,#ffe4f0,#ece5ff); }
+[data-series="ai"]     { --c1:#b6e04a; --c2:#22a861; --ac:#17683a; --ac-soft:#eef8e4; --ac-line:#cde7b2; --page:#f5f9ef; --hero:linear-gradient(135deg,#eefad0,#d8f3e2); }
+[data-series="video"]  { --c1:#ff9f43; --c2:#ef3b4b; --ac:#b4321f; --ac-soft:#fff1ea; --ac-line:#f6cdb8; --page:#fcf7f3; --hero:linear-gradient(135deg,#ffeedb,#ffe1e3); }
+:root { --grad: linear-gradient(90deg, var(--c1), var(--c2)); }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--page); color: var(--ink); font-family: var(--font); line-height: 1.75; -webkit-font-smoothing: antialiased; }
+a { color: var(--ac); text-underline-offset: 3px; }
+code, pre, kbd { font-family: var(--mono); }
+img, svg { max-width: 100%; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+/* ===== Motion（opacity:0 は keyframes 側のみ＝動きを切っても内容は必ず見える） ===== */
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+@keyframes pop  { from { opacity: 0; transform: scale(.94); } }
+.rise { animation: rise .5s var(--ease) calc(var(--i, 0) * 80ms) backwards; }
+/* 「動きを減らす」設定: 装飾の動きだけを止める。
+   教材として見せる動き（.teach の中身）は止めない＝動きそのものが学習内容のため。
+   教材側は、自動再生しない・ボタンで再生・コマ送りできる、という代替手段を別に用意する。 */
+@media (prefers-reduced-motion: reduce) {
+  *:not(.teach):not(.teach *), *:not(.teach):not(.teach *)::before, *:not(.teach):not(.teach *)::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* ===== Hero ===== */
+.hero { position: relative; overflow: hidden; background: var(--hero); border-bottom: 1px solid var(--ac-line); padding: 0 0 44px; }
+.hero::before { content: ""; display: block; height: 6px; background: var(--grad); }
+.hero::after { content: ""; position: absolute; right: -90px; top: -70px; width: 340px; height: 340px; border-radius: 50%; background: var(--grad); opacity: .16; pointer-events: none; }
+.hero .wrap { position: relative; z-index: 1; padding-top: 28px; display: grid; grid-template-columns: 1fr auto; gap: 24px 40px; align-items: center; }
+.pill-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.series { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; letter-spacing: .04em; color: var(--ac); background: #fff; border: 1px solid var(--ac-line); border-radius: 999px; padding: 4px 14px 4px 10px; }
+.series::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--grad); }
+.tipno { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--sub); }
+h1 { font-size: clamp(25px, 4.4vw, 38px); line-height: 1.4; letter-spacing: .01em; margin: 16px 0 14px; font-weight: 800; }
+.lead { font-size: clamp(15px, 2vw, 17px); color: #38415a; max-width: 38em; }
+.lead b { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--c1) 35%, transparent) 62%); font-weight: 700; }
+.hero-art { width: 200px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.meta span { font-size: 12px; color: var(--sub); background: rgba(255,255,255,.75); border: 1px solid var(--ac-line); border-radius: 999px; padding: 1px 12px; }
+
+/* ===== Section ===== */
+main { padding: 36px 0 24px; }
+.sec { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 30px 32px 32px; margin-bottom: 22px; box-shadow: 0 1px 2px rgba(27,31,42,.04), 0 18px 40px -26px rgba(27,31,42,.22); }
+.sec-h { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.sec-n { flex: none; width: 30px; height: 30px; border-radius: 10px; background: var(--grad); color: #1b1f2a; display: grid; place-items: center; font-size: 14px; font-weight: 800; }
+[data-series="design"] .sec-n, [data-series="video"] .sec-n { color: #fff; }
+h2 { font-size: clamp(19px, 2.8vw, 23px); line-height: 1.45; font-weight: 800; }
+.sec-sub { color: var(--sub); font-size: 14.5px; margin: 0 0 20px 42px; }
+h3 { font-size: 16px; line-height: 1.5; }
+p + p { margin-top: .8em; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.card { background: var(--ac-soft); border: 1px solid var(--ac-line); border-radius: 16px; padding: 18px 20px; transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
+.card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -16px rgba(27,31,42,.35); }
+.card .kicker { font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--ac); }
+.card .big { font-size: 28px; font-weight: 800; line-height: 1.3; margin: 4px 0 4px; }
+.card p { font-size: 14px; color: #38415a; }
+
+/* ===== Before / After ===== */
+.ba { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; position: relative; }
+.pane { min-width: 0; border: 1px solid var(--line); border-radius: 16px; padding: 18px; background: #fff; }
+.pane.after { border-color: var(--ac-line); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c2) 10%, transparent); }
+.pane-h { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.badge { flex: none; font-size: 11px; font-weight: 800; letter-spacing: .08em; border-radius: 999px; padding: 1px 11px; color: var(--sub); background: var(--bg); border: 1px solid var(--line); }
+.after .badge { color: #fff; background: var(--ac); border-color: var(--ac); }
+.pane-h h3 { font-size: 15px; }
+.cap { font-size: 13px; color: var(--sub); margin-top: 10px; }
+
+/* ===== Callout ===== */
+.note { border-radius: 14px; padding: 14px 18px 15px; font-size: 14.5px; background: var(--ac-soft); border: 1px solid var(--ac-line); }
+.note h3 { display: flex; align-items: center; gap: 8px; font-size: 13px; letter-spacing: .05em; color: var(--ac); margin-bottom: 3px; }
+.note h3::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.note.warn { background: #fff7e8; border-color: #efd7a6; }
+.note.warn h3 { color: #8a5300; }
+.notes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+/* ===== Code ===== */
+.code { margin: 14px 0 0; border-radius: 14px; overflow: hidden; border: 1px solid var(--ac-line); background: #f8faf8; }
+.code figcaption { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; font-weight: 800; letter-spacing: .06em; color: var(--ac); padding: 8px 14px; background: var(--ac-soft); border-bottom: 1px solid var(--ac-line); }
+.code pre { font-size: 13.5px; line-height: 1.75; padding: 14px 16px; overflow-x: auto; color: #23304a; tab-size: 2; }
+.code.dark { background: #14201a; border-color: #243a2d; }
+.code.dark figcaption { background: #1b2c22; color: #b9e78a; border-color: #243a2d; }
+.code.dark pre { color: #e4f1e0; }
+.btn { appearance: none; border: 1px solid var(--ac-line); background: #fff; color: var(--ac); font: inherit; font-size: 12px; font-weight: 800; letter-spacing: .04em; border-radius: 999px; padding: 3px 14px; cursor: pointer; transition: background .2s var(--ease), transform .2s var(--ease); }
+.btn:hover { background: var(--ac-soft); }
+.btn:active { transform: scale(.97); }
+.btn:focus-visible, input:focus-visible, summary:focus-visible, button:focus-visible { outline: 3px solid color-mix(in srgb, var(--c2) 55%, #fff); outline-offset: 2px; }
+.btn.solid { background: var(--ac); border-color: var(--ac); color: #fff; padding: 6px 18px; font-size: 13.5px; }
+.btn.solid:hover { background: color-mix(in srgb, var(--ac) 88%, #000); }
+.tk-add { color: #0e6b32; background: #e3f6e8; } .tk-del { color: #a4281c; background: #fdeceb; }
+
+/* ===== Steps ===== */
+.steps { list-style: none; counter-reset: s; display: grid; gap: 12px; }
+.steps > li { counter-increment: s; position: relative; padding: 14px 16px 14px 58px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.steps > li::before { content: counter(s); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--grad); color: #1b1f2a; font-weight: 800; font-size: 14px; }
+[data-series="design"] .steps > li::before, [data-series="video"] .steps > li::before { color: #fff; }
+.steps h3 { font-size: 15.5px; }
+.steps p { font-size: 14px; color: #38415a; margin-top: 2px; }
+
+/* ===== Check list / refs ===== */
+.chk { list-style: none; display: grid; gap: 8px; }
+.chk li { position: relative; padding-left: 30px; font-size: 14.5px; }
+.chk li::before { content: "✓"; position: absolute; left: 0; top: 2px; width: 20px; height: 20px; border-radius: 6px; background: var(--ac); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 800; line-height: 1; }
+.refs { font-size: 13px; color: var(--sub); padding: 6px 4px 54px; }
+.refs h2 { font-size: 13px; letter-spacing: .08em; color: var(--sub); margin-bottom: 6px; }
+.refs li { margin-left: 1.2em; word-break: break-all; }
+.refs .by { margin-top: 10px; }
+.tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; padding: 0 9px; border-radius: 999px; }
+.tag.ok { color: var(--ok); background: var(--ok-soft); }
+.tag.ng { color: var(--ng); background: var(--ng-soft); }
+.rows .tag, .judge .tag { font-size: 0; }
+.rows .tag::before, .judge .tag::before { font-size: 11px; }
+.rows .tag.ok::before, .judge .tag.ok::before { content: "✓ OK"; }
+.rows .tag.ng::before, .judge .tag.ng::before { content: "✕ 不足"; }
+
+@media (max-width: 720px) {
+  .wrap { padding: 0 14px; }
+  .hero .wrap { grid-template-columns: 1fr; }
+  .hero-art { display: none; }
+  .sec { padding: 22px 16px 24px; border-radius: 16px; }
+  .sec-sub { margin-left: 0; }
+  .grid2, .grid3, .ba, .notes { grid-template-columns: 1fr; }
+}
+
+
+/* ===== このページ専用 ===== */
+
+  /* デザイン系: 大きな数字・ゆったりした余白・ピンク→パープル */
+  .hero-art { width: 210px; text-align: center; }
+  .ring { width: 190px; height: 190px; border-radius: 50%; background: conic-gradient(from 210deg, var(--c1), var(--c2), var(--c1)); display: grid; place-items: center; margin: 0 auto; box-shadow: 0 20px 40px -20px rgba(139,92,246,.6); }
+  .ring > div { width: 158px; height: 158px; border-radius: 50%; background: #fff; display: grid; place-items: center; align-content: center; }
+  .ring b { font-size: 44px; line-height: 1.05; font-weight: 800; letter-spacing: -.02em; color: var(--ac); }
+  .ring small { font-size: 12px; color: var(--sub); font-weight: 700; letter-spacing: .06em; }
+
+  /* ---- 1. 3つの目安 ---- */
+  .rule .big { font-size: 34px; color: var(--ac); }
+  .rule .big small { font-size: 15px; font-weight: 700; color: var(--ink); margin-left: 4px; }
+  .sample-aa { display: flex; align-items: baseline; gap: 14px; margin-top: 8px; }
+  .sample-aa .s16 { font-size: 16px; } .sample-aa .s24 { font-size: 24px; } .sample-aa .s19 { font-size: 18.7px; font-weight: 700; }
+
+  /* ---- 2. Before / After ---- */
+  .ad { border-radius: 14px; padding: 18px 18px 16px; border: 1px solid #e6e6ea; }
+  .ad h4 { font-size: 20px; line-height: 1.4; }
+  .ad .body { font-size: 15px; margin: 8px 0 6px; }
+  .ad .note-s { font-size: 12.5px; }
+  .ad .cta { display: inline-block; margin-top: 12px; font-weight: 700; font-size: 15px; padding: 9px 22px; border-radius: 999px; }
+  .ad.b { background: #fff; }
+  .ad.b h4 { color: #8a8a8a; } .ad.b .body { color: #aaaaaa; } .ad.b .note-s { color: #cccccc; } .ad.b .cta { background: #8ec5ff; color: #fff; }
+  .ad.a { background: #fff; }
+  .ad.a h4 { color: #1f1f2e; } .ad.a .body { color: #4a4a4a; } .ad.a .note-s { color: #6b6b6b; } .ad.a .cta { background: #1b64c4; color: #fff; }
+  .rows { list-style: none; margin-top: 12px; display: grid; gap: 6px; }
+  .rows li { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .rows .sw { flex: none; width: 18px; height: 18px; border-radius: 5px; border: 1px solid #d9d9e0; }
+  .rows .nm { flex: 1; min-width: 0; }
+  .rows .rt { font-family: var(--mono); font-weight: 700; }
+
+  /* ---- 3. 数字で見る ---- */
+  .ladder { display: grid; gap: 10px; }
+  .lad { display: grid; grid-template-columns: 150px 1fr 210px; align-items: center; gap: 14px; }
+  .lad .smp { font-size: 17px; font-weight: 600; white-space: nowrap; }
+  .lad .smp span { font-family: var(--mono); font-size: 12px; font-weight: 400; color: var(--sub); margin-left: 6px; }
+  .track { position: relative; height: 14px; border-radius: 999px; background: var(--bg); }
+  .track i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px; background: var(--grad); transform-origin: left; animation: grow .9s var(--ease) backwards; animation-delay: calc(var(--n) * 90ms); }
+  @keyframes grow { from { transform: scaleX(0); } }
+  .track::before, .track::after { content: ""; position: absolute; top: -5px; bottom: -5px; width: 2px; background: var(--ink); opacity: .55; z-index: 1; }
+  .track::before { left: calc(3 / 21 * 100%); } .track::after { left: calc(4.5 / 21 * 100%); }
+  .scale { display: grid; grid-template-columns: 150px 1fr 210px; gap: 14px; font-size: 11.5px; color: var(--sub); margin-top: -2px; }
+  .scale .ax { position: relative; height: 16px; }
+  .scale .ax span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+  .res { display: flex; align-items: center; gap: 6px; justify-content: flex-end; flex-wrap: nowrap; }
+  .tag { white-space: nowrap; }
+
+  /* ---- 4. チェッカー ---- */
+  .checker { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; align-items: stretch; }
+  .checker > *, .ctl, .ctl > *, .ctl label, .ctl .in { min-width: 0; }
+  .ctl { display: grid; gap: 14px; align-content: start; }
+  .ctl label { display: grid; gap: 4px; font-size: 13px; font-weight: 700; }
+  .ctl .in { display: flex; gap: 8px; }
+  .ctl input[type=color] { width: 52px; height: 42px; border: 1px solid var(--line); border-radius: 10px; padding: 3px; background: #fff; cursor: pointer; }
+  .ctl input[type=text] { flex: 1; min-width: 0; font: inherit; font-family: var(--mono); font-size: 15px; border: 1px solid #b9bfcc; border-radius: 10px; padding: 0 12px; height: 42px; }
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; }
+  .view { border-radius: 16px; padding: 22px 22px 20px; border: 1px solid var(--line); display: grid; gap: 14px; align-content: space-between; }
+  .view .n16 { font-size: 16px; } .view .n24 { font-size: 24px; font-weight: 700; line-height: 1.4; }
+  .view .lab { font-size: 11px; font-weight: 800; letter-spacing: .08em; opacity: .85; }
+  .score { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; align-items: center; margin-top: 4px; }
+  .score .num { font-size: 40px; font-weight: 800; line-height: 1; font-family: var(--font); }
+  .score .num small { font-size: 16px; }
+  .judge { display: grid; gap: 6px; }
+  .judge div { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+
+  /* ---- 5. 手順 ---- */
+  .fix { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
+  .fix .card p { font-size: 13.5px; }
+
+  @media (max-width: 720px) {
+    .lad, .scale { grid-template-columns: 1fr; gap: 4px; }
+    .scale > :first-child, .scale > :last-child { display: none; }
+    .res { justify-content: flex-start; }
+    .checker, .fix { grid-template-columns: 1fr; }
+    .ring { width: 150px; height: 150px; } .ring > div { width: 122px; height: 122px; } .ring b { font-size: 34px; }
+  }
+
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <div class="pill-row rise"><span class="series">なんとなくで決めないデザイン</span><span class="tipno">TIPS D-01 / コントラスト比</span></div>
+      <h1 class="rise" style="--i:1">文字色、薄すぎない？<br>「4.5:1」で確認する<br>コントラストの基本</h1>
+      <p class="lead rise" style="--i:2">文字と背景の色が近いと読みにくい。通常の文字は<b>コントラストが 4.5:1 以上</b>がひとつの目安。</p>
+      <div class="meta rise" style="--i:3"><span>難易度：初級</span><span>バナー・LP・カンプの配色確認に</span><span>色を試せるチェッカーつき</span></div>
+    </div>
+    <div class="hero-art rise" style="--i:2" aria-hidden="true">
+      <div class="ring"><div><b>4.5:1</b><small>通常の文字の目安</small></div></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">1</span><h2>まず、2つの目安と判定のルール</h2></div>
+    <p class="sec-sub">コントラスト比は「文字と背景の明るさの差」を表す数字。1:1（同じ色）〜21:1（白と黒）の範囲です。</p>
+    <div class="grid3 rule">
+      <div class="card"><div class="kicker">通常の文字</div><div class="big">4.5:1<small>以上</small></div><p>本文・注釈・ボタンの文字など、ふつうのサイズの文字。</p><div class="sample-aa" aria-hidden="true"><span class="s16">Aa 本文</span></div></div>
+      <div class="card"><div class="kicker">大きな文字</div><div class="big">3:1<small>以上</small></div><p>目安は <b>24px以上</b>、または<b>太字で約18.5px以上</b>（18pt / 太字14pt）。</p><div class="sample-aa" aria-hidden="true"><span class="s24">Aa 見出し</span></div></div>
+      <div class="card"><div class="kicker">判定のしかた</div><div class="big">丸めない</div><p>比率は小数点以下を丸めません。<b>4.499:1 は不合格</b>。ぎりぎりを狙わず余裕を持たせます。</p></div>
+    </div>
+    <p class="cap">出典：W3C WCAG 2.2 達成基準 1.4.3（コントラスト（最低限））</p>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">2</span><h2>Before / After：同じデザインで、文字色だけ変える</h2></div>
+    <p class="sec-sub">どちらも背景は白。「きれいに見える」薄い色が、数値で見るとどうなるか。</p>
+    <div class="ba">
+      <div class="pane">
+        <div class="pane-h"><span class="badge">BEFORE</span><h3>薄いグレーでまとめた</h3></div>
+        <div class="ad b">
+          <h4>春の無料相談会</h4>
+          <p class="body">お仕事帰りでも参加しやすい、夜の時間帯を追加しました。</p>
+          <p class="note-s">※ 参加費無料・予約制</p>
+          <span class="cta">予約する</span>
+        </div>
+        <ul class="rows">
+          <li><span class="sw" style="background:#aaaaaa"></span><span class="nm">本文 <code>#aaaaaa</code></span><span class="rt">2.32:1</span><span class="tag ng">ng</span></li>
+          <li><span class="sw" style="background:#cccccc"></span><span class="nm">注釈 <code>#cccccc</code></span><span class="rt">1.60:1</span><span class="tag ng">ng</span></li>
+          <li><span class="sw" style="background:#8ec5ff"></span><span class="nm">ボタン（白文字 / <code>#8ec5ff</code>）</span><span class="rt">1.81:1</span><span class="tag ng">ng</span></li>
+        </ul>
+      </div>
+      <div class="pane after">
+        <div class="pane-h"><span class="badge">AFTER</span><h3>文字色だけ少し濃くした</h3></div>
+        <div class="ad a">
+          <h4>春の無料相談会</h4>
+          <p class="body">お仕事帰りでも参加しやすい、夜の時間帯を追加しました。</p>
+          <p class="note-s">※ 参加費無料・予約制</p>
+          <span class="cta">予約する</span>
+        </div>
+        <ul class="rows">
+          <li><span class="sw" style="background:#4a4a4a"></span><span class="nm">本文 <code>#4a4a4a</code></span><span class="rt">8.86:1</span><span class="tag ok">ok</span></li>
+          <li><span class="sw" style="background:#6b6b6b"></span><span class="nm">注釈 <code>#6b6b6b</code></span><span class="rt">5.32:1</span><span class="tag ok">ok</span></li>
+          <li><span class="sw" style="background:#1b64c4"></span><span class="nm">ボタン（白文字 / <code>#1b64c4</code>）</span><span class="rt">5.72:1</span><span class="tag ok">ok</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="cap">デザインの雰囲気は変えず、色を少し濃くするだけで「読める差」が確保できます。（見出しの <code>#8a8a8a</code> は大きな文字なので、3:1 を超えていれば基準内です）</p>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">3</span><h2>数字で見る：白い背景の上のグレー</h2></div>
+    <p class="sec-sub">縦線は <b>3:1</b> と <b>4.5:1</b>。バーが線を越えているかどうかを見てください。</p>
+    <div class="ladder">
+      <div class="lad" style="--n:0"><div class="smp" style="color:#595959">文字サンプル<span>#595959</span></div><div class="track"><i style="width:33.4%"></i></div><div class="res"><b style="font-family:var(--mono)">7.00:1</b><span class="tag ok" title="通常の文字">通常 ✓</span><span class="tag ok" title="大きな文字">大きい文字 ✓</span></div></div>
+      <div class="lad" style="--n:1"><div class="smp" style="color:#767676">文字サンプル<span>#767676</span></div><div class="track"><i style="width:21.6%"></i></div><div class="res"><b style="font-family:var(--mono)">4.54:1</b><span class="tag ok" title="通常の文字">通常 ✓</span><span class="tag ok" title="大きな文字">大きい文字 ✓</span></div></div>
+      <div class="lad" style="--n:2"><div class="smp" style="color:#949494">文字サンプル<span>#949494</span></div><div class="track"><i style="width:14.4%"></i></div><div class="res"><b style="font-family:var(--mono)">3.03:1</b><span class="tag ng" title="通常の文字">通常 ✕</span><span class="tag ok" title="大きな文字">大きい文字 ✓</span></div></div>
+      <div class="lad" style="--n:3"><div class="smp" style="color:#aaaaaa">文字サンプル<span>#aaaaaa</span></div><div class="track"><i style="width:11.1%"></i></div><div class="res"><b style="font-family:var(--mono)">2.32:1</b><span class="tag ng" title="通常の文字">通常 ✕</span><span class="tag ng" title="大きな文字">大きい文字 ✕</span></div></div>
+      <div class="lad" style="--n:4"><div class="smp" style="color:#cccccc">文字サンプル<span>#cccccc</span></div><div class="track"><i style="width:7.6%"></i></div><div class="res"><b style="font-family:var(--mono)">1.60:1</b><span class="tag ng" title="通常の文字">通常 ✕</span><span class="tag ng" title="大きな文字">大きい文字 ✕</span></div></div>
+    </div>
+    <div class="scale" aria-hidden="true"><div></div><div class="ax"><span style="left:calc(3/21*100%)">3:1</span><span style="left:calc(4.5/21*100%);margin-left:14px">4.5:1</span><span style="left:100%;transform:translateX(-100%)">21:1</span></div><div></div></div>
+    <p class="cap">白背景で通常の文字に使える最も薄いグレーは <code>#767676</code>（約4.5:1）。「少し薄く」のつもりが、すぐ基準を割ります。</p>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">4</span><h2>自分の色で試す</h2></div>
+    <p class="sec-sub">文字色と背景色を変えると、比率と判定がその場で変わります。</p>
+    <div class="checker">
+      <div class="ctl">
+        <label for="fg-t">文字色
+          <span class="in"><input type="color" id="fg-c" value="#949494" aria-label="文字色を選ぶ"><input type="text" id="fg-t" value="#949494" maxlength="7" spellcheck="false" autocomplete="off"></span>
+        </label>
+        <label for="bg-t">背景色
+          <span class="in"><input type="color" id="bg-c" value="#ffffff" aria-label="背景色を選ぶ"><input type="text" id="bg-t" value="#ffffff" maxlength="7" spellcheck="false" autocomplete="off"></span>
+        </label>
+        <div><div class="cap" style="margin:0 0 6px">よくある組み合わせ</div>
+          <div class="presets">
+            <button class="btn" type="button" data-fg="#949494" data-bg="#ffffff">薄いグレー × 白</button>
+            <button class="btn" type="button" data-fg="#767676" data-bg="#ffffff">#767676 × 白</button>
+            <button class="btn" type="button" data-fg="#ffffff" data-bg="#8ec5ff">白 × 水色ボタン</button>
+            <button class="btn" type="button" data-fg="#ffffff" data-bg="#f5a623">白 × 黄橙</button>
+            <button class="btn" type="button" data-fg="#333333" data-bg="#ffe08a">濃灰 × 黄</button>
+          </div>
+        </div>
+      </div>
+      <div class="view" id="view" style="color:#949494;background:#ffffff">
+        <div><div class="lab">通常の文字（16px）</div><div class="n16">お仕事帰りでも参加しやすい、夜の時間帯を追加しました。</div></div>
+        <div><div class="lab">大きな文字（24px）</div><div class="n24">春の無料相談会</div></div>
+        <div class="score" aria-live="polite">
+          <div class="num" id="ratio">3.03<small>:1</small></div>
+          <div class="judge">
+            <div style="color:var(--ink)"><span class="tag ng" id="j-n">ng</span><span>通常の文字（4.5:1）</span></div>
+            <div style="color:var(--ink)"><span class="tag ok" id="j-l">ok</span><span>大きな文字（3:1）</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <noscript><p class="cap">JavaScriptが無効のため、チェッカーは動きません。上の数字の表が同じ計算結果です。</p></noscript>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">5</span><h2>実務での確認の流れ</h2></div>
+    <p class="sec-sub">バナーやLPの本文・注釈・ボタン文字、デザインカンプの配色確認に。特に「薄いグレーを使いたい」「写真の上に文字を置きたい」ときの判断材料になります。</p>
+    <ol class="steps">
+      <li><h3>文字色と背景色を調べる</h3><p>デザインデータやCSSから色コード（#xxxxxx）を取り出します。背景がグラデーションや写真のときは、いちばん文字と近い色の部分で確認します。</p></li>
+      <li><h3>比率を出す</h3><p>上のチェッカーや、ブラウザの開発者ツールの色選択画面などで比率を確認します。</p></li>
+      <li><h3>足りないときは「どれか1つ」を動かす</h3><div class="fix">
+        <div class="card"><div class="kicker">文字を濃く</div><p>一番手っ取り早い。デザインの雰囲気は保ちやすい。</p></div>
+        <div class="card"><div class="kicker">背景を調整</div><p>ボタンなら背景を濃く／文字を白に。薄い背景なら文字を濃く。</p></div>
+        <div class="card"><div class="kicker">大きく・太く</div><p>大きな文字の基準（3:1）に当てはまるサイズまで上げる方法も。</p></div>
+      </div></li>
+    </ol>
+  </section>
+
+  <section class="sec rise">
+    <div class="sec-h"><span class="sec-n">6</span><h2>注意点・確認ポイント</h2></div>
+    <p class="sec-sub">4.5:1 は「すべての文字に一律」ではありません。</p>
+    <div class="notes">
+      <div class="note warn"><h3>例外がある</h3>大きな文字には3:1の基準があり、ロゴや装飾的な文字などは対象外です。何が対象かは基準を確認します。</div>
+      <div class="note warn"><h3>案件の基準を確認</h3>案件で求められるアクセシビリティ基準（AA など）をあわせて確認します。</div>
+      <div class="note"><h3>文字以外は別の基準</h3>ボタンの枠線やアイコンなど、文字ではない部分には別の基準（3:1、WCAG 1.4.11）があります。</div>
+      <div class="note"><h3>数値だけに頼らない</h3>基準を満たしても、実際の画面で読みづらいことはあります。数値と目視の両方で確認します。</div>
+    </div>
+    <ul class="chk" style="margin-top:18px">
+      <li>本文・注釈の色は 4.5:1 以上か</li>
+      <li>見出しなど大きな文字は 3:1 以上か</li>
+      <li>ボタン文字と背景の組み合わせも測ったか</li>
+      <li>案件で決められた基準（AA など）に合っているか</li>
+    </ul>
+  </section>
+
+  <section class="refs">
+    <h2>参考・出典</h2>
+    <ul><li><a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html" target="_blank" rel="noopener">W3C WCAG 2.2 Understanding 1.4.3：Contrast (Minimum)</a></li></ul>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const lin = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  const lum = (h) => { const n = parseInt(h.slice(1), 16); return 0.2126 * lin(n >> 16) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255); };
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+  const norm = (v) => { v = v.trim(); if (/^#[0-9a-f]{3}$/i.test(v)) v = '#' + [...v.slice(1)].map((c) => c + c).join(''); return /^#[0-9a-f]{6}$/i.test(v) ? v.toLowerCase() : null; };
+  const set = (el, ok) => { el.className = 'tag ' + (ok ? 'ok' : 'ng'); el.textContent = ok ? 'ok' : 'ng'; };
+  const update = (fg, bg) => {
+    const r = ratio(fg, bg);
+    $('#view').style.color = fg; $('#view').style.background = bg;
+    // 表示は小数2桁へ切り捨て（四捨五入で 4.499 が 4.50 に見えないように）
+    $('#ratio').innerHTML = (Math.floor(r * 100) / 100).toFixed(2) + '<small>:1</small>';
+    set($('#j-n'), r >= 4.5); set($('#j-l'), r >= 3);
+  };
+  const sync = (from) => {
+    const fg = norm($('#fg-t').value), bg = norm($('#bg-t').value);
+    if (from === 'c') { $('#fg-t').value = $('#fg-c').value; $('#bg-t').value = $('#bg-c').value; }
+    else { if (fg) $('#fg-c').value = fg; if (bg) $('#bg-c').value = bg; }
+    const f = norm($('#fg-t').value), b = norm($('#bg-t').value);
+    if (f && b) update(f, b);
+  };
+  ['#fg-c', '#bg-c'].forEach((s) => $(s).addEventListener('input', () => sync('c')));
+  ['#fg-t', '#bg-t'].forEach((s) => $(s).addEventListener('input', () => sync('t')));
+  document.querySelectorAll('.presets .btn').forEach((b) => b.addEventListener('click', () => { $('#fg-t').value = b.dataset.fg; $('#bg-t').value = b.dataset.bg; sync('t'); }));
+})();
+</script>
+</body>
+</html>

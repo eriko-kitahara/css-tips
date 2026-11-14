@@ -284,6 +284,87 @@ p + p { margin-top: .8em; }
 
 #stopBtn { min-width: 0; padding: 4px 12px; }
 
+/* ===== 「Premiere Proではどうする？」共通セクション（静的な簡略図。JS不要） ===== */
+.pp-judge { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 12px; }
+.pp-judge .j { font-size: 12.5px; font-weight: 800; padding: 5px 12px; border-radius: 999px; border: 1.5px solid var(--ac-line); background: #fff; color: #8c93a3; line-height: 1.4; }
+.pp-judge .j.on { background: var(--grad); color: #fff; border-color: transparent; }
+.pp-judge .j.on::before { content: "✔ "; }
+.pp-lead { font-size: 15px; line-height: 1.8; margin: 0 0 14px; }
+.pp-lead b { color: var(--ac); }
+.pp-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.pp-grid > * { min-width: 0; }
+.pp-fig { margin: 0; }
+.pp-fig figcaption { font-size: 11.5px; color: var(--sub); margin-top: 6px; line-height: 1.5; }
+.pp-txt h3 { font-size: 15px; margin: 0 0 6px; }
+.pp-txt ol { margin: 0 0 10px; padding-left: 1.4em; font-size: 13.5px; line-height: 1.65; }
+.pp-txt li { margin: 3px 0; }
+.pp-txt code { font-size: 12px; background: var(--ac-soft); border-radius: 5px; padding: 0 5px; }
+.pp-look { border: 2px solid var(--ac); background: var(--ac-soft); border-radius: 12px; padding: 8px 12px; font-size: 13.5px; margin-bottom: 8px; line-height: 1.65; }
+.pp-look b { color: var(--ac); }
+.pp-warn { font-size: 13px; color: #8a5300; background: #fff7e8; border: 1px solid #efd7a6; border-radius: 10px; padding: 7px 12px; margin: 0 0 8px; line-height: 1.6; }
+.pp-links { font-size: 12.5px; margin: 6px 0 0; }
+.pp-links a { display: inline-block; margin: 2px 12px 2px 0; }
+.pp-note { font-size: 11.5px; color: var(--sub); margin-top: 12px; }
+
+.ui { background: #2a2a33; border-radius: 10px; color: #dcdce4; font-size: 12px; overflow: hidden; border: 1px solid #1b1b22; line-height: 1.4; }
+.ui + .ui { margin-top: 8px; }
+.ui-t { background: #1f1f27; padding: 4px 10px; font-size: 11px; font-weight: 700; color: #aeb0bd; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.ui-b { padding: 8px 10px; display: grid; gap: 5px; }
+.ui-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
+.ui-2 .ui + .ui { margin-top: 0; }
+.ui-r { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: center; padding: 3px 7px; border-radius: 6px; border: 2px solid transparent; }
+.ui-r .v { font-family: var(--mono); color: #fff; text-align: right; }
+.ui-r .n { font-weight: 700; }
+.ui .hl { border-color: #ff9f43; background: rgba(255,159,67,.16); box-shadow: 0 0 0 3px rgba(255,159,67,.22); }
+.ui-tag { display: inline-block; font-size: 10.5px; font-weight: 800; color: #fff; background: var(--grad); border-radius: 999px; padding: 1px 8px; margin-left: 6px; white-space: nowrap; }
+.ui-mon { aspect-ratio: 16 / 9; background: #14141a; position: relative; border-radius: 6px; overflow: hidden; margin: 8px 10px; }
+.ui-mon i { position: absolute; display: block; box-sizing: border-box; }
+.ui-mon span { position: absolute; font-size: 10px; font-weight: 800; }
+.kfl { position: relative; height: 22px; background: #1d1d24; border-radius: 4px; margin: 2px 4px; }
+.kfl i { position: absolute; top: 4px; width: 12px; height: 12px; background: #ffd34d; transform: rotate(45deg); border-radius: 2px; box-shadow: 0 0 0 3px rgba(255,211,77,.25); }
+.kfl span { position: absolute; top: 24px; font-size: 10.5px; color: #aeb0bd; white-space: nowrap; }
+.kfl.pad { margin-bottom: 20px; }
+
+.tl2 { position: relative; padding: 4px 10px 8px; }
+.tl2 .t { font-size: 11px; font-weight: 800; color: #ffcf9a; margin: 6px 0 2px; }
+.tl2 .tr { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 6px; align-items: center; margin: 3px 0; }
+.tl2 .tr .n { font-size: 11px; font-weight: 800; color: #aeb0bd; }
+.tl2 .lane { position: relative; height: 26px; background: #1d1d24; border-radius: 4px; }
+.tl2 .lane b { position: absolute; top: 2px; bottom: 2px; border-radius: 3px; font-size: 10.5px; font-weight: 800; color: #fff; display: flex; align-items: center; padding: 0 4px; white-space: nowrap; overflow: hidden; box-sizing: border-box; }
+.tl2 .a { background: #6b7a99; } .tl2 .a2 { background: #5a6888; } .tl2 .b { background: #e8791f; }
+.tl2 b.hl { outline: 2px solid #ffd34d; outline-offset: 1px; box-shadow: 0 0 0 4px rgba(255,211,77,.25); z-index: 2; }
+.tl2 .cut { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dashed rgba(255,255,255,.65); left: calc(36px + (100% - 36px) * .5); pointer-events: none; z-index: 3; }
+.tl2 .wrapc { position: relative; }
+
+.sl { position: relative; height: 6px; border-radius: 3px; margin: 8px 6px 3px; }
+.sl.t { background: linear-gradient(90deg, #5aa9ff, #d8d8e0, #ffb347); }
+.sl.g { background: linear-gradient(90deg, #3cb371, #d8d8e0, #e052b0); }
+.sl i { position: absolute; top: -5px; width: 12px; height: 16px; margin-left: -6px; border-radius: 3px; background: #fff; border: 2px solid #ff9f43; box-sizing: border-box; }
+.sl-l { display: flex; justify-content: space-between; font-size: 10.5px; color: #aeb0bd; margin: 0 4px; }
+.eye { display: inline-flex; width: 26px; height: 26px; border-radius: 6px; background: #3b3b47; align-items: center; justify-content: center; }
+.menu { background: #3a3a46; border: 1px solid #55555f; border-radius: 6px; padding: 4px 0; font-size: 11.5px; }
+.menu div { padding: 2px 10px; color: #cfcfd8; }
+.menu .on { background: rgba(255,159,67,.28); color: #fff; font-weight: 800; box-shadow: inset 2px 0 0 #ff9f43; }
+
+.pp-flow { display: grid; gap: 4px; }
+.pp-flow .fb { border-radius: 12px; padding: 8px 12px; font-size: 12.5px; line-height: 1.55; }
+.pp-flow .fb b { display: block; font-size: 12px; }
+.pp-flow .cam { background: var(--ac-soft); border: 2px solid var(--ac); color: #38415a; }
+.pp-flow .cam b { color: var(--ac); }
+.pp-flow .mid { background: #fff; border: 1.5px dashed var(--ac-line); color: #38415a; text-align: center; font-weight: 700; }
+.pp-flow .pr { background: #2a2a33; color: #dcdce4; border: 1px solid #1b1b22; }
+.pp-flow .pr b { color: #ffcf9a; }
+.pp-flow .pr .ng { color: #ff8f8f; font-weight: 800; }
+.pp-flow .pr .ok { color: #9fe3b0; }
+.pp-flow .ar { text-align: center; color: var(--ac); font-weight: 800; line-height: 1; }
+.pp-pics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+.pp-pics div { border-radius: 8px; border: 1px solid var(--ac-line); background: #fff; padding: 6px; font-size: 11.5px; text-align: center; font-weight: 700; color: #38415a; }
+.pp-pics .pic { position: relative; aspect-ratio: 16 / 9; border-radius: 6px; overflow: hidden; background: #cfd8e8; margin-bottom: 4px; }
+.pp-pics .pic .bgb { position: absolute; inset: -10%; background: repeating-linear-gradient(90deg, #8fb4a0 0 14px, #cfd8e8 14px 28px), #cfd8e8; }
+.pp-pics .pic .bgb.blur { filter: blur(6px); }
+.pp-pics .pic .sb { position: absolute; left: 40%; top: 22%; width: 20%; height: 62%; border-radius: 40% 40% 12% 12%; background: #e8791f; }
+@media (max-width: 720px) { .pp-grid { grid-template-columns: 1fr; } }
+
 /* ===== このページ専用 ===== */
 
   .hero-art { width: 210px; }
@@ -346,7 +427,8 @@ p + p { margin-top: .8em; }
 // 動き自体は消さず、操作したときだけ・少ない動きで確認できるようにする。
 (() => {
   const run = window.V.run;
-  window.V.run = (duration, cb, done) => {
+  window.V.runSmooth = run; // 補間を間引かない版（音と同時に進めたいときなど）
+  window.V.run =(duration, cb, done) => {
     if (!window.V.reduced()) return run(duration, cb, done);
     let last = -1;
     return run(duration, (t) => { const k = Math.round(t * 10); if (k !== last) { last = k; cb(k / 10); } }, done);
@@ -474,6 +556,26 @@ p + p { margin-top: .8em; }
       <div class="note warn"><h3>AWBは便利だが万能ではない</h3>オート（AWB）は、場面によって結果が変わることがあります。色味を揃えたい撮影では、手動設定も検討します。</div>
     </div>
   </section>
+
+
+  <!-- pp:start -->
+  <section class="sec rise pp" id="premiere">
+    <div class="sec-h"><span class="sec-n">6</span><h2>Premiere Proではどうする？</h2></div>
+    <div class="pp-judge" aria-label="分類"><span class="j on">Premiereで直接調整できる</span><span class="j">撮影時に決めるもの</span><span class="j">Premiereで近い見た目は作れる（本来の撮影とは別）</span></div>
+    <p class="pp-lead">ホワイトバランスは、<b>Premiere Proで直接調整できます</b>。</p>
+    <div class="pp-grid">
+      <figure class="pp-fig" role="group" aria-label="Premiere Proの操作箇所（簡略図）"><div class="ui"><div class="ui-t"><span>Lumetri Color ▸ Basic Correction</span><span></span></div><div class="ui-b"><div class="ui-r"><span class="n">White Balance</span><span class="v"></span></div><div class="ui-r hl"><span class="n"><span class="eye"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M11 1.2l3.8 3.8-1.9 1.9-.9-.9-4.6 4.6v1.6l-2.3 2.3H2.700v-2.800l2.300-2.300h1.600l4.600-4.600-.9-.9z" fill="#fff"/></svg></span></span><span class="v">スポイト：白・グレーをクリック</span></div><div class="ui-r hl"><span class="n">Temperature</span><span class="v">色温度</span></div><div class="sl t"><i style="left:58%"></i></div><div class="sl-l"><span>寒色</span><span>暖色</span></div><div class="ui-r hl"><span class="n">Tint</span><span class="v">色合い</span></div><div class="sl g"><i style="left:46%"></i></div><div class="sl-l"><span>緑</span><span>マゼンタ</span></div></div></div><figcaption>色補正パネル（Lumetri Color）の White Balance だけを取り出した簡略図です。</figcaption></figure>
+      <div class="pp-txt">
+        <h3>やってみるなら</h3>
+        <ol><li>タイムラインでクリップを選ぶ</li><li><b>Lumetri Color</b> パネルの <b>Basic Correction</b> で <b>White Balance</b> を確認する</li><li><b>スポイト</b>で白やグレーの部分をクリックするか、<b>Temperature</b>（色温度）・<b>Tint</b>（色合い）を動かして調整する</li></ol>
+        <div class="pp-look"><b>ここを見る：</b>白やグレーに<b>不自然な色かぶり</b>がないか。人物がいるときは<b>肌色</b>も確認します。</div>
+        
+        <p class="pp-links">Adobe公式で確認：<a href="https://helpx.adobe.com/premiere/desktop/correct-color/color-correction-fundamentals/basic-color-correction-options.html" target="_blank" rel="noopener">Adobe「Basic color correction options」</a></p>
+      </div>
+    </div>
+    <p class="pp-note">図は説明用の簡略図で、実際のPremiere Proの画面とは異なります。メニュー名・機能名はAdobe公式ヘルプ（2026年11月14日確認）に基づきますが、バージョンによって表示が変わることがあります。</p>
+  </section>
+  <!-- pp:end -->
 
   <section class="refs">
     <h2>参考・出典</h2>
